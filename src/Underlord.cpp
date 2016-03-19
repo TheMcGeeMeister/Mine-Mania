@@ -373,5 +373,9 @@ void Underlord::deserialize(stringstream& file)
 	handPos.setX(pos_x);
 	handPos.setY(pos_y);
 }
+void Underlord::update()
+{
+	health.update();
+}
 ////////////////////////////////////////////////
 

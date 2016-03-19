@@ -9,7 +9,7 @@ using namespace std;
 
 class Display;
 
-class Underlord
+class Underlord : public Entity
 {
     public:
         Underlord();
@@ -70,6 +70,8 @@ class Underlord
 		void deserialize(ifstream& file);
 		void deserialize(stringstream& file);
 		//////////////////////////////////
+
+		virtual void update();
 
 
     protected:
