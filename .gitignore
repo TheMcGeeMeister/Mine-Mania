@@ -54,7 +54,17 @@ projects/Game.vcxproj.filters
 *.ipch
 *.obj
 *.tlog
+*.vcxproj
 
-projects/
+projects/ipch/
+projects/Logs/
+projects/obj/
+projects/Saves/
+projects/SimpleNet/objectstuffidk/
+projects/SimpleNet/bin/
+projects/ReadMe.txt
 bin/Game_r.exe
 bin/Game_r.pdb
+*.user
+*.filters
+projects/Snake.v12.suo
