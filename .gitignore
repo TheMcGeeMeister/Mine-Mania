@@ -45,3 +45,14 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.dat
+projects/.vs/Dungeon Keeper/v14/.suo
+*.sdf
+projects/Game.vcxproj
+*.sln
+projects/Game.vcxproj.filters
+*.ipch
+*.obj
+*.tlog
+
+projects/
