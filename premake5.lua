@@ -74,3 +74,16 @@ solution "Dungeon Keeper"
                "include/**.h", 
                "src/**.cpp",
            }
+	project "SimpleNet"
+		kind "ConsoleApp"
+		language "C++"
+		targetdir "pojects/simplenet/bin"
+		includedirs
+			{
+				"projects/simplenet/include",
+			}
+		files
+			{
+				"projects/simplenet/include/**.h",
+				"projects/simplenet/src/**.cpp",
+			}
