@@ -212,6 +212,10 @@ void SimpleNetClient::Loop()
 	char msgBuffer[150000];
 	while (isExit_ == false)
 	{
+		while (isPaused_ == true && isExit_ == false)
+		{
+			Sleep(5);
+		}
 		memset(msgBuffer, 0x00, sizeof(msgBuffer));
 		int iResult = recv(SimpleNet::ConnectSocket, msgBuffer, BufferLength, NULL);
 		if (iResult == 0)
@@ -448,6 +452,16 @@ void SimpleNetClient::Close()
 	WSACleanup();
 }
 
+void SimpleNetClient::Pause()
+{
+	isPaused_ = true;
+}
+
+void SimpleNetClient::Continue()
+{
+	isPaused_ = false;
+}
+
 void SimpleNetClient::isExit(bool isExit)
 {
 	isExit_ = isExit;
@@ -471,6 +485,11 @@ bool SimpleNetClient::Initialize()
 bool SimpleNetClient::isConnected()
 {
 	return isConnected_;
+}
+
+bool SimpleNetClient::isPaused()
+{
+	return isPaused_;
 }
 
 void SimpleNetClient::UpdateTile(int x, int y)

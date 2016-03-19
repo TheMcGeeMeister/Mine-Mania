@@ -3,15 +3,11 @@
 #include <string>
 #include <Position.h>
 #include <UserInterface.h>
+#include <HealthComponent.h>
 
 using namespace std;
 
 class Display;
-
-enum ObjectID
-{
-	NORMTURRETID
-};
 
 class Underlord
 {
@@ -83,6 +79,8 @@ class Underlord
         int maxGoldAmount_;
         int manaAmount_;
         int maxManaAmount_;
+
+		HealthComponent health;
 
 		bool moved_;
 		bool mined_;

@@ -1,6 +1,7 @@
 #ifndef POSITION_H
 #define POSITION_H
 #include <utility>
+#include <Direction.h>
 
 class Position
 {
@@ -27,6 +28,9 @@ class Position
 		void down();
 		void left();
 		void right();
+
+		void go(DIRECTION direction);
+		void go(DIRECTION direction, int amount);
 
         bool operator<(const Position&) const;
 		void operator()(int _x, int _y);

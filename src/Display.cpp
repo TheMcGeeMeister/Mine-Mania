@@ -350,6 +350,29 @@ void Display::updateTileServer(Position pos)
 	//mapReal_[pos].serialize(serverBuff);
 }
 
+Position Display::searchLine(Position sPos, DIRECTION direction, int amount, char target)
+{
+	Position rPos; // Return Position
+	Position cPos; // Current Position
+
+	cPos = sPos;
+	
+	for (int x = 0; x < amount; x++)
+	{
+		if (mapReal_[cPos].getGraphic() == target)
+		{
+			rPos = cPos;
+			return rPos;
+		}
+		else
+		{
+			cPos.go(direction);
+		}
+	}
+	cPos.isValid(false);
+	return cPos;
+}
+
 Position Display::getPosUp(Position pos)
 {
     if(isBorderUsed_)
@@ -469,6 +492,11 @@ Position Display::getPosRight(Position pos)
 Tile& Display::getTileRefAt(Position pos)
 {
     return mapReal_[pos];
+}
+
+Tile& Display::getTileRefAt(int x, int y)
+{
+	return mapReal_[Position(x, y)];
 }
 
 bool Display::isPacketsAvailable()

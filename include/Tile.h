@@ -4,6 +4,7 @@
 #include <string>
 #include <windows.h>
 #include <Position.h>
+#include <HealthComponent.h>
 
 class Underlord;
 
@@ -24,10 +25,11 @@ class Tile
         bool isDestructable() const;
         bool isWalkable() const;
         bool hasGold() const;
-        int getHealth() const;
-        int getMaxHealth() const;
+        double getHealth() const;
+        double getMaxHealth() const;
         int getClaimedPercentage() const;
         int getGold() const;
+		int getObjectId() const;
         string getClaimedBy() const;
         string getCurBeingClaimedBy() const;
         WORD getColor() const;
@@ -39,8 +41,8 @@ class Tile
         void setBackground(WORD background);
         void setGraphic(char graphic);
         void setGoldAmount(int amount);
-        void setHealth(int health);
-        void setMaxHealth(int maxHealth);
+        void setHealth(double health);
+        void setMaxHealth(double maxHealth);
         void setPos(Position position);
         void setIsWall(bool);
         void setIsWalkable(bool);
@@ -50,6 +52,7 @@ class Tile
         void setIsClaimable(bool);
         void setCanFlyOver(bool);
         void setClaimedBy(string);
+		void setObjectId(int id);
         void isWall(bool);
         void isWalkable(bool);
 		void isFortified(bool);
@@ -74,10 +77,10 @@ class Tile
     protected:
 
     private:
-        int health_;
-        int maxHealth_;
+		HealthComponent health;
         int claimedPercentage_;
         int gold_;
+		int objectid_;
         char graphic_;
         string claimedBy_;
         string curBeingClaimedBy_;

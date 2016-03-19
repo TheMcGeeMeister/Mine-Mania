@@ -782,6 +782,10 @@ void gameLoop()
 			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
 			threadStarted = true;
 		}
+		if (game::server.isPaused())
+		{
+			game::server.Continue();
+		}
         while(isExitGame(game) == false)
         {
             LOGIC(InputCoolDown, game, core);
@@ -810,6 +814,7 @@ void gameLoop()
 			}
 			Sleep(10);
         }
+		game::server.Pause();
 		clearScreenPart(100, 30);
 		Sleep(250);
     }
@@ -824,6 +829,14 @@ void gameLoop()
 	{
 		game::server.Close();
 		game::server.isExit(true);
+	}
+	if (threadStarted)
+	{
+		game::server.isExit(true);
+		Sleep(20);
+		game::server.Close();
+		Sleep(20);
+		sThread.join();
 	}
 	loadScreen(500, "Exiting...");
 	return;

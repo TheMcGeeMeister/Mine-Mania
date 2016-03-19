@@ -223,17 +223,6 @@ Position Underlord::getHandPosition()
 
 
 
-void Underlord::placeObject(uint16_t objectID)
-{
-	switch (objectID)
-	{
-	case NORMTURRETID: 
-		
-		break;
-	default: break;
-	}
-}
-
 void Underlord::reset()
 {
 	goldAmount_ = 100;

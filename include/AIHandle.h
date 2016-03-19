@@ -3,16 +3,19 @@
 #include <string>
 #include <list>
 #include <Timer.h>
+#include <Position.h>
 
 class ObjectProperties
 {
 public:
 	
 	void setPosition(int x, int y);
+	void startTimer(int seconds);
+	Position getPos();
+	bool isReady();
 private:
 	Timer UpdateCoolDown;
-	int pos_x;
-	int pos_y;
+	Position pos_;
 };
 
 class AIHandle
@@ -20,6 +23,10 @@ class AIHandle
 public:
 	AIHandle();
 	~AIHandle();
+
+	void addObject(int x, int y);
+
+	void log(std::string txt);
 
 	void update();
 private:

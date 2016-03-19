@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include "..\Dungeon Keeper\include\Packet.h"
+#include <Direction.h>
 
 using namespace std;
 
@@ -34,6 +35,9 @@ public:
 
 	void updateTileServer(Position pos);
 
+	/* Search Method */
+	Position searchLine(Position sPos, DIRECTION direction, int amount, char target);
+
     /* Loading/Saving */
     ///////////////////////////////////
 	void loadWorld();
@@ -50,6 +54,7 @@ public:
 
 
     Tile& getTileRefAt(Position);
+	Tile& getTileRefAt(int x, int y);
 
 	bool isPacketsAvailable();
 	list<Packet>& getPackets();

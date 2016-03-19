@@ -17,10 +17,9 @@ Tile::Tile()
 {
     graphic_=' ';
     color_=C_Black;
-    health_=10;
-    maxHealth_=10;
     gold_=0;
     claimedPercentage_=0;
+	objectid_ = 0;
     isClaimable_=false;
     canFlyOver_=false;
     claimedBy_="Neutral";
@@ -103,14 +102,14 @@ bool Tile::hasGold() const
     return hasGold_;
 }
 
-int Tile::getHealth() const
+double Tile::getHealth() const
 {
-    return health_;
+	return health.getHealth();
 }
 
-int Tile::getMaxHealth() const
+double Tile::getMaxHealth() const
 {
-    return maxHealth_;
+	return health.getMaxHealth();
 }
 
 int Tile::getClaimedPercentage() const
@@ -123,6 +122,11 @@ int Tile::getGold() const
     return gold_;
 }
 
+int Tile::getObjectId() const
+{
+	return objectid_;
+}
+
 string Tile::getClaimedBy() const
 {
     return claimedBy_;
@@ -133,14 +137,14 @@ string Tile::getCurBeingClaimedBy() const
     return curBeingClaimedBy_;
 }
 
-void Tile::setHealth(int health)
+void Tile::setHealth(double health)
 {
-    health_=health;
+	this->health.forceHealth(health);
 }
 
-void Tile::setMaxHealth(int maxHealth)
+void Tile::setMaxHealth(double maxHealth)
 {
-    maxHealth_=maxHealth;
+	health.setMaxHealth(maxHealth);
 }
 
 void Tile::setColor(WORD color)
@@ -195,6 +199,11 @@ void Tile::setClaimedBy(string claimedBy)
     claimedBy_=claimedBy;
 }
 
+void Tile::setObjectId(int id)
+{
+	objectid_ = id;
+}
+
 void Tile::isWall(bool isWall)
 {
     isWall_=isWall;
@@ -209,15 +218,15 @@ void Tile::isFortified(bool isFortified)
 {
 	if (isFortified == true && isFortified_==false)
 	{
-		health_ += 50;
-		maxHealth_ += 50;
+		health.getHealthRef() += 50;
+		health.getMaxHealthRef() += 50;
 		color_ = S_Right;
 		game::TileHandler.push_back(pos_);
 	}
 	else if(isFortified_ == true && isFortified == false)
 	{
-		health_ -= 50;
-		maxHealth_ -= 50;
+		health.getHealthRef() -= 50;
+		health.getMaxHealthRef() -= 50;
 	}
 	isFortified_ = isFortified;
 }
@@ -229,10 +238,10 @@ void Tile::isDestructable(bool isDestructable)
 
 void Tile::isClaimed(bool isClaimed)
 {
-    isClaimed_=isClaimed;
-    if(isClaimed==false)
+    isClaimed_ = isClaimed;
+    if(isClaimed == false)
     {
-        claimedBy_="Neutral";
+        claimedBy_ = "Neutral";
     }
 }
 
@@ -281,12 +290,10 @@ void Tile::decrementHealth(int amount)
     if(isDestructable_==false)
         if(amount>0)
             return;
-    if(health_==maxHealth_)
-    {
-        game::RegenHandler.push_back(pos_);
-    }
-    health_-=amount;
-    if(health_<=0)
+
+	health.damage(amount);
+
+    if(health.getHealthRef() <= 0)
     {
         if(isWall_)
         {
@@ -298,36 +305,38 @@ void Tile::decrementHealth(int amount)
             isDestructable_=true;
             isClaimable(true);
         }
-        health_=maxHealth_;
-    }else if(health_>maxHealth_)
+		health.getHealthRef() = health.getMaxHealthRef();
+    }else if(health.getHealthRef() > health.getMaxHealthRef())
     {
-        health_=maxHealth_;
+		health.getHealthRef() = health.getMaxHealthRef();
     }
 	game::server.UpdateTile(pos_.getX(), pos_.getY());
 }
 
 void Tile::incrementHealth(int amount)
 {
-    if(isDestructable_==false)
-        if(amount<0)
-            return;
-    health_+=amount;
-    if(health_<=0)
+	if (isDestructable_ == false)
+		if (amount < 0)
+			return;
+
+	health.heal(amount);
+
+    if(health.getHealthRef() <= 0)
     {
         if(isWall_)
         {
-            isWall_=false;
-            graphic_=TG_StoneFloor;
-            color_=TGC_StoneFloor;
-            background_=TGB_StoneFloor;
-            isWalkable_=true;
-            isDestructable_=true;
-            isClaimable_=true;
+            isWall_ = false;
+            graphic_ = TG_StoneFloor;
+            color_ = TGC_StoneFloor;
+            background_ = TGB_StoneFloor;
+            isWalkable_ = true;
+            isDestructable_ = true;
+            isClaimable_ = true;
         }
-        health_=maxHealth_;
-    }else if(health_>maxHealth_)
+		health.getHealthRef() = health.getMaxHealthRef();
+    }else if(health.getHealthRef() > health.getMaxHealthRef())
     {
-        health_=maxHealth_;
+		health.getHealthRef() = health.getMaxHealthRef();
     }
 	game::server.UpdateTile(pos_.getX(), pos_.getY());
 }
@@ -338,37 +347,37 @@ void Tile::claim(int amount, string claimer)
     {
 		if (claimer == claimedBy_)
 			return;
-        if(isClaimed_==false)
+        if(isClaimed_ == false)
         {
-            if(curBeingClaimedBy_==claimer)
+            if(curBeingClaimedBy_ == claimer)
             {
-                claimedPercentage_+=amount;
-                if(claimedPercentage_>100)
+                claimedPercentage_ += amount;
+                if(claimedPercentage_ > 100)
                 {
-                    claimedBy_=claimer;
-                    claimedPercentage_=0;
-                    isClaimed_=true;
-                    curBeingClaimedBy_="None";
+                    claimedBy_ = claimer;
+                    claimedPercentage_ = 0;
+                    isClaimed_ = true;
+                    curBeingClaimedBy_ = "None";
                 }
             }else
             {
                 int newClaim;
-                newClaim=claimedPercentage_-amount;
-                if(newClaim<=0)
+                newClaim = claimedPercentage_ - amount;
+                if(newClaim <= 0)
                 {
-                    claimedPercentage_+=amount+newClaim;
-                    curBeingClaimedBy_=claimer;
+                    claimedPercentage_ += amount+newClaim;
+                    curBeingClaimedBy_ = claimer;
                 }
             }
         }else
         {
-            claimedPercentage_+=amount;
-            if(claimedPercentage_>=100)
+            claimedPercentage_ += amount;
+            if(claimedPercentage_ >= 100)
             {
-                claimedBy_="Neutral";
-                claimedPercentage_=0;
-                isClaimed_=false;
-                curBeingClaimedBy_=claimer;
+                claimedBy_ = "Neutral";
+                claimedPercentage_ = 0;
+                isClaimed_ = false;
+                curBeingClaimedBy_ = claimer;
             }
         }
     }
@@ -396,16 +405,11 @@ void Tile::mine(int damage, Underlord& underlord)
 		if (damage>0)
 			return;
 
-    if(health_==maxHealth_)
-    {
-        game::RegenHandler.push_back(pos_);
-    }
+	health.getHealthRef() -= damage;
 
-	health_ -= damage;
-
-    if(health_<=0)
+    if(health.getHealthRef() <= 0)
     {
-        isWall_=false;
+        isWall_ = false;
         setGraphic(TG_StoneFloor);
         setColor(TGC_StoneFloor);
         setBackground(TGB_StoneFloor);
@@ -413,17 +417,19 @@ void Tile::mine(int damage, Underlord& underlord)
 		isDestructable_ = false;
 		isClaimable_ = true;;
 		canFlyOver_ = true;
-		maxHealth_ = 100;
+		health.getMaxHealthRef() = 100;
+
         if(hasGold_)
         {
             underlord.addGold(gold_);
             hasGold_=false;
             gold_=0;
         }
-        health_=maxHealth_;
-    }else if(health_>maxHealth_)
+
+		health.getHealthRef() = health.getMaxHealthRef();
+    }else if(health.getHealthRef() > health.getMaxHealthRef())
     {
-        health_=maxHealth_;
+		health.getHealthRef() = health.getMaxHealthRef();
     }
 }
 
@@ -453,8 +459,8 @@ void Tile::serialize(fstream& file)
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
     file << "Tile" <<endl;
-    file << health_ <<endl;
-    file << maxHealth_ <<endl;
+    file << health.getHealth() <<endl;
+    file << health.getMaxHealth() <<endl;
     file << claimedPercentage_ <<endl;
     file << gold_ <<endl;
     file << (int)graphic_ <<endl;
@@ -498,8 +504,8 @@ void Tile::serialize(ofstream& file)
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
 	file << "Tile" << endl;
-	file << health_ << endl;
-	file << maxHealth_ << endl;
+	file << health.getHealth() << endl;
+	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;
 	file << gold_ << endl;
 	file << (int)graphic_ << endl;
@@ -542,8 +548,8 @@ void Tile::serialize(stringstream& file)
 {
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
-	file << health_ << endl;
-	file << maxHealth_ << endl;
+	file << health.getHealth() << endl;
+	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;
 	file << gold_ << endl;
 	file << (int)graphic_ << endl;
@@ -568,8 +574,8 @@ string Tile::serialize(bool)
 	stringstream file;
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
-	file << health_ << endl;
-	file << maxHealth_ << endl;
+	file << health.getHealth() << endl;
+	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;
 	file << gold_ << endl;
 	file << (int)graphic_ << endl;
@@ -595,8 +601,8 @@ void Tile::deserialize(stringstream& file)
 	int pos_x = 0;
 	int pos_y = 0;
 	int graphic = 0;
-	file >> health_;
-	file >> maxHealth_;
+	file >> health.getHealthRef();
+	file >> health.getMaxHealthRef();
 	file >> claimedPercentage_;
 	file >> gold_;
 	file >> graphic;
@@ -624,25 +630,25 @@ void Tile::deserialize(fstream& file)
     int pos_x=0;
     int pos_y=0;
     int graphic=0;
-    file>>health_;
-    file>>maxHealth_;
-    file>>claimedPercentage_;
-    file>>gold_;
-    file>>graphic;
-    file>>claimedBy_;
-    file>>curBeingClaimedBy_;
-    file>>color_;
-    file>>background_;
-    file>>isClaimable_;
-    file>>isWalkable_;
-    file>>canFlyOver_;
-    file>>isDestructable_;
-    file>>isWall_;
+	file >> health.getHealthRef();
+	file >> health.getMaxHealthRef();
+    file >> claimedPercentage_;
+    file >> gold_;
+    file >> graphic;
+    file >> claimedBy_;
+    file >> curBeingClaimedBy_;
+    file >> color_;
+    file >> background_;
+    file >> isClaimable_;
+    file >> isWalkable_;
+    file >> canFlyOver_;
+    file >> isDestructable_;
+    file >> isWall_;
 	file >> isFortified_;
-    file>>isClaimable_;
-    file>>hasGold_;
-    file>>pos_x;
-    file>>pos_y;
+    file >> isClaimable_;
+    file >> hasGold_;
+    file >> pos_x;
+    file >> pos_y;
 	pos_.setX(pos_x);
 	pos_.setY(pos_y);
 	graphic_ = graphic;
@@ -675,8 +681,8 @@ void Tile::deserialize(ifstream& file)
 	int pos_x = 0;
 	int pos_y = 0;
 	int graphic = 0;
-	file >> health_;
-	file >> maxHealth_;
+	file >> health.getHealthRef();
+	file >> health.getMaxHealthRef();
 	file >> claimedPercentage_;
 	file >> gold_;
 	file >> graphic;

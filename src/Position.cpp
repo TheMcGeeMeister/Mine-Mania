@@ -108,6 +108,28 @@ void Position::right()
 	x_++;
 }
 
+void Position::go(DIRECTION direction)
+{
+	switch (direction)
+	{
+	case DIRECTION_UP: right(); break;
+	case DIRECTION_DOWN: down(); break;
+	case DIRECTION_LEFT: left(); break;
+	case DIRECTION_RIGHT: right(); break;
+	}
+}
+
+void Position::go(DIRECTION direction, int amount)
+{
+	switch(direction)
+	{
+	case DIRECTION_UP:y_ -= amount; if (y_ < 0) y_ = 0; break;
+	case DIRECTION_DOWN:y_ += amount; break;
+	case DIRECTION_LEFT:x_ -= amount; if (x_ < 0) x_ = 0;  break;
+	case DIRECTION_RIGHT:x_ += amount; break;
+	}
+}
+
 bool Position::operator<(const Position& r) const
 {
     if (getX() < r.getX())  return true;
