@@ -56,3 +56,5 @@ projects/Game.vcxproj.filters
 *.tlog
 
 projects/
+bin/Game_r.exe
+bin/Game_r.pdb
