@@ -8,7 +8,10 @@
 namespace game
 {
 	extern Underlord player;
+	extern System system;
 }
+
+extern void setFontInfo(int fontSize, int font);
 
 Display::Display()
 {
@@ -22,6 +25,8 @@ Display::Display()
 	borderWidth_ = 0;
 	offset_x_ = 0;
 	offset_y_ = 0;
+	int font = 0;
+	int fontSize = 28;
 	saveSuffix_ = "0";
 }
 
@@ -34,7 +39,7 @@ void Display::update()
 {
     for(auto &iter : tileChanges_)
     {
-        mapReal_[iter.first]=iter.second;
+        m_map[iter.first]=iter.second;
         /*if(isSeen_[iter.first]==true) no vision yet
         {
             mapSeen_[iter.first]=iter.second;
@@ -43,9 +48,14 @@ void Display::update()
         updatePos(iter.first);
     }
     tileChanges_.clear();
+
+	for (auto &iter : m_map)
+	{
+		iter.second.update();
+	}
     if(reloadAll_)
     {
-        for(auto &iter : mapReal_)
+        for(auto &iter : m_map)
         {
             updatePos(iter.first);
             reloadAll_=false;
@@ -55,15 +65,15 @@ void Display::update()
 
 void Display::updatePos(Position pos_)
 {
-	if (!mapReal_.count(pos_))
+	if (!m_map.count(pos_))
 		return;
     Position CurrentPosition;
     CurrentPosition=pos_;
-    const char graphic=mapReal_[CurrentPosition].getGraphic();
-    WORD color=mapReal_[CurrentPosition].getColor();
-    if(mapReal_[CurrentPosition].getBackground()!=0)
+    const char graphic=m_map[CurrentPosition].getGraphic();
+    WORD color=m_map[CurrentPosition].getColor();
+    if(m_map[CurrentPosition].getBackground()!=0)
     {
-        color=color | mapReal_[CurrentPosition].getBackground();
+        color=color | m_map[CurrentPosition].getBackground();
     }
 	if (isSelected_.count(pos_))
 	{
@@ -138,6 +148,23 @@ void Display::setSizeY(int y)
     size_y_=y;
 }
 
+void Display::setFont(int font)
+{
+	font_ = font;
+}
+
+void Display::setFontSize(int fontSize)
+{
+	if (fontSize < 5 || fontSize > 72)
+	{
+		return;
+	}
+	else
+	{
+		fontSize_ = fontSize;
+	}
+}
+
 void Display::isHidden(bool hidden)
 {
 	isHidden_ = hidden;
@@ -150,6 +177,11 @@ void Display::isHidden(bool hidden)
 	{
 		reloadAll();
 	}
+}
+
+void Display::isFullScreen(bool is)
+{
+	isFullscreen_ = is;
 }
 
 void Display::setPos(Position ipos, char graphic)
@@ -345,6 +377,11 @@ bool Display::isValidPosition(Position pos)
 	return true;
 }
 
+bool Display::isFullScreen()
+{
+	return isFullscreen_;
+}
+
 void Display::updateTileServer(Position pos)
 {
 	//mapReal_[pos].serialize(serverBuff);
@@ -359,7 +396,7 @@ Position Display::searchLine(Position sPos, DIRECTION direction, int amount, cha
 	
 	for (int x = 0; x < amount; x++)
 	{
-		if (mapReal_[cPos].getGraphic() == target)
+		if (m_map[cPos].getGraphic() == target)
 		{
 			rPos = cPos;
 			return rPos;
@@ -491,12 +528,12 @@ Position Display::getPosRight(Position pos)
 
 Tile& Display::getTileRefAt(Position pos)
 {
-    return mapReal_[pos];
+    return m_map[pos];
 }
 
 Tile& Display::getTileRefAt(int x, int y)
 {
-	return mapReal_[Position(x, y)];
+	return m_map[Position(x, y)];
 }
 
 bool Display::isPacketsAvailable()
@@ -521,9 +558,19 @@ void Display::clearPackets()
 	packetsBuffer_.clear();
 }
 
+int Display::getFont()
+{
+	return font_;
+}
+
+int Display::getFontSize()
+{
+	return fontSize_;
+}
+
 void Display::claimNameChange(string currentName, string newName)
 {
-	for (auto& iter : mapReal_)
+	for (auto& iter : m_map)
 	{
 		if (iter.second.isClaimedBy(currentName))
 		{
@@ -583,9 +630,9 @@ void Display::saveWorld()
         {
             pos.setX(x);
             pos.setY(y);
-            if(!mapReal_.count(pos))
+            if(!m_map.count(pos))
                 continue;
-            Tile& tile=mapReal_[pos];
+            Tile& tile=m_map[pos];
 			tile.serialize(file);
         }
     }
@@ -613,9 +660,9 @@ void Display::saveWorld(string filename)
 		{
 			pos.setX(x);
 			pos.setY(y);
-			if (!mapReal_.count(pos))
+			if (!m_map.count(pos))
 				continue;
-			Tile& tile = mapReal_[pos];
+			Tile& tile = m_map[pos];
 			tile.serialize(file);
 		}
 	}
@@ -634,7 +681,7 @@ string Display::getWorld()
 	}
 	////////////////
 	stringstream world;
-	for (auto& iter : mapReal_)
+	for (auto& iter : m_map)
 	{
 		world << iter.second.serialize(true);
 	}
@@ -666,7 +713,7 @@ void Display::loadWorld(string filename)
 			file.clear();
 			Tile tile;
 			tile.deserialize(file);
-			mapReal_[tile.getPos()] = tile;
+			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
 		if (text == "Underlord")
@@ -697,7 +744,7 @@ void Display::loadWorldServer(string data)
 			msg.clear();
 			Tile tile;
 			tile.deserialize(msg);
-			mapReal_[tile.getPos()] = tile;
+			m_map[tile.getPos()] = tile;
 			msg.clear();
 		}
 		if (text == "Underlord")
@@ -724,7 +771,7 @@ void Display::loadWorldServer(stringstream& msg)
 			msg.clear();
 			Tile tile;
 			tile.deserialize(msg);
-			mapReal_[tile.getPos()] = tile;
+			m_map[tile.getPos()] = tile;
 			msg.clear();
 		}
 		if (text == "Underlord")
@@ -766,7 +813,7 @@ void Display::loadWorld()
 			file.clear();
 			Tile tile;
 			tile.deserialize(file);
-			mapReal_[tile.getPos()] = tile;
+			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
 		if (text == "Underlord")
@@ -847,19 +894,19 @@ void Display::newWorld()
             {
                 gold.setGoldAmount((rand() % 500)+101);
                 gold.setPos(newPos);
-                mapReal_[newPos]=gold;
+                m_map[newPos]=gold;
             }
             else
             {
                 stone.setPos(newPos);
-                mapReal_[newPos]=stone;
+                m_map[newPos]=stone;
             }
         }
     }
 	core.setPos(corePos);
 	stoneFloor.setPos(startPos);
-    mapReal_[startPos]=stoneFloor;
-    mapReal_[corePos]=core;
+    m_map[startPos]=stoneFloor;
+    m_map[corePos]=core;
 	isLoaded_ = true;
 	game::player.forceHandPosition(startPos, *this);
 	reloadAll_ = true;
@@ -941,5 +988,50 @@ int Display::getSaveAmount()
 		worldAmount++;
 	}
 	return realWorldAmount;
+}
+
+void Display::saveSettings()
+{
+	fstream file("Settings.txt");
+	if (!file)
+	{
+		file.open("Settings.txt", ios::app);
+	}
+	file << "Settings" << endl;
+	file << "Font: " << font_ << endl;
+	file << "FontSize: " << fontSize_ << endl;
+	file << "FullScreen: " << isFullscreen_ << endl;
+}
+
+void Display::loadSettings()
+{
+	fstream file("Settings.txt");
+	if (!file)
+	{
+		file.open("Settings.txt", ios::app);
+		file << "Settings" << endl;
+		file << "Font: 0" << endl;
+		file << "FontSize: 28" << endl;
+		file << "FullScreen: 1" << endl;
+	}
+	else
+	{
+		string none;
+		file >> none;
+		file >> none;
+		file >> font_;
+		file >> none;
+		file >> fontSize_;
+		file >> none;
+		file >> isFullscreen_;
+		setFontInfo(fontSize_, font_);
+		if (isFullscreen_)
+		{
+			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+			DWORD flags = CONSOLE_FULLSCREEN_MODE;
+			COORD pos;
+			SetConsoleDisplayMode(h, flags, &pos);
+		}
+	}
 }
 ///////////////////////////////////

@@ -16,12 +16,16 @@
 #include <conio.h>
 #include <SimpleNetClient.h>
 
+#define DEFAULT_CLEAR_WIDTH 100
+#define DEFAULT_CLEAR_HEIGHT 36
+
 using namespace std;
 
 bool pauseGameMenu(Display& game);
 
 namespace game
 {
+	System system;
     TileChangeManager TileHandler;
     RegenManager RegenHandler;
     Underlord player;
@@ -32,6 +36,12 @@ namespace game
 	UserInterface ServerUI(0, 10, 75, 28);
 	SimpleNetClient server;
 	bool threadExit;
+	int curFont;
+	void Log(string txt)
+	{
+		fstream file("Logs\\Log.txt", ios::app);
+		file << txt << endl;
+	}
 }
 
 namespace gametiles
@@ -95,9 +105,89 @@ void setCursorPos(int x, int y)
     SetConsoleCursorPosition(h, pos);
 }
 
+void setFontInfo(int FontSize, int font)
+{
+	if (FontSize < 5 || FontSize > 72)
+		FontSize = 28;
+	if (font == 0)
+	{
+		CONSOLE_FONT_INFOEX info = { 0 };
+		info.cbSize = sizeof(info);
+		info.dwFontSize.Y = FontSize; // leave X as zero
+		info.FontWeight = FW_NORMAL;
+		wcscpy(info.FaceName, L"Lucida Console");
+		SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), NULL, &info);
+	}
+	else
+	{
+		CONSOLE_FONT_INFOEX info = { 0 };
+		info.cbSize = sizeof(info);
+		info.dwFontSize.Y = FontSize; // leave X as zero
+		info.FontWeight = FW_NORMAL;
+		wcscpy(info.FaceName, L"Consolas");
+		SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), NULL, &info);
+	}
+}
+
+void setFullsreen()
+{
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD flags = CONSOLE_FULLSCREEN_MODE;
+	COORD pos;
+	SetConsoleDisplayMode(h, flags, &pos);
+}
+
+void swapConsoleFullScreen()
+{
+	DWORD flags;
+	GetConsoleDisplayMode(&flags);
+	if (flags != CONSOLE_FULLSCREEN_MODE)
+	{
+		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+		DWORD flags = CONSOLE_FULLSCREEN_MODE;
+		COORD pos;
+		SetConsoleDisplayMode(h, flags, &pos);
+	}
+	else
+	{
+		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+		DWORD flags = CONSOLE_FULLSCREEN_HARDWARE;
+		COORD pos;
+		SetConsoleDisplayMode(h, flags, &pos);
+	}
+}
+
+void removeScrollBar()
+{
+	HANDLE hOut;
+	CONSOLE_SCREEN_BUFFER_INFO SBInfo;
+	COORD NewSBSize;
+	int Status;
+
+	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	GetConsoleScreenBufferInfo(hOut, &SBInfo);
+	NewSBSize.X = SBInfo.dwSize.X - 2;
+	NewSBSize.Y = SBInfo.dwSize.Y;
+
+	Status = SetConsoleScreenBufferSize(hOut, NewSBSize);
+
+	string txt;
+	txt = Status;
+	txt += " :Status";
+	game::SlideUI.addSlide(txt);
+}
+
+void initializeWindowProperties()
+{
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD flags = CONSOLE_FULLSCREEN_MODE;
+	COORD pos;
+	SetConsoleDisplayMode(h, flags, &pos);
+}
+
 void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
 {
-
     if(InputCoolDown.Update()==true)
     {
 		/* Movement */
@@ -133,7 +223,8 @@ void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
 				case 'a':game::player.moveHandLeft(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 'd':game::player.moveHandRight(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 'j':game::SlideUI.addSlide("Testing"); InputCoolDown.StartNewTimer(0.075); break;
-				case 'm':game::server.SendLiteral("SendHost\nMsg\nTesting\nEnd"); InputCoolDown.StartNewTimer(0.075); break;
+				case 't':swapConsoleFullScreen(); removeScrollBar(); InputCoolDown.StartNewTimer(0.075); break;
+				case 'm':game::server.SendLiteral("12\n9\nTesting"); InputCoolDown.StartNewTimer(0.075); break;
 				case 72:game::player.mineUp(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 80:game::player.mineDown(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 75:game::player.mineLeft(game); InputCoolDown.StartNewTimer(0.075); break;
@@ -195,11 +286,11 @@ void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
 
 void loadScreen(int time, string text)
 {
-	clearScreenPart(50, 100);
+	clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 	setCursorPos(0, 0);
 	cout << text;
 	Sleep(time);
-	clearScreenPart(25, 1);
+	clearScreenPart(DEFAULT_CLEAR_WIDTH, 1);
 	setCursorPos(0, 0);
 	return;
 }
@@ -282,7 +373,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 
 void loadMenu(Display& game)
 {
-	clearScreenPart(25, 10);
+	clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 	Sleep(500);
 	UserInterface menu(0, 0, 0, 0);
 	int worldAmount = game.getSaveAmount();
@@ -296,7 +387,7 @@ void loadMenu(Display& game)
 			menu.update();
 			if (menu.isSectionActivated())
 			{
-				clearScreenPart(25, 10);
+				clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 				exitFlag = true;
 			}
 		}
@@ -325,21 +416,21 @@ void loadMenu(Display& game)
 		{
 			if (menu.getActivatedSection() == worldAmount + 1)
 			{
-				clearScreenPart(25, 10);
+				clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 				exitFlag = true;
 				continue;
 			}
 			stringstream filename;
 			if (menu.getActivatedSection()<10)
 			{
-				clearScreenPart(25, 10);
+				clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 				filename << "Saves\\" << "World" << "0" << menu.getActivatedSection() << ".dat";
 				game.loadWorld(filename.str());
 				exitFlag = true;
 			}
 			else
 			{
-				clearScreenPart(25, 10);
+				clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 				filename << "Saves\\" << "World" << menu.getActivatedSection() << ".dat";
 				game.loadWorld(filename.str());
 				exitFlag = true;
@@ -428,6 +519,64 @@ void saveMenu(Display& game)
 	return;
 }
 
+void settingsMenu()
+{
+	Sleep(250);
+	UserInterface menu(0, 0, 0, 0);
+	menu.push_isection("Font Size:");
+	menu.addSection("Font:", true, false);
+	menu.getSectionRef(2).addVar("");
+	menu.addSection("Fullscreen:", true, false);
+	menu.getSectionRef(3).addVar("");
+	menu.addSection("Exit", true, false);
+
+	bool exitFlag = false;
+	
+	bool isFullScreen = game::game.isFullScreen();
+	int font = game::game.getFont();
+	int fontSize = game::game.getFontSize();
+	string fontTxt;
+	if (font == 0) { fontTxt = "Consolas"; }
+	else { fontTxt = "Lucida Console"; }
+
+	stringstream txt; txt << fontSize;
+	menu.getSectionRef(1).setIVar(txt.str());
+	menu.getSectionRef(2).setVar(1, fontTxt);
+
+	if (isFullScreen) { menu.getSectionRef(3).setVar(1, "True"); }
+	else { menu.getSectionRef(3).setVar(1, "False"); }
+	
+	while (exitFlag == false)
+	{
+		menu.update();
+		if (menu.isSectionActivated())
+		{
+			switch (menu.getActivatedSection())
+			{
+			case 1:
+				fontSize = atoi(menu.getSectionRef(1).getIVar().c_str());
+				setFontInfo(fontSize, font); break;
+			case 2:	
+				if (font == 0) { fontTxt = "Lucida Console"; font = 1; setFontInfo(fontSize, font); }
+				else { fontTxt = "Consolas"; font = 0; setFontInfo(fontSize, font); }
+				menu.getSectionRef(2).setVar(1, fontTxt); break;
+			case 3:
+				if (isFullScreen) { isFullScreen = false; menu.getSectionRef(3).setVar(1, "False"); swapConsoleFullScreen(); }
+				else { isFullScreen = true; menu.getSectionRef(3).setVar(1, "True"); setFullsreen(); menu.reDrawAll(); }
+				break;
+			case 4:
+				exitFlag = true; break;
+			default:
+				break;
+			}
+		}
+	}
+	menu.isHidden(true);
+	game::game.setFont(font);
+	game::game.setFontSize(fontSize);
+	Sleep(250);
+}
+
 void newWorldMenu(Display& game)
 {
 	Sleep(250);
@@ -461,7 +610,7 @@ void newWorldMenu(Display& game)
 void gameNotLoadedMenu(Display& game)
 {
 	Sleep(250);
-	clearScreenPart(25, 10);
+	clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 	UserInterface menu(0, 0, 0, 0);
 	menu.addSection("No Game Loaded", false, true);
 	menu.addSection("1.New Game", true, true);
@@ -475,9 +624,9 @@ void gameNotLoadedMenu(Display& game)
 		{
 			switch (menu.getActivatedSection())
 			{
-			case 2: menu.isHidden(true); newWorldMenu(game); clearScreenPart(25, 10); Sleep(250); return; break;
-			case 3: loadMenu(game); clearScreenPart(25, 10); Sleep(250); return; break;
-			case 4: clearScreenPart(25, 10); Sleep(250); return; break;
+			case 2: menu.isHidden(true); newWorldMenu(game); clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT); Sleep(250); return; break;
+			case 3: loadMenu(game); clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT); Sleep(250); return; break;
+			case 4: clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT); Sleep(250); return; break;
 			}
 		}
 	}
@@ -512,13 +661,14 @@ bool pauseGameMenu(Display& game)
 
 bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 {
-    clearScreenPart(100, 40);
+    clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
     UserInterface menu;
 	PositionVariables pVar(0, 0, 0, 0);
 	menu.setPositionVariables(pVar);
     menu.addSection("Continue", true, false);
     menu.addSection("Save", true, false);
     menu.addSection("Load", true, false);
+	menu.addSection("Settings", true, false);
     menu.addSection("New World", true, false);
 	menu.addSection("Connect", true, false);
     menu.addSection("Exit", true, false);
@@ -548,11 +698,16 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 				if (game.isLoaded())
 					return false;
 				break;
-            case 4: // New
+			case 4: // Settings
+				menu.isHidden(true);
+				settingsMenu();
+				menu.isHidden(false);
+				break;
+            case 5: // New
 				menu.isHidden(true); newWorldMenu(game); exitFlag = true; continue; break;
-			case 5: // Connect
+			case 6: // Connect
 				menu.isHidden(true); connectMenu(sThread, threadStarted); exitFlag = true; break;
-            case 6: // Exit
+            case 7: // Exit
 				return true; break;
             }
         }
@@ -717,6 +872,8 @@ namespace AI
 
 void gameLoop()
 {
+	game::game.loadSettings();
+
     Timer InputCoolDown;
     Position newPos(1,1);
 	game::SlideUI.initializeSlideUI();
@@ -759,16 +916,16 @@ void gameLoop()
     game.update();
     bool exitFlag=false;
 	bool threadStarted = false;
-    while(exitFlag==false)
-    {
-        exitFlag=pauseMenu(game, sThread, threadStarted);
+	while (exitFlag == false)
+	{
+		exitFlag = pauseMenu(game, sThread, threadStarted);
 
-        if(exitFlag==true)
-            continue;
+		if (exitFlag == true)
+			continue;
 
-        game.reloadAll();
+		game.reloadAll();
 
-        clearScreenPart(40, 20);
+		clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 
 		if (game.isLoaded() == false)
 			gameNotLoadedMenu(game);
@@ -786,12 +943,12 @@ void gameLoop()
 		{
 			game::server.Continue();
 		}
-        while(isExitGame(game) == false)
-        {
-            LOGIC(InputCoolDown, game, core);
-            game.update();
-            game::RegenHandler.update(game);
-            game::TileHandler.update(game);
+		while (isExitGame(game) == false)
+		{
+			LOGIC(InputCoolDown, game, core);
+			game.update();
+			game::RegenHandler.update(game);
+			game::TileHandler.update(game);
 			game::player.updateMiningUI();
 			updateTileInfo();
 			game::SlideUI.update();
@@ -813,22 +970,10 @@ void gameLoop()
 				}
 			}
 			Sleep(10);
-        }
+		}
 		game::server.Pause();
-		clearScreenPart(100, 30);
+		clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 		Sleep(250);
-    }
-	if (sThread.joinable() == true)
-	{
-		game::server.Close();
-		game::server.isExit(true);
-		Sleep(20);
-		sThread.join();
-	}
-	else
-	{
-		game::server.Close();
-		game::server.isExit(true);
 	}
 	if (threadStarted)
 	{
@@ -895,7 +1040,11 @@ int main()
 
 	initializeStdTiles();
 
+	setFullsreen();
+
     gameLoop();
+
+	game::game.saveSettings();
 
 	setCursorPos(0, 0);
 	/*while (isExit() == false)

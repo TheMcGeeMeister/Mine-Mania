@@ -290,6 +290,7 @@ void SimpleNetClient::Send(Packet msg)
 
 void SimpleNetClient::SendLiteral(std::string msg)
 {
+	if (isConnected_ == false) return;
 	send(SimpleNet::ConnectSocket, msg.c_str(), msg.length(), NULL);
 }
 

@@ -629,6 +629,11 @@ void Tile::deserialize(stringstream& file)
 	graphic_ = graphic;
 }
 
+void Tile::update()
+{
+	health.update();
+}
+
 void Tile::deserialize(fstream& file)
 {
 	int pos_x = 0;

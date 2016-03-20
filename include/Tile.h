@@ -74,6 +74,8 @@ class Tile
         void deserialize(fstream& file);
 		void deserialize(ifstream& file);
 		void deserialize(stringstream& data);
+
+		void update();
     protected:
 
     private:

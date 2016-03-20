@@ -1,0 +1,4 @@
+Settings
+Font: 0
+FontSize: 28
+FullScreen: 1

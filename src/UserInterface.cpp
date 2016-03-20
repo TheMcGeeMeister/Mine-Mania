@@ -7,6 +7,11 @@
 
 using namespace std;
 
+namespace game
+{
+	extern void Log(std::string txt);
+}
+
 
 UserInterface::UserInterface()
 {
@@ -385,16 +390,17 @@ void UserInterface::update()
 					{
 						moveSelectionUp();
 						inputCoolDown.StartNewTimer(0.175);
+						return;
 					}
 					if (GetAsyncKeyState('S'))
 					{
 						moveSelectionDown();
 						inputCoolDown.StartNewTimer(0.175);
+						return;
 					}
 					if (GetAsyncKeyState(VK_RETURN))
 					{
-						isSelectionActivated_ = true;
-						if (sections[curSelected_].isISection())
+						if (sections[curSelected_].isISection() == true)
 						{
 							isInIMode_ = true;
 							iManager.clear();
@@ -402,7 +408,12 @@ void UserInterface::update()
 							FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 							redraws.push_back(curSelected_);
 						}
+						else
+						{
+							isSelectionActivated_ = true;
+						}
 						inputCoolDown.StartNewTimer(0.175);
+						return;
 					}
 				}
 				else
@@ -419,6 +430,7 @@ void UserInterface::update()
 							iManage.join();
 						}
 						FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+						isSelectionActivated_ = true;
 						return;
 					}
 					if (GetAsyncKeyState(VK_ESCAPE))
@@ -434,6 +446,7 @@ void UserInterface::update()
 							iManage.join();
 						}
 						FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+						isSelectionActivated_ = true;
 						return;
 					}
 					iManager.start();
@@ -529,7 +542,7 @@ void UserInterface::slideDraw(uint16_t index, string text)
 {
 
 	setCursorPos(positionVars_.offset_x, index);
-	cout << text << "                       ";
+	cout << text << "               ";
 }
 
 void UserInterface::slideClear(uint16_t index)

@@ -102,5 +102,6 @@ void HealthComponent::update()
 		{
 			health_ = maxHealth_;
 		}
+		regenCoolDown.StartNewTimer(2);
 	}
 }

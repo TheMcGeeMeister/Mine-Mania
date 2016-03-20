@@ -69,3 +69,4 @@ bin/Game_r.pdb
 *.filters
 projects/Snake.v12.suo
 *.opendb
+bin/Settings.txt
