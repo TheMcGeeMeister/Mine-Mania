@@ -134,10 +134,9 @@ bool Position::operator<(const Position& r) const
 {
     if (getX() < r.getX())  return true;
     if (getX() > r.getX())  return false;
-    // Otherwise a are equal
     if (getY() < r.getY())  return true;
     if (getY() > r.getY())  return false;
-    // Otherwise both are equal
+	
     return false;
 }
 

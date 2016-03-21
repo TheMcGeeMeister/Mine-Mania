@@ -10,8 +10,17 @@ public:
 	BulletAIComponent();
 	~BulletAIComponent();
 
+	void setDirection(DIRECTION direction);
+	void setPosition(Position position);
+
+	DIRECTION getDirection();
+	Position getPosition();
+
 	virtual void update();
 private:
-
+	Timer movementCoolDown;
+	double movementCoolDownTime;
+	DIRECTION direction;
+	Position position;
 };
 

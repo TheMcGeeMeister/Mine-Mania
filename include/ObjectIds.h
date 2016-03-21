@@ -2,5 +2,5 @@
 
 enum ObjectID
 {
-	NONEID, NORMTURRETID
+	NONEID, TURRET_ID
 };

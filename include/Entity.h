@@ -4,6 +4,11 @@
 #include <map>
 #include <Position.h>
 
+enum COMPONENT
+{
+	COMPONENT_HEALTH, COMPONENT_HITTABLE
+};
+
 class Component
 {
 public:
@@ -27,6 +32,8 @@ public:
 	int getID();
 	bool isKilled();
 	Position getPos();
+
+	virtual bool hasComponent(int component) = 0;
 private:
 	int id_;
 	bool kill_;
@@ -42,6 +49,7 @@ public:
 	void update();
 	
 	int addEntity(std::shared_ptr<Entity>);
+	
 private:
 	int id_index;
 	std::map<int, std::shared_ptr<Entity>> m_system;
