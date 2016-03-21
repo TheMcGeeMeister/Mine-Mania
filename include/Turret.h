@@ -14,6 +14,10 @@ public:
 
 	void setGraphic(char g);
 
+	void setPosition(Position pos);
+
+	void setRange(int);
+
 
 	char getGraphic();
 
@@ -21,12 +25,16 @@ public:
 
 	virtual void update();
 	virtual bool hasComponent(int component);
+	virtual bool isKilled();
+	virtual void kill();
+	virtual void clean();
 private:
 	std::string owner;
 
 	char graphic;
 
-	Position position;
+
+	bool isDestroyed_;
 
 	TurretAIComponent ai;
 };

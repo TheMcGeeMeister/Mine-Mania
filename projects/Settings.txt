@@ -1,4 +1,4 @@
 Settings
-Font: 0
+Font: 1
 FontSize: 28
 FullScreen: 1

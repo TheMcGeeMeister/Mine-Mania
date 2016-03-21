@@ -1,4 +1,4 @@
-#include <Underlord.h>
+#include <Player.h>
 #include <fstream>
 #include <Position.h>
 #include <Display.h>
@@ -8,9 +8,10 @@ namespace game
 {
 	extern Display game;
 	extern UserInterface SlideUI;
+	extern System system;
 }
 
-Underlord::Underlord() : UI(0, 0, 50, 30)
+Player::Player() : UI(0, 0, 50, 30)
 {
     goldAmount_ = 100;
 	maxGoldAmount_ = 10000;
@@ -31,7 +32,7 @@ Underlord::Underlord() : UI(0, 0, 50, 30)
 	mineUIPos.setY(0);
 }
 
-Underlord::~Underlord()
+Player::~Player()
 {
     //dtor
 }
@@ -39,27 +40,27 @@ Underlord::~Underlord()
 
 /* Getters */
 ////////////////////////////////////////////////
-int Underlord::getGoldAmount()
+int Player::getGoldAmount()
 {
     return goldAmount_;
 }
 
-int Underlord::getManaAmount()
+int Player::getManaAmount()
 {
     return manaAmount_;
 }
 
-int Underlord::getMaxGoldAmount()
+int Player::getMaxGoldAmount()
 {
     return maxGoldAmount_;
 }
 
-int Underlord::getMaxManaAmount()
+int Player::getMaxManaAmount()
 {
     return maxManaAmount_;
 }
 
-string Underlord::getName()
+string Player::getName()
 {
     return name_;
 }
@@ -68,12 +69,12 @@ string Underlord::getName()
 
 /* Setters */
 ////////////////////////////////////////////////
-void Underlord::setManaAmount(int amount)
+void Player::setManaAmount(int amount)
 {
     manaAmount_=amount;
 }
 
-void Underlord::setMaxManaAmount(int amount)
+void Player::setMaxManaAmount(int amount)
 {
     maxManaAmount_=amount;
     if(manaAmount_>maxManaAmount_)
@@ -82,7 +83,7 @@ void Underlord::setMaxManaAmount(int amount)
     }
 }
 
-void Underlord::setName(string name)
+void Player::setName(string name)
 {
 	game::game.claimNameChange(name_, name);
 	name_ = name;
@@ -92,7 +93,7 @@ void Underlord::setName(string name)
 
 /* Hand*/
 ////////////////////////////////////////////////
-void Underlord::moveHandUp(Display& game)
+void Player::moveHandUp(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefY()--;
@@ -106,7 +107,7 @@ void Underlord::moveHandUp(Display& game)
 	return;
 }
 
-void Underlord::moveHandDown(Display& game)
+void Player::moveHandDown(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefY()++;
@@ -120,7 +121,7 @@ void Underlord::moveHandDown(Display& game)
 	return;
 }
 
-void Underlord::moveHandLeft(Display& game)
+void Player::moveHandLeft(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefX()--;
@@ -134,7 +135,7 @@ void Underlord::moveHandLeft(Display& game)
 	return;
 }
 
-void Underlord::moveHandRight(Display& game)
+void Player::moveHandRight(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefX()++;
@@ -148,7 +149,7 @@ void Underlord::moveHandRight(Display& game)
 	return;
 }
 
-void Underlord::mineUp(Display& game)
+void Player::mineUp(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefY()--;
@@ -161,7 +162,7 @@ void Underlord::mineUp(Display& game)
 	moved_ = false;
 }
 
-void Underlord::mineDown(Display& game)
+void Player::mineDown(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefY()++;
@@ -174,7 +175,7 @@ void Underlord::mineDown(Display& game)
 	moved_ = false;
 }
 
-void Underlord::mineLeft(Display& game)
+void Player::mineLeft(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefX()--;
@@ -187,7 +188,7 @@ void Underlord::mineLeft(Display& game)
 	moved_ = false;
 }
 
-void Underlord::mineRight(Display& game)
+void Player::mineRight(Display& game)
 {
 	Position newPos = handPos;
 	newPos.getRefX()++;
@@ -200,14 +201,14 @@ void Underlord::mineRight(Display& game)
 	moved_ = false;
 }
 
-void Underlord::forceHandPosition(Position newPos, Display& game)
+void Player::forceHandPosition(Position newPos, Display& game)
 {
 	game.removeSelectedAtTile(handPos);
 	handPos = newPos;
 	game.setTileAsSelected(newPos);
 }
 
-void Underlord::claimOnHand()
+void Player::claimOnHand()
 {
 	if (game::game.isClaimedTileNear(handPos, name_))
 	{
@@ -215,7 +216,7 @@ void Underlord::claimOnHand()
 	}
 }
 
-Position Underlord::getHandPosition()
+Position Player::getHandPosition()
 {
 	return handPos;
 }
@@ -223,7 +224,21 @@ Position Underlord::getHandPosition()
 
 
 
-void Underlord::reset()
+void Player::placeObject(uint16_t objectID)
+{
+
+}
+
+void Player::spawnTurret(Position pos)
+{
+	shared_ptr<Turret> turret = make_shared<Turret>();
+	turret->setPosition(pos);
+	turret->setGraphic('*');
+	turret->setRange(5);
+	game::system.addEntity(turret, "Turret");
+}
+
+void Player::reset()
 {
 	goldAmount_ = 100;
 	maxGoldAmount_ = 10000;
@@ -235,7 +250,7 @@ void Underlord::reset()
 	name_ = "None";
 }
 
-void Underlord::updateMiningUI()
+void Player::updateMiningUI()
 {
 	if (mined_ && moved_==false)
 	{
@@ -274,7 +289,7 @@ void Underlord::updateMiningUI()
 
 /* Gold Related*/
 ////////////////////////////////////////////////
-void Underlord::addGold(int amount)
+void Player::addGold(int amount)
 {
     goldAmount_+=amount;
 	stringstream goldAdd;
@@ -287,19 +302,19 @@ void Underlord::addGold(int amount)
     }
 }
 
-void Underlord::removeGold(int amount)
+void Player::removeGold(int amount)
 {
     goldAmount_-=amount;
     if(goldAmount_<0)
         goldAmount_=0;
 }
 
-void Underlord::setGoldAmount(int amount)
+void Player::setGoldAmount(int amount)
 {
 	goldAmount_ = amount;
 }
 
-void Underlord::setMaxGoldAmount(int amount)
+void Player::setMaxGoldAmount(int amount)
 {
 	maxGoldAmount_ = amount;
 	if (goldAmount_>maxGoldAmount_)
@@ -311,9 +326,9 @@ void Underlord::setMaxGoldAmount(int amount)
 
 /* Serialize - Deserialize */
 ////////////////////////////////////////////////
-void Underlord::serialize(fstream& file)
+void Player::serialize(fstream& file)
 {
-	file << "Underlord" << endl;
+	file << "Player" << endl;
 	file << goldAmount_ << endl;
 	file << maxGoldAmount_ << endl;
 	file << manaAmount_ << endl;
@@ -323,9 +338,9 @@ void Underlord::serialize(fstream& file)
 	file << handPos.getY() << endl;
 }
 
-void Underlord::serialize(ofstream& file)
+void Player::serialize(ofstream& file)
 {
-	file << "Underlord" << endl;
+	file << "Player" << endl;
 	file << goldAmount_ << endl;
 	file << maxGoldAmount_ << endl;
 	file << manaAmount_ << endl;
@@ -335,7 +350,7 @@ void Underlord::serialize(ofstream& file)
 	file << handPos.getY() << endl;
 }
 
-void Underlord::deserialize(fstream& file)
+void Player::deserialize(fstream& file)
 {
 	int pos_x;
 	int pos_y;
@@ -350,7 +365,7 @@ void Underlord::deserialize(fstream& file)
 	handPos.setY(pos_y);
 }
 
-void Underlord::deserialize(ifstream& file)
+void Player::deserialize(ifstream& file)
 {
 	file >> goldAmount_;
 	file >> maxGoldAmount_;
@@ -359,7 +374,7 @@ void Underlord::deserialize(ifstream& file)
 	file >> name_;
 }
 
-void Underlord::deserialize(stringstream& file)
+void Player::deserialize(stringstream& file)
 {
 	int pos_x;
 	int pos_y;
@@ -373,9 +388,34 @@ void Underlord::deserialize(stringstream& file)
 	handPos.setX(pos_x);
 	handPos.setY(pos_y);
 }
-void Underlord::update()
+void Player::update()
 {
 	health.update();
 }
+bool Player::hasComponent(int id)
+{
+	switch (id)
+	{
+	case COMPONENT_HEALTH: return true;
+	default: return false;
+	}
+}
+
+bool Player::isKilled()
+{
+	return isDead_;
+}
+
+void Player::kill()
+{
+	isDead_ = true;
+	clean();
+}
+
+void Player::clean()
+{
+	game::game.removeSelectedAtTile(handPos);
+}
+
 ////////////////////////////////////////////////
 

@@ -11,9 +11,12 @@ public:
 
 	void setPosition(Position Position);
 	void setShootCoolDownTime(int Seconds);
+	void setVisionRange(int range);
 
 	void search();
-	void shoot(DIRECTION Direction, Position StartPosition);
+	void shoot(DIRECTION direction);
+
+	Position getPosition();
 
 	virtual void update();
 private:

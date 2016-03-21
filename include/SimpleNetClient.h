@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "..\Dungeon Keeper\include\Packet.h"
+#include "..\Mine-Mania\include\Packet.h"
 
 class SimpleNetClient
 {

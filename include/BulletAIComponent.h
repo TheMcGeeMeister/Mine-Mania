@@ -12,6 +12,13 @@ public:
 
 	void setDirection(DIRECTION direction);
 	void setPosition(Position position);
+	void setRange(int range);
+	void isDestroyed(bool);
+	void setGraphic(char g);
+
+	void clean();
+
+	bool isDestroyed();
 
 	DIRECTION getDirection();
 	Position getPosition();
@@ -22,5 +29,10 @@ private:
 	double movementCoolDownTime;
 	DIRECTION direction;
 	Position position;
+	int range;
+	int rangeIndex;
+	bool isDestroyed_;
+	bool isCleaned_;
+	char graphic_;
 };
 

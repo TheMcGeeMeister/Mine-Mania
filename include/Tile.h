@@ -6,7 +6,7 @@
 #include <Position.h>
 #include <HealthComponent.h>
 
-class Underlord;
+class Player;
 
 using namespace std;
 
@@ -25,11 +25,13 @@ class Tile
         bool isDestructable() const;
         bool isWalkable() const;
         bool hasGold() const;
+		bool hasOverlay() const;
         double getHealth() const;
         double getMaxHealth() const;
         int getClaimedPercentage() const;
         int getGold() const;
 		int getObjectId() const;
+		char getOverlayGraphic() const;
         string getClaimedBy() const;
         string getCurBeingClaimedBy() const;
         WORD getColor() const;
@@ -53,6 +55,8 @@ class Tile
         void setCanFlyOver(bool);
         void setClaimedBy(string);
 		void setObjectId(int id);
+		void setOverlayEnabled(bool);
+		void setOverlayGraphic(char);
         void isWall(bool);
         void isWalkable(bool);
 		void isFortified(bool);
@@ -65,7 +69,8 @@ class Tile
         void claim(int amount, string claimer);
         void forceClaim(string claim);
         void hasGold(bool hasGold);
-        void mine(int damage, Underlord&);
+        void mine(int damage, Player&);
+		void removeOverlay();
 
         void serialize(fstream& file);
 		void serialize(ofstream& file);
@@ -84,6 +89,7 @@ class Tile
         int gold_;
 		int objectid_;
         char graphic_;
+		char overlayGraphic_;
         string claimedBy_;
         string curBeingClaimedBy_;
         WORD color_;
@@ -96,5 +102,6 @@ class Tile
 		bool isFortified_;
         bool isClaimed_;
         bool hasGold_;
+		bool overlayEnabled_;
         Position pos_;
 };

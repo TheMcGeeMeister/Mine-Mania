@@ -1,5 +1,6 @@
 #include "..\include\Entity.h"
 #include <list>
+#include <fstream>
 
 
 
@@ -63,6 +64,11 @@ void System::update()
 		if (iter.second->isKilled() == true)
 		{
 			d_queue.push_back(iter.first);
+			/* Debug */
+			/////////////////////////////////
+			std::fstream file("Logs\\Log.txt", std::ios::app);
+			file << "System: Entity Deleted ID:" << iter.first << std::endl;
+			/////////////////////////////////
 			continue;
 		}
 		else
@@ -80,6 +86,23 @@ void System::update()
 int System::addEntity(std::shared_ptr<Entity> entity)
 {
 	m_system[id_index] = entity;
-	id_index;
+	id_index++;
+	/* Debug */
+	/////////////////////////////////
+	std::fstream file("Logs\\Log.txt", std::ios::app);
+	file << "System: Entity Created ID:" << id_index << std::endl;
+	/////////////////////////////////
+	return (id_index - 1);
+}
+
+int System::addEntity(std::shared_ptr<Entity> entity, std::string txt)
+{
+	m_system[id_index] = entity;
+	id_index++;
+	/* Debug */
+	/////////////////////////////////
+	std::fstream file("Logs\\Log.txt", std::ios::app);
+	file << "System: Entity Created ID:" << id_index << " <" << txt.c_str() << ">" << std::endl;
+	/////////////////////////////////
 	return (id_index - 1);
 }

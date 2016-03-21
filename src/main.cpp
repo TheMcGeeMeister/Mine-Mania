@@ -7,7 +7,7 @@
 #include <TileChangeManager.h>
 #include <RegenManager.h>
 #include <TileEnums.h>
-#include <Underlord.h>
+#include <Player.h>
 #include <Tile.h>
 #include <thread>
 #include <UserInterface.h>
@@ -28,8 +28,8 @@ namespace game
 	System system;
     TileChangeManager TileHandler;
     RegenManager RegenHandler;
-    Underlord player;
-	Underlord enemy;
+    Player player;
+	Player enemy;
 	Display game;
 	UserInterface tileUI(30, 10, 0, 30);
 	UserInterface SlideUI(0, 10, 75, 0);
@@ -223,6 +223,7 @@ void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
 				case 'a':game::player.moveHandLeft(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 'd':game::player.moveHandRight(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 'j':game::SlideUI.addSlide("Testing"); InputCoolDown.StartNewTimer(0.075); break;
+				case 'y':game::player.spawnTurret(Position(10, 10)); InputCoolDown.StartNewTimer(0.075); break;
 				case 't':swapConsoleFullScreen(); removeScrollBar(); InputCoolDown.StartNewTimer(0.075); break;
 				case 'm':game::server.SendLiteral("12\n9\nTesting"); InputCoolDown.StartNewTimer(0.075); break;
 				case 72:game::player.mineUp(game); InputCoolDown.StartNewTimer(0.075); break;
@@ -762,7 +763,7 @@ namespace AI
 		file << text << endl;
 		file.close();
 	}
-	void testAI(Underlord enemy)
+	void testAI(Player enemy)
 	{
 		Timer coolDown;
 		int action = 1;
@@ -953,6 +954,7 @@ void gameLoop()
 			updateTileInfo();
 			game::SlideUI.update();
 			game::ServerUI.update();
+			game::system.update();
 			if (game::server.isConnected() == true)
 			{
 				if (game::game.isPacketsAvailable())

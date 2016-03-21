@@ -7,7 +7,7 @@
 #include <list>
 #include <iostream>
 #include <sstream>
-#include "..\Dungeon Keeper\include\Packet.h"
+#include "..\Mine-Mania\include\Packet.h"
 #include <Direction.h>
 
 using namespace std;

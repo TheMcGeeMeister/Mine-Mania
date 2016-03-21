@@ -12,7 +12,7 @@
 #include <fstream>
 #include <Display.h>
 #include <UserInterface.h>
-#include "..\Dungeon Keeper\include\Packet.h"
+#include "..\Mine-Mania\include\Packet.h"
 
 namespace game
 {

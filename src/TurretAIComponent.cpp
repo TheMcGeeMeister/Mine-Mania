@@ -1,11 +1,16 @@
 #include "..\include\TurretAIComponent.h"
+#include "..\include\BulletAIComponent.h"
+#include "..\include\Bullet.h"
 #include <Display.h>
-#include <Underlord.h>
+#include <Player.h>
+#include <fstream>
+
 
 namespace game
 {
 	extern Display game;
-	extern Underlord player;
+	extern Player player;
+	extern System system;
 }
 
 
@@ -30,6 +35,11 @@ void TurretAIComponent::setShootCoolDownTime(int secs)
 	shootCoolDownTime_ = secs;
 }
 
+void TurretAIComponent::setVisionRange(int range)
+{
+	visionRange_ = range;
+}
+
 void TurretAIComponent::search() // Currently Only Shoots at the Player
 {
 	Position cPos = curPosition_; // Current Position
@@ -45,21 +55,73 @@ void TurretAIComponent::search() // Currently Only Shoots at the Player
 
 	if (player_y >= uPos.getY() && player_y < dPos.getY()) // Player is 3 under, or above turret
 	{
-		targetFound_ = true;
-		targetPosition_ = pPos;
-		return;
+		if (player_x == cPos.getX())
+		{
+			targetFound_ = true;
+			targetPosition_ = pPos;
+			if (player_y > curPosition_.getY())
+				shoot(DIRECTION_DOWN);
+			else
+				shoot(DIRECTION_UP);
+			return;
+		}
 	}
-	else if (player_x >= lPos.getX() && player_x < rPos.getX()) // Player is 3 left, or right of turret
+	/*else if (player_y <= dPos.getY() && player_y > uPos.getY())
 	{
 		targetFound_ = true;
 		targetPosition_ = pPos;
+		shoot(DIRECTION_UP);
 		return;
+	}*/
+	else if (player_x >= lPos.getX() && player_x < rPos.getX()) // Player is 3 left, or right of turret
+	{
+		if (player_y == cPos.getY())
+		{
+			targetFound_ = true;
+			targetPosition_ = pPos;
+			if (player_x < curPosition_.getX())
+				shoot(DIRECTION_LEFT);
+			else
+				shoot(DIRECTION_RIGHT);
+			return;
+		}
 	}
+	/*else if (player_x <= rPos.getX() && player_x > lPos.getX())
+	{
+		targetFound_ = true;
+		targetPosition_ = pPos;
+		shoot(DIRECTION_RIGHT);
+		return;
+	}*/
 }
 
-void TurretAIComponent::shoot(DIRECTION direction, Position sPos)
+void TurretAIComponent::shoot(DIRECTION direction)
 {
+	Position nPos = curPosition_; // New Position
+	switch (direction)
+	{
+	case DIRECTION_UP: nPos.go(DIRECTION_UP); break;
+	case DIRECTION_DOWN: nPos.go(DIRECTION_DOWN); break;
+	case DIRECTION_LEFT: nPos.go(DIRECTION_LEFT); break;
+	case DIRECTION_RIGHT: nPos.go(DIRECTION_RIGHT); break;
+	}
 
+	shared_ptr<Bullet> bullet = make_shared<Bullet>();
+	bullet->setDirection(direction);
+	bullet->setPosition(nPos);
+	bullet->setGraphic('@');
+
+	game::system.addEntity(bullet);
+
+	fstream file("Logs\\Log.txt", ios::app);
+	file << "TurretAI:" << "Bullet Shot " << direction << endl;
+	file << "TurretAI:" << "Pos:" << nPos.getX() << "," << nPos.getY() << endl;
+	file.close();
+}
+
+Position TurretAIComponent::getPosition()
+{
+	return curPosition_;
 }
 
 void TurretAIComponent::update()

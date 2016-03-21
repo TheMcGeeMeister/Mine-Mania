@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Turret.h>
 #include <string>
 #include <Position.h>
 #include <UserInterface.h>
@@ -9,11 +10,11 @@ using namespace std;
 
 class Display;
 
-class Underlord : public Entity
+class Player : public Entity
 {
     public:
-        Underlord();
-        virtual ~Underlord();
+        Player();
+        virtual ~Player();
 
         /* Getters */
 		//////////////////////////////////
@@ -57,6 +58,7 @@ class Underlord : public Entity
 		/* Object Place */
 		//////////////////////////////////
 		void placeObject(uint16_t objectID);
+		void spawnTurret(Position pos);
 		//////////////////////////////////
 
 		void reset();
@@ -72,6 +74,10 @@ class Underlord : public Entity
 		//////////////////////////////////
 
 		virtual void update();
+		virtual bool hasComponent(int id);
+		virtual bool isKilled();
+		virtual void kill();
+		virtual void clean();
 
 
     protected:
@@ -86,6 +92,7 @@ class Underlord : public Entity
 
 		bool moved_;
 		bool mined_;
+		bool isDead_;
 
 		Position handPos;
 		Position mineUIPos;

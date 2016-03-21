@@ -2,12 +2,12 @@
 #include <sstream>
 #include <fstream>
 #include <TileEnums.h>
-#include <Underlord.h>
-#include "..\Dungeon Keeper\include\Packet.h"
+#include <Player.h>
+#include "..\Mine-Mania\include\Packet.h"
 
 namespace game
 {
-	extern Underlord player;
+	extern Player player;
 	extern System system;
 }
 

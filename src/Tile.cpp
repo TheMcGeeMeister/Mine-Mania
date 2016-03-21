@@ -2,7 +2,7 @@
 #include <game.h>
 #include <sstream>
 #include <fstream>
-#include <Underlord.h>
+#include <Player.h>
 #include <TileChangeManager.h>
 #include <TileEnums.h>
 #include <Position.h>
@@ -16,12 +16,14 @@ namespace game
 Tile::Tile()
 {
 	graphic_ = ' ';
+	overlayGraphic_ = ' ';
 	color_ = C_Black;
 	gold_ = 0;
 	claimedPercentage_ = 0;
 	objectid_ = 0;
 	isClaimable_ = false;
 	canFlyOver_ = false;
+	overlayEnabled_ = false;
 	claimedBy_ = "Neutral";
 	curBeingClaimedBy_ = "None";
 	isWalkable_ = false;
@@ -61,7 +63,10 @@ Position Tile::getPos() const
 
 char Tile::getGraphic() const
 {
-	return graphic_;
+	if (overlayEnabled_ == true)
+		return overlayGraphic_;
+	else
+		return graphic_;
 }
 
 bool Tile::isWall() const
@@ -102,6 +107,11 @@ bool Tile::hasGold() const
 	return hasGold_;
 }
 
+bool Tile::hasOverlay() const
+{
+	return overlayEnabled_;
+}
+
 double Tile::getHealth() const
 {
 	return health.getHealth();
@@ -125,6 +135,11 @@ int Tile::getGold() const
 int Tile::getObjectId() const
 {
 	return objectid_;
+}
+
+char Tile::getOverlayGraphic() const
+{
+	return overlayGraphic_;
 }
 
 string Tile::getClaimedBy() const
@@ -202,6 +217,17 @@ void Tile::setClaimedBy(string claimedBy)
 void Tile::setObjectId(int id)
 {
 	objectid_ = id;
+}
+
+void Tile::setOverlayEnabled(bool is)
+{
+	overlayEnabled_ = is;
+}
+
+void Tile::setOverlayGraphic(char g)
+{
+	overlayGraphic_ = g;
+	game::TileHandler.push_back(pos_);
 }
 
 void Tile::isWall(bool isWall)
@@ -399,7 +425,7 @@ void Tile::hasGold(bool hasGold)
 	hasGold_ = hasGold;
 }
 
-void Tile::mine(int damage, Underlord& underlord)
+void Tile::mine(int damage, Player& underlord)
 {
 	if (isWall_ == false)
 		return;
@@ -435,6 +461,13 @@ void Tile::mine(int damage, Underlord& underlord)
 	{
 		health.getHealthRef() = health.getMaxHealthRef();
 	}
+}
+
+void Tile::removeOverlay()
+{
+	overlayGraphic_ = ' ';
+	overlayEnabled_ = false;
+	game::TileHandler.push_back(pos_);
 }
 
 /*

@@ -1,16 +1,27 @@
 #include "..\include\Turret.h"
 #include <ObjectIds.h>
+#include <Display.h>
+#include <TileChangeManager.h>
+
+namespace game
+{
+	extern Display game;
+	extern TileChangeManager TileHandler;
+}
 
 
 Turret::Turret()
 {
+	isDestroyed_ = false;
+	graphic = ' ';
 }
 
 Turret::Turret(Position position, std::string owner)
 {
-	this->position = position;
 	this->owner = owner;
 	ai.setPosition(position);
+	isDestroyed_ = false;
+	graphic = ' ';
 }
 
 
@@ -21,6 +32,19 @@ Turret::~Turret()
 void Turret::setGraphic(char g)
 {
 	graphic = g;
+	Tile& tile = game::game.getTileRefAt(ai.getPosition());
+	tile.setOverlayEnabled(true);
+	tile.setOverlayGraphic(g);
+}
+
+void Turret::setPosition(Position pos)
+{
+	ai.setPosition(pos);
+}
+
+void Turret::setRange(int range)
+{
+	ai.setVisionRange(range);
 }
 
 char Turret::getGraphic()
@@ -40,4 +64,22 @@ bool Turret::hasComponent(int component)
 	case TURRET_ID: return true;
 	default: return false;
 	}
+}
+
+bool Turret::isKilled()
+{
+	return isDestroyed_;
+}
+
+void Turret::kill()
+{
+	isDestroyed_ = true;
+	clean();
+}
+
+void Turret::clean()
+{
+	Tile &tile = game::game.getTileRefAt(ai.getPosition());
+	tile.removeOverlay();
+	game::TileHandler.push_back(ai.getPosition());
 }

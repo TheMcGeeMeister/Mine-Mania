@@ -27,13 +27,14 @@ public:
 
 	void setID(int id);
 	void setPos(Position pos);
-	void kill();
 
 	int getID();
-	bool isKilled();
 	Position getPos();
 
 	virtual bool hasComponent(int component) = 0;
+	virtual bool isKilled() = 0;
+	virtual void kill() = 0;
+	virtual void clean() = 0;
 private:
 	int id_;
 	bool kill_;
@@ -49,6 +50,8 @@ public:
 	void update();
 	
 	int addEntity(std::shared_ptr<Entity>);
+
+	int addEntity(std::shared_ptr<Entity>, std::string txt);
 	
 private:
 	int id_index;
