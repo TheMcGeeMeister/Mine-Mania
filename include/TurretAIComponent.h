@@ -12,11 +12,14 @@ public:
 	void setPosition(Position Position);
 	void setShootCoolDownTime(int Seconds);
 	void setVisionRange(int range);
+	void setOwner(std::string owner);
 
 	void search();
+	void searchLine(Position sPos, DIRECTION direction, int amount, Position& fPos, bool& isFind);
 	void shoot(DIRECTION direction);
 
 	Position getPosition();
+	std::string getOwner();
 
 	virtual void update();
 private:
@@ -27,5 +30,6 @@ private:
 	bool targetFound_;
 	Position targetPosition_;
 	Position curPosition_;
+	std::string owner_;
 };
 

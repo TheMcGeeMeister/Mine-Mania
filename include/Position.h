@@ -38,6 +38,8 @@ class Position
         void operator=(Position& pos);
 		void operator=(const Position& pos);
 
+		bool operator==(const Position& pos);
+
     protected:
 
     private:

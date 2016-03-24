@@ -4,7 +4,17 @@
 
 enum SPacketNames
 {
-	None, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, SendPlayer, SendHost, SendDefault
+	None, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
+
+	UpdatePlayerPosition, UpdateTile, UpdateTileChar, UpdateTileColor,
+
+	AddPlayer, AddPlayerLocal,
+
+	WaitingPlayer, Start,
+
+	PlayerConnect,
+
+	PacketEnd = -255
 };
 
 class SPacket

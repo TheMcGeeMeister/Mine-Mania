@@ -14,6 +14,7 @@ class Player : public Entity
 {
     public:
         Player();
+		Player(Player&);
         virtual ~Player();
 
         /* Getters */
@@ -40,6 +41,12 @@ class Player : public Entity
         void setName(string name);
 		//////////////////////////////////
 
+		/* Stats*/
+		//////////////////////////////////
+		void damage(int amount);
+		void heal(int amount);
+		//////////////////////////////////
+
 		/* Hand */
 		//////////////////////////////////
 		void moveHandUp(Display& game);
@@ -64,10 +71,13 @@ class Player : public Entity
 		void reset();
 		void updateMiningUI();
 
+		void operator=(Player& player);
+
 		/* Serialize / Deserialize */
 		//////////////////////////////////
 		void serialize(fstream& file);
 		void serialize(ofstream& file);
+		void serialize(stringstream& file);
 		void deserialize(fstream& file);
 		void deserialize(ifstream& file);
 		void deserialize(stringstream& file);
@@ -93,6 +103,7 @@ class Player : public Entity
 		bool moved_;
 		bool mined_;
 		bool isDead_;
+		bool isLocal_;
 
 		Position handPos;
 		Position mineUIPos;

@@ -17,6 +17,7 @@ public:
 	double getMaxHealth() const;
 	double getHealthRegen() const;
 	bool isRegenEnabled() const;
+	bool isDead() const;
 
 	double& getHealthRef();
 	double& getMaxHealthRef();
@@ -33,5 +34,6 @@ private:
 	double healthRegen_;
 	Timer regenCoolDown;
 	bool isRegenEnabled_;
+	bool isDead_;
 };
 

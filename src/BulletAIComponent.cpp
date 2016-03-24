@@ -1,10 +1,12 @@
 #include "..\include\BulletAIComponent.h"
 #include <Display.h>
+#include <PlayerHandler.h>
 
 namespace game
 {
 	extern Display game;
 	extern System system;
+	extern PlayerHandler pHandler;
 }
 
 
@@ -12,9 +14,10 @@ namespace game
 BulletAIComponent::BulletAIComponent()
 {
 	movementCoolDownTime = 0.100;
-	int range = 5;
-	int rangeIndex = 0;
-	direction = DIRECTION_LEFT;
+	range = 10;
+	rangeIndex = 0;
+	damage = 10;
+	direction = DIRECTION_UP;
 	isDestroyed_ = false;
 	movementCoolDown.StartNewTimer(movementCoolDownTime);
 }
@@ -34,11 +37,18 @@ void BulletAIComponent::setPosition(Position position)
 {
 	game::game.getTileRefAt(this->position).removeOverlay();
 	this->position = position;
+	game::game.getTileRefAt(position).setOverlayEnabled(true);
+	game::game.getTileRefAt(position).setOverlayGraphic(graphic_);
 }
 
 void BulletAIComponent::setRange(int range)
 {
 	this->range = range;
+}
+
+void BulletAIComponent::setDamage(int damage)
+{
+	this->damage = damage;
 }
 
 void BulletAIComponent::isDestroyed(bool is)
@@ -52,6 +62,11 @@ void BulletAIComponent::setGraphic(char g)
 	Tile& tile = game::game.getTileRefAt(position);
 	tile.setOverlayEnabled(true);
 	tile.setOverlayGraphic(g);
+}
+
+int BulletAIComponent::getDamage()
+{
+	return damage;
 }
 
 void BulletAIComponent::clean()
@@ -84,6 +99,18 @@ void BulletAIComponent::update()
 	if (isDestroyed_ == true) return;
 	if (movementCoolDown.Update() == true)
 	{
+		if (game::pHandler.playerAt(position) == true)
+		{
+			Player *player = nullptr;
+			if (game::pHandler.getPlayerAt(position, &player) == true)
+			{
+				if (player == nullptr) return;
+				player->damage(damage);
+				isDestroyed(true);
+				clean();
+				return;
+			}
+		}
 		if (rangeIndex == range)
 		{
 			isDestroyed(true);
@@ -102,6 +129,19 @@ void BulletAIComponent::update()
 			isDestroyed(true);
 			clean();
 			return;
+		}
+
+		if (game::pHandler.playerAt(nPos) == true)
+		{
+			Player *player = nullptr;
+			if (game::pHandler.getPlayerAt(nPos, &player) == true)
+			{
+				if (player == nullptr) return;
+				player->damage(damage);
+				isDestroyed(true);
+				clean();
+				return;
+			}
 		}
 
 		tile.setOverlayEnabled(true);

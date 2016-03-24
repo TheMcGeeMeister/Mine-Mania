@@ -32,6 +32,11 @@ Player::Player() : UI(0, 0, 50, 30)
 	mineUIPos.setY(0);
 }
 
+Player::Player(Player & p)
+{
+	*this = p;
+}
+
 Player::~Player()
 {
     //dtor
@@ -88,6 +93,26 @@ void Player::setName(string name)
 	game::game.claimNameChange(name_, name);
 	name_ = name;
 }
+
+void Player::damage(int amount)
+{
+	health.damage(amount);
+	std::stringstream slide;
+	slide << " -" << amount << " Health";
+	game::SlideUI.addSlide(slide.str());
+	if (health.isDead() == true)
+	{
+		game::SlideUI.addSection(name_ + " Died");
+	}
+}
+
+void Player::heal(int amount)
+{
+	health.heal(amount);
+	std::stringstream healthSlide;
+	healthSlide << name_ << " +" << amount << " Health";
+	game::SlideUI.addSlide(healthSlide.str());
+}
 ////////////////////////////////////////////////
 
 
@@ -104,6 +129,12 @@ void Player::moveHandUp(Display& game)
 	handPos = newPos;
 	moved_ = true;
 	mined_ = false;
+	std::stringstream msg;
+	msg << UpdatePlayerPosition << endl
+		<< name_ << endl
+		<< newPos.getX() << endl
+		<< newPos.getY() << endl;
+	game::game.addPacket(msg.str());
 	return;
 }
 
@@ -118,6 +149,12 @@ void Player::moveHandDown(Display& game)
 	handPos = newPos;
 	moved_ = true;
 	mined_ = false;
+	std::stringstream msg;
+	msg << UpdatePlayerPosition << endl
+		<< name_ << endl
+		<< newPos.getX() << endl
+		<< newPos.getY() << endl;
+	game::game.addPacket(msg.str());
 	return;
 }
 
@@ -132,6 +169,12 @@ void Player::moveHandLeft(Display& game)
 	handPos = newPos;
 	moved_ = true;
 	mined_ = false;
+	std::stringstream msg;
+	msg << UpdatePlayerPosition << endl
+		<< name_ << endl
+		<< newPos.getX() << endl
+		<< newPos.getY() << endl;
+	game::game.addPacket(msg.str());
 	return;
 }
 
@@ -146,6 +189,12 @@ void Player::moveHandRight(Display& game)
 	handPos = newPos;
 	moved_ = true;
 	mined_ = false;
+	std::stringstream msg;
+	msg << UpdatePlayerPosition << endl
+		<< name_ << endl
+		<< newPos.getX() << endl
+		<< newPos.getY() << endl;
+	game::game.addPacket(msg.str());
 	return;
 }
 
@@ -233,8 +282,9 @@ void Player::spawnTurret(Position pos)
 {
 	shared_ptr<Turret> turret = make_shared<Turret>();
 	turret->setPosition(pos);
-	turret->setGraphic('*');
+	turret->setGraphic('+');
 	turret->setRange(5);
+	turret->setOwner(name_);
 	game::system.addEntity(turret, "Turret");
 }
 
@@ -283,6 +333,25 @@ void Player::updateMiningUI()
 		}
 	}
 	UI.update();
+}
+
+void Player::operator=(Player & player)
+{
+	goldAmount_ = player.goldAmount_;
+	maxGoldAmount_ = player.maxGoldAmount_;
+	manaAmount_ = player.manaAmount_;
+	maxManaAmount_ = player.maxManaAmount_;
+	health.setHealth(player.health.getHealth());
+	health.setHealthRegen(player.health.getHealthRegen());
+	health.setMaxHealth(player.health.getMaxHealth());
+	health.isRegenEnabled(player.health.isRegenEnabled());
+	moved_ = player.moved_;
+	mined_ = player.mined_;
+	isDead_ = player.isDead_;
+	isLocal_ = player.isLocal_;
+	handPos = player.handPos;
+	mineUIPos = player.mineUIPos;
+	name_ = player.name_;
 }
 
 
@@ -350,6 +419,18 @@ void Player::serialize(ofstream& file)
 	file << handPos.getY() << endl;
 }
 
+void Player::serialize(stringstream & file)
+{
+	file << "Player" << endl;
+	file << goldAmount_ << endl;
+	file << maxGoldAmount_ << endl;
+	file << manaAmount_ << endl;
+	file << maxManaAmount_ << endl;
+	file << name_ << endl;
+	file << handPos.getX() << endl;
+	file << handPos.getY() << endl;
+}
+
 void Player::deserialize(fstream& file)
 {
 	int pos_x;
@@ -367,15 +448,22 @@ void Player::deserialize(fstream& file)
 
 void Player::deserialize(ifstream& file)
 {
+	int pos_x;
+	int pos_y;
 	file >> goldAmount_;
 	file >> maxGoldAmount_;
 	file >> manaAmount_;
 	file >> maxManaAmount_;
 	file >> name_;
+	file >> pos_x;
+	file >> pos_y;
+	handPos.setX(pos_x);
+	handPos.setY(pos_y);
 }
 
 void Player::deserialize(stringstream& file)
 {
+	file.clear();
 	int pos_x;
 	int pos_y;
 	file >> goldAmount_;

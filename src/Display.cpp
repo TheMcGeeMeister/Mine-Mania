@@ -4,11 +4,12 @@
 #include <TileEnums.h>
 #include <Player.h>
 #include "..\Mine-Mania\include\Packet.h"
+#include <PlayerHandler.h>
 
 namespace game
 {
-	extern Player player;
 	extern System system;
+	extern PlayerHandler pHandler;
 }
 
 extern void setFontInfo(int fontSize, int font);
@@ -101,12 +102,6 @@ void Display::setTileAt(Position _pos, Tile _tile)
     newTileChange.first=_pos;
     newTileChange.second=_tile;
     tileChanges_.push_back(newTileChange);
-	stringstream data;
-	newTileChange.second.serialize(data);
-	Packet nMsg;
-	nMsg.name = SetTile;
-	nMsg.data = data.str();
-	//packetsBuffer_.push_back(nMsg);
 }
 void Display::setTileAtS(Position _pos, Tile _tile)
 {
@@ -121,13 +116,6 @@ void Display::setTileAsSelected(Position newPos)
 	color = S_Box | C_White;
 	setPos(newPos, color);
 	isSelected_[newPos] = true;
-	Packet nMsg;
-	nMsg.name = SetSelected;
-	stringstream data;
-	data << newPos.getX() << End;
-	data << newPos.getY() << End;
-	nMsg.data = data.str();
-	packetsBuffer_.push_back(nMsg);
 }
 
 void Display::setTileAsSelectedS(Position newPos)
@@ -384,7 +372,11 @@ bool Display::isFullScreen()
 
 void Display::updateTileServer(Position pos)
 {
-	//mapReal_[pos].serialize(serverBuff);
+	Packet msg;
+	msg.send = SendDefault;
+	msg.name = UpdateTile;
+	msg.data = m_map[pos].serialize(true);
+	packetsBuffer_.push_back(msg);
 }
 
 Position Display::searchLine(Position sPos, DIRECTION direction, int amount, char target)
@@ -553,6 +545,19 @@ list<Packet>& Display::getPackets()
 	return packetsBuffer_;
 }
 
+void Display::addPacket(std::string rMsg)
+{
+	std::stringstream msg;
+	msg << rMsg;
+	Packet packet;
+	packet.send = SendDefault;
+	msg >> packet.name;
+	std::stringstream buff;
+	buff << msg.rdbuf();
+	packet.data = buff.str();
+	packetsBuffer_.push_back(packet);
+}
+
 void Display::clearPackets()
 {
 	packetsBuffer_.clear();
@@ -585,13 +590,6 @@ void Display::removeSelectedAtTile(Position pos)
 	if (isSelected_.count(pos))
 		isSelected_.erase(pos);
 	updatePos(pos);
-	Packet nMsg;
-	nMsg.name = RemoveSelected;
-	stringstream data;
-	data << pos.getX() << End;
-	data << pos.getY() << End;
-	nMsg.data = data.str();
-	packetsBuffer_.push_back(nMsg);
 }
 
 void Display::removeSelectedAtTileS(Position pos)
@@ -636,7 +634,7 @@ void Display::saveWorld()
 			tile.serialize(file);
         }
     }
-	game::player.serialize(file);
+	game::pHandler.getLocalPlayer().serialize(file);
 	file << "End";
     file.close();
 }
@@ -666,7 +664,7 @@ void Display::saveWorld(string filename)
 			tile.serialize(file);
 		}
 	}
-	game::player.serialize(file);
+	game::pHandler.getLocalPlayer().serialize(file);
 	file << "End";
 	file.close();
 }
@@ -685,6 +683,7 @@ string Display::getWorld()
 	{
 		world << iter.second.serialize(true);
 	}
+	world << "End";
 	return world.str();
 }
 
@@ -716,9 +715,10 @@ void Display::loadWorld(string filename)
 			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
-		if (text == "Underlord")
+		if (text == "Player")
 		{
-			game::player.deserialize(file);
+			game::pHandler.getLocalPlayer().deserialize(file);
+			game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
 		}
 		text = "";
 		file.clear();
@@ -747,9 +747,11 @@ void Display::loadWorldServer(string data)
 			m_map[tile.getPos()] = tile;
 			msg.clear();
 		}
-		if (text == "Underlord")
+		if (text == "Player")
 		{
-			game::player.deserialize(msg);
+			Player player;
+			player.deserialize(msg);
+			game::pHandler.addPlayer(player);
 		}
 		text = "";
 		msg.clear();
@@ -764,7 +766,7 @@ void Display::loadWorldServer(stringstream& msg)
 {
 	string text;
 	msg >> text;
-	while (text != "End")
+	while (text!="End")
 	{
 		if (text == "Tile")
 		{
@@ -772,13 +774,15 @@ void Display::loadWorldServer(stringstream& msg)
 			Tile tile;
 			tile.deserialize(msg);
 			m_map[tile.getPos()] = tile;
-			msg.clear();
 		}
-		if (text == "Underlord")
+		if (text == "Player")
 		{
-			game::player.deserialize(msg);
+			msg.clear();
+			Player player;
+			player.deserialize(msg);
+			game::pHandler.addPlayer(player);
 		}
-		text = "";
+		text = "End";
 		msg.clear();
 		msg >> text;
 	}
@@ -816,9 +820,9 @@ void Display::loadWorld()
 			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
-		if (text == "Underlord")
+		if (text == "Player")
 		{
-			game::player.deserialize(file);
+			game::pHandler.getLocalPlayer().deserialize(file);
 		}
 		text = "";
 		file.clear();
@@ -835,7 +839,7 @@ void Display::newWorld()
 
 	getSaveSuffix();
 
-	game::player.reset();
+	game::pHandler.getLocalPlayer().reset();
 
     Tile gold;
     gold.setGraphic(TG_Gold);
@@ -855,7 +859,7 @@ void Display::newWorld()
     stoneFloor.isDestructable(false);
     stoneFloor.isWall(false);
     stoneFloor.isWalkable(true);
-    stoneFloor.forceClaim(game::player.getName());
+    stoneFloor.forceClaim(game::pHandler.getLocalPlayer().getName());
     stoneFloor.isClaimable(true);
 	stoneFloor.setHealth(100);
 	stoneFloor.setMaxHealth(100);
@@ -870,7 +874,7 @@ void Display::newWorld()
     core.isClaimable(false);
     core.setMaxHealth(2500);
     core.setHealth(2500);
-    core.setClaimedBy(game::player.getName());
+    core.setClaimedBy(game::pHandler.getLocalPlayer().getName());
 
 	Tile stone;
     stone.setGraphic(TG_Stone);
@@ -908,7 +912,113 @@ void Display::newWorld()
     m_map[startPos]=stoneFloor;
     m_map[corePos]=core;
 	isLoaded_ = true;
-	game::player.forceHandPosition(startPos, *this);
+	game::pHandler.getLocalPlayer().forceHandPosition(startPos, *this);
+	reloadAll_ = true;
+}
+
+void Display::newWorldMulti()
+{
+	Position newPos(1, 1);
+
+	getSaveSuffix();
+
+	game::pHandler.getLocalPlayer().reset();
+
+	Tile gold;
+	gold.setGraphic(TG_Gold);
+	gold.setColor(TGC_Gold);
+	gold.setBackground(TGB_Gold);
+	gold.isDestructable(true);
+	gold.isWall(true);
+	gold.isWalkable(false);
+	gold.isClaimable(false);
+	gold.setHealth(150);
+	gold.setMaxHealth(150);
+
+	Tile stoneFloor;
+	stoneFloor.setColor(TGC_StoneFloor);
+	stoneFloor.setGraphic(TG_StoneFloor);
+	stoneFloor.setBackground(TGB_StoneFloor);
+	stoneFloor.isDestructable(false);
+	stoneFloor.isWall(false);
+	stoneFloor.isWalkable(true);
+	stoneFloor.forceClaim(game::pHandler.getLocalPlayer().getName());
+	stoneFloor.isClaimable(true);
+	stoneFloor.setHealth(100);
+	stoneFloor.setMaxHealth(100);
+
+	Tile core;
+	core.setGraphic('C');
+	core.setColor(TC_Gray);
+	core.setBackground(B_DarkGray);
+	core.isWall(false);
+	core.isWalkable(false);
+	core.isDestructable(true);
+	core.isClaimable(false);
+	core.setMaxHealth(2500);
+	core.setHealth(2500);
+	core.setClaimedBy(game::pHandler.getLocalPlayer().getName());
+
+	Tile stone;
+	stone.setGraphic(TG_Stone);
+	stone.setColor(TGC_Stone);
+	stone.setBackground(TGB_Stone);
+	stone.isDestructable(true);
+	stone.setMaxHealth(100);
+	stone.setHealth(100);
+	stone.isWall(true);
+
+	//Position startPos(rand() % 50, rand() % 20);
+	//Position corePos(rand() % 50, rand() % 20);
+	Position startPos(0, 1);
+	Position corePos(0, 0);
+	int key = rand() % 15;
+	for (int x = 0; x<size_x_; x++)
+	{
+		for (int y = 0; y<size_y_; y++)
+		{
+			newPos.setX(x);
+			newPos.setY(y);
+			if ((rand() % 15) == key)
+			{
+				gold.setGoldAmount((rand() % 500) + 101);
+				gold.setPos(newPos);
+				m_map[newPos] = gold;
+			}
+			else
+			{
+				stone.setPos(newPos);
+				m_map[newPos] = stone;
+			}
+		}
+	}
+	Player other;
+	other.setName("Other");
+
+	game::pHandler.getLocalPlayer().setName("Host");
+
+	/* Host */
+	startPos(0, 1);
+	core.setPos(Position(0,0));
+	stoneFloor.setPos(Position(0,1));
+	core.forceClaim("Host");
+	stoneFloor.forceClaim("Host");
+	m_map[startPos] = stoneFloor;
+	m_map[corePos] = core;
+	game::pHandler.getLocalPlayer().forceHandPosition(Position(0, 1), *this);
+	game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
+
+	/* Other*/
+	core.setPos(Position(74, 29));
+	stoneFloor.setPos(Position(74, 28));
+	core.forceClaim("Other");
+	stoneFloor.forceClaim("Other");
+	m_map[Position(74, 28)] = stoneFloor;
+	m_map[Position(74, 29)] = core;
+
+	other.forceHandPosition(Position(74, 28), *this);
+	game::pHandler.addPlayer(other);
+	isLoaded_ = true;
 	reloadAll_ = true;
 }
 

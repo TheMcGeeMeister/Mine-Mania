@@ -52,6 +52,7 @@ public:
 	void saveWorld(string filename);
 	string getWorld();
     void newWorld();
+	void newWorldMulti();
 	void getSaveSuffix();
 	int getSaveAmount();
 
@@ -65,6 +66,7 @@ public:
 
 	bool isPacketsAvailable();
 	list<Packet>& getPackets();
+	void addPacket(std::string);
 	void clearPackets();
 
 	int getFont();

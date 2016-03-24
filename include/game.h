@@ -20,4 +20,6 @@ namespace gameTiles
 
 extern void updateTileInfo();
 
+//void connectMenu(thread & sThread, bool & threadStarted);
+
 #endif // GAME_H_INCLUDED

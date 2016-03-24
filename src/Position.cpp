@@ -112,7 +112,7 @@ void Position::go(DIRECTION direction)
 {
 	switch (direction)
 	{
-	case DIRECTION_UP: right(); break;
+	case DIRECTION_UP: up(); break;
 	case DIRECTION_DOWN: down(); break;
 	case DIRECTION_LEFT: left(); break;
 	case DIRECTION_RIGHT: right(); break;
@@ -158,6 +158,18 @@ void Position::operator=(const Position& pos)
 	x_ = pos.x_;
 	y_ = pos.y_;
 	isValid_ = pos.isValid_;
+}
+
+bool Position::operator==(const Position & pos)
+{
+	if (x_ == pos.x_ & y_ == pos.y_)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 std::pair<int, int> Position::getPair()

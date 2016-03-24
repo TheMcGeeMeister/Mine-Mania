@@ -53,8 +53,15 @@ public:
 
 	int addEntity(std::shared_ptr<Entity>, std::string txt);
 	
+	//int addPlayer(std::shared_ptr<Player>);
+
+	//bool getPlayerAt(Position pos, Player& player);
+
+	//bool playerAt(Position pos);
 private:
 	int id_index;
+	int id_player_index;
 	std::map<int, std::shared_ptr<Entity>> m_system;
+	//std::map<int, std::shared_ptr<Player>> m_players;
 };
 

@@ -4,6 +4,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -27,9 +29,10 @@
 namespace SimpleNet
 {
 	SOCKET ListenSocket;
-	SOCKET HostSocket;
-	SOCKET PlayerSocket;
-	bool ListenLoopContinue;
+	SOCKET HostSocket = INVALID_SOCKET;
+	SOCKET PlayerSocket = INVALID_SOCKET;
+	bool ListenLoopContinue = true;
+	bool PlayerLoopExit = false;
 	bool PlayerConnected = false;
 	bool HostConnected = false;
 	void Log(std::string text)
@@ -114,43 +117,43 @@ bool StartServer()
 
 void ListenLoop()
 {
-	//while (SimpleNet::ClientSocket == INVALID_SOCKET)
-	//{
-		/*timeval time;
-		time.tv_sec = 0.01;
-		if (select(NULL, &s, NULL, NULL, &time))
-		{
-			SimpleNet::ClientSocket = INVALID_SOCKET;
 
-			if (FD_ISSET(&s, SimpleNet::ListenSocket))
-			{
-				SimpleNet::ClientSocket = accept(SimpleNet::ListenSocket, NULL, NULL);
-				if (SimpleNet::ClientSocket == INVALID_SOCKET)
-				{
-					closesocket(SimpleNet::ListenSocket);
-					WSACleanup();
-					return;
-				}
-			}
-		}*/
-		SimpleNet::HostSocket = accept(SimpleNet::ListenSocket, NULL, NULL);
-		std::string msg = (char)SetHost + "\n";
-		send(SimpleNet::HostSocket, msg.c_str(), msg.length(), NULL);
+	SimpleNet::HostSocket = accept(SimpleNet::ListenSocket, NULL, NULL);
+
+	std::stringstream msg;
+
+	if (SimpleNet::HostSocket != INVALID_SOCKET)
+	{
+		msg << SetHost;
+		send(SimpleNet::HostSocket, msg.str().c_str(), msg.str().length(), NULL);
 		SimpleNet::HostConnected = true;
-		if (SimpleNet::HostSocket == INVALID_SOCKET)
-		{
-			closesocket(SimpleNet::ListenSocket);
-			WSACleanup();
-			return;
-		}
-		SimpleNet::PlayerConnected = true;
 		std::cout << "Host Connected" << std::endl;
-		SimpleNet::PlayerSocket = accept(SimpleNet::ListenSocket, NULL, NULL);
-		msg = (char)SetPlayer + "\n";
-		send(SimpleNet::PlayerSocket, msg.c_str(), msg.length(), NULL);
+	}else
+	{
+		shutdown(SimpleNet::ListenSocket, 1);
+		closesocket(SimpleNet::ListenSocket);
 		return;
-	//}
+	}
+
+	msg.str(std::string());
+
+	SimpleNet::PlayerSocket = accept(SimpleNet::ListenSocket, NULL, NULL);
+
+	if(SimpleNet::PlayerSocket != INVALID_SOCKET)
+	{
+		SimpleNet::PlayerConnected = true;
+		msg << SetPlayer;
+		send(SimpleNet::PlayerSocket, msg.str().c_str(), msg.str().length(), NULL);
+		std::cout << "Player Connected" << std::endl;
+		return;
+	}
+	else
+	{
+		shutdown(SimpleNet::ListenSocket, 1);
+		closesocket(SimpleNet::ListenSocket);
+	}
 	return;
+
 }
 
 void Send(bool toHost, std::string msg)
@@ -161,11 +164,14 @@ void Send(bool toHost, std::string msg)
 	}
 	else
 	{
-		send(SimpleNet::PlayerSocket, msg.c_str(), msg.length(), NULL);
+		if (SimpleNet::PlayerConnected == true)
+		{
+			send(SimpleNet::PlayerSocket, msg.c_str(), msg.length(), NULL);
+		}
 	}
 }
 
-void Go(std::string rMsg)
+void Go(std::string rMsg, bool isHost)
 {
 	/*std::string key;
 	std::stringstream msg;
@@ -197,11 +203,57 @@ void Go(std::string rMsg)
 	{
 		std::stringstream rMsg;
 		rMsg << sMsg.rdbuf();
-		Send(true, rMsg.str());
+		if (isHost)
+		{
+			Send(false, rMsg.str());
+		}
+		else
+		{
+			Send(true, rMsg.str());
+		}
+	}
+	else if (send == SendPlayer)
+	{
+		std::stringstream rMsg;
+		rMsg << sMsg.rdbuf();
+		Send(false, rMsg.str());
 	}
 	else
 	{
 		SimpleNet::Log("Error: Unknown Send");
+	}
+}
+
+void PlayerLoop()
+{
+	while (true)
+	{
+		/* Player */
+		/////////////////////////////////////
+		if (SimpleNet::PlayerConnected)
+		{
+			char pbuff[150000];
+			memset(pbuff, '\0', sizeof(pbuff));
+			int result = recv(SimpleNet::PlayerSocket, pbuff, 150000, NULL);
+			std::string msg = pbuff;
+			if (result == 0)
+			{
+				SimpleNet::Log("Player Disconnected");
+				std::cout << "Server:Player Disconnected..." << std::endl;
+				closesocket(SimpleNet::PlayerSocket);
+				break;
+			}
+			else if (result > 0)
+			{
+				Go(msg, false);
+			}
+		}
+		/////////////////////////////////////
+		Sleep(10);
+		if (SimpleNet::PlayerLoopExit == true)
+		{
+			return;
+		}
 	}
 }
 
@@ -215,6 +267,7 @@ int main()
 	SimpleNet::ListenLoopContinue = true;
 
 	std::thread listen(ListenLoop);
+	std::thread player(PlayerLoop);
 
 	//SimpleNetClient client;
 
@@ -239,46 +292,60 @@ int main()
 			std::string text = hbuff;
 			if (iResult == 0)
 			{
-				SimpleNet::Log("Error: Host Result == 0");
+				SimpleNet::Log("Host Disconnected");
 				std::cout << "Server:Host Disconnected..." << std::endl;
 				closesocket(SimpleNet::HostSocket);
 				break;
 			}
 			else if (iResult > 0)
 			{
-				//std::cout << "Host:" << text << std::endl;
-				Go(text);
+				Go(text, true);
 			}
 		}
 		/////////////////////////////////////
 
-		/* Player */
+		/* Player 
 		/////////////////////////////////////
 		if (SimpleNet::PlayerConnected)
 		{
 			char pbuff[150000];
 			memset(pbuff, '\0', sizeof(pbuff));
-			int result = recv(SimpleNet::HostSocket, pbuff, 150000, NULL);
+			int result = recv(SimpleNet::PlayerSocket, pbuff, 150000, NULL);
 			std::string msg = pbuff;
 			if (result == 0)
 			{
-				SimpleNet::Log("Error: Result == 0\n");
+				SimpleNet::Log("Player Disconnected");
 				std::cout << "Server:Player Disconnected..." << std::endl;
-				closesocket(SimpleNet::HostSocket);
+				closesocket(SimpleNet::PlayerSocket);
 				break;
 			}
 			else if (result > 0)
 			{
-				//std::cout << "Player:" << msg << std::endl
-				Go(msg);
+				Go(msg, false);
 			}
-		}
+		}*/
 		/////////////////////////////////////
 
 		Sleep(10);
 	}
 	SimpleNet::ListenLoopContinue = false;
+	SimpleNet::PlayerLoopExit = true;
+	WSACancelBlockingCall();
 	Sleep(250);
+	shutdown(SimpleNet::ListenSocket, 1);
+	closesocket(SimpleNet::ListenSocket);
+	shutdown(SimpleNet::PlayerSocket, 1);
+	closesocket(SimpleNet::PlayerConnected);
+	WSACleanup();
+	Sleep(250);
+	if (listen.joinable())
+	{
+		listen.join();
+	}
+	if (player.joinable())
+	{
+		player.join();
+	}
 	FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE));
 	return 0;
 }

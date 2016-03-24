@@ -12,11 +12,13 @@
 #include <fstream>
 #include <Display.h>
 #include <UserInterface.h>
+#include <PlayerHandler.h>
 #include "..\Mine-Mania\include\Packet.h"
 
 namespace game
 {
 	extern Display game;
+	extern PlayerHandler pHandler;
 	extern UserInterface SlideUI;
 	extern UserInterface ServerUI;
 }
@@ -32,6 +34,8 @@ SimpleNetClient::SimpleNetClient()
 	isConnected_ = false;
 	isHost_ = false;
 	isHostChosen_ = false;
+	isWaiting_ = true;
+	isPlayerConnected_ = false;
 	SimpleNet::ConnectSocket = INVALID_SOCKET;
 }
 
@@ -227,15 +231,14 @@ void SimpleNetClient::Loop()
 			isExit_ = true;
 		}else if (iResult > 0)
 		{
-			msg << msgBuffer;
+			/*msg << msgBuffer;
 			Packet nMsg;
-			uint16_t name;
-			msg >> name;
+			msg >> nMsg.name;
 			stringstream tStream;
 			tStream << msg.rdbuf();
-			nMsg.data = tStream.str();
-			Do(nMsg);
-			//Log(msg.str());
+			nMsg.data = tStream.str();*/
+			std::string msg = msgBuffer;
+			Do(msg);
 		}
 		/*else
 		{
@@ -291,102 +294,166 @@ void SimpleNetClient::Send(Packet msg)
 void SimpleNetClient::SendLiteral(std::string msg)
 {
 	if (isConnected_ == false) return;
-	send(SimpleNet::ConnectSocket, msg.c_str(), msg.length(), NULL);
+	int amount = msg.length();
+	int amountSent = 0;
+	int result;
+	std::string cur;
+	result = send(SimpleNet::ConnectSocket, msg.c_str(), msg.length(), NULL);
+	if (result != amount)
+	{
+		amountSent += result;
+		while (amountSent < amount)
+		{
+			cur = msg.substr(amountSent, msg.length());
+			result = send(SimpleNet::ConnectSocket, cur.c_str(), cur.length(), NULL);
+			amountSent += result;
+		}
+	}
 }
 
 void SimpleNetClient::Do(std::string rMsg)
 {
-	Log(rMsg);
 	int loopLimit = 1000;
 	int curLoop = 0;
 	std::stringstream msg;
 	msg << rMsg;
-	std::string key;
-	msg >> key;
-	if (rMsg.find("End", 0) == std::string::npos)
+	int name;
+	msg >> name;
+	while (msg)
 	{
-		Log("Error:No End Found");
-		return;
-	}
-	while (key != "End")
-	{
-		if (key == "World")
+		if (name == SetSelected)
 		{
-			std::stringstream remainder;
-			remainder << msg.rdbuf();
-			game::game.loadWorldServer(msg);
-			return;
+			int posX;
+			int posY;
+			msg >> posX;
+			msg >> posY;
+			Position pos;
+			pos.setX(posX);
+			pos.setY(posY);
+			game::game.setTileAsSelectedS(pos);
 		}
-		else if (key == "SETHOST")
+		else if (name == RemoveSelected)
 		{
-			isHost_ = true;
-			isHostChosen_ = true;
+			int posX;
+			int posY;
+			msg >> posX;
+			msg >> posY;
+			Position pos;
+			pos.setX(posX);
+			pos.setY(posY);
+			game::game.removeSelectedAtTileS(pos);
 		}
-		else if (key == "SETPLAYER")
-		{
-			isHost_ = false;
-			isHostChosen_ = true;
-		}
-		else if (key == "MSG")
-		{
-			string text;
-			msg >> text;
-			game::SlideUI.addSlide(text);
-		}
-		else if (key == "GetWorld")
-		{
-			stringstream nMsg;
-			nMsg << "SendHost\n";
-			nMsg << "World\n";
-			nMsg << game::game.getWorld();
-			nMsg << "End";
-			SendLiteral(nMsg.str());
-		}
-		else if (key == "Tile")
+		else if (name == SetTile)
 		{
 			Tile tile;
 			tile.deserialize(msg);
 			game::game.setTileAtS(tile.getPos(), tile);
+			Log("Tile\n");
 		}
-		else if (key == "SetSelected")
+		else if (name == UpdatePlayerPosition)
 		{
-			int pos_x;
-			int pos_y;
-			msg >> pos_x;
-			msg >> pos_y;
-			Position pos;
-			pos.setX(pos_x);
-			pos.setY(pos_y);
-			game::game.setTileAsSelectedS(pos);
+			string name;
+			msg >> name;
+			int x;
+			int y;
+			msg >> x;
+			msg >> y;
+			Player* player;
+			if (game::pHandler.getPlayer(name, &player) == true)
+			{
+				Position pos(x, y);
+				player->forceHandPosition(pos, game::game);
+			}
+			else
+				Log("UpdatePlayerPosition Failed - \n" + name);
+			Log("UpdatePlayerPosition\n");
 		}
-		else if (key == "RemoveSelected")
+		else if (name == PacketNames::UpdateTile)
 		{
-			int pos_x;
-			int pos_y;
-			msg >> pos_x;
-			msg >> pos_y;
-			Position pos;
-			pos.setX(pos_x);
-			pos.setY(pos_y);
-			game::game.removeSelectedAtTileS(pos);
+			Tile tile;
+			string null;
+			msg >> null;
+			tile.deserialize(msg);
+			game::game.setTileAt(tile.getPos(), tile);
+			Log("UpdateTile\n");
 		}
-		key = "";
-		msg >> key;
-		curLoop++;
-		if (loopLimit == curLoop)
+		else if (name == AddPlayer)
 		{
-			Log("Error: Loop Limit Hit:\n");
-			Log(rMsg);
-			Log("----------------------------------");
-			return;
+			//Log("//////////////////\n" + msg.str() + "///////////////////");
+			Player player;
+			std::string null;
+			msg >> null;
+			player.deserialize(msg);
+			game::pHandler.addPlayer(player);
+			//Log("Player Added - " + player.getName());
+			Log("AddPlayer\n");
 		}
+		else if (name == AddPlayerLocal)
+		{
+			//Log("//////////////////\n" + msg.str() + "///////////////////");
+			Player player;
+			std::string null;
+			msg >> null;
+			player.deserialize(msg);
+			game::pHandler.addLocalPlayer(player);
+			//Log("Local Player Added - " + player.getName());
+			Log("AddPlayerLocal\n");
+		}
+		else if (name == GetWorld)
+		{
+			std::string world = game::game.getWorld();
+			std::stringstream wMsg; // World Msg
+			wMsg << SendDefault << endl;
+			wMsg << World << endl;
+			wMsg << world << endl;
+			wMsg << "End" << endl;
+			SendLiteral(wMsg.str());
+			Log("GetWorld\n");
+		}
+		else if (name == World)
+		{
+			game::game.loadWorldServer(msg);
+			Log("World\n");
+		}
+		else if (name == SetHost)
+		{
+			isHost_ = true;
+			isHostChosen_ = true;
+			Log("SetHost\n");
+		}
+		else if (name == SetPlayer)
+		{
+			isHost_ = false;
+			isHostChosen_ = true;
+			Log("SetPlayer\n");
+		}
+		else if (name == WaitingPlayer)
+		{
+
+		}
+		else if (name == PlayerConnect)
+		{
+			isPlayerConnected_ = true;
+			Log("PlayerConnect\n");
+		}
+		else if (name == PacketNames::Start)
+		{
+			isWaiting_ = false;
+			Log("Start\n");
+		}
+		else
+		{
+			Log("SimpleNet: Unknown Packet Name: " + name);
+		}
+		name = None;
+		msg >> name;
 	}
 	return;
 }
 
 void SimpleNetClient::Do(Packet msg)
 {
-	Log(msg.data);
+	Log("Network Recieved:" + msg.data + "\nEnd\n");
 	if (msg.name == SetSelected)
 	{
 		stringstream data; data << msg.data;
@@ -491,6 +558,21 @@ bool SimpleNetClient::isConnected()
 bool SimpleNetClient::isPaused()
 {
 	return isPaused_;
+}
+
+bool SimpleNetClient::isWaiting()
+{
+	return isWaiting_;
+}
+
+bool SimpleNetClient::isPlayerConnected()
+{
+	return isPlayerConnected_;
+}
+
+bool SimpleNetClient::isHost()
+{
+	return isHost_;
 }
 
 void SimpleNetClient::UpdateTile(int x, int y)

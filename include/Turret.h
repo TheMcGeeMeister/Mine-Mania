@@ -14,12 +14,16 @@ public:
 
 	void setGraphic(char g);
 
+	void setOwner(std::string owner);
+
 	void setPosition(Position pos);
 
 	void setRange(int);
 
 
 	char getGraphic();
+
+	std::string getOwner();
 
 
 

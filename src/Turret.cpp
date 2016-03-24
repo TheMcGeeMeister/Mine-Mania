@@ -14,6 +14,7 @@ Turret::Turret()
 {
 	isDestroyed_ = false;
 	graphic = ' ';
+	owner = "None";
 }
 
 Turret::Turret(Position position, std::string owner)
@@ -22,6 +23,7 @@ Turret::Turret(Position position, std::string owner)
 	ai.setPosition(position);
 	isDestroyed_ = false;
 	graphic = ' ';
+	owner = "None";
 }
 
 
@@ -35,6 +37,12 @@ void Turret::setGraphic(char g)
 	Tile& tile = game::game.getTileRefAt(ai.getPosition());
 	tile.setOverlayEnabled(true);
 	tile.setOverlayGraphic(g);
+}
+
+void Turret::setOwner(std::string owner)
+{
+	this->owner = owner;
+	ai.setOwner(owner);
 }
 
 void Turret::setPosition(Position pos)
@@ -52,8 +60,14 @@ char Turret::getGraphic()
 	return graphic;
 }
 
+std::string Turret::getOwner()
+{
+	return owner;
+}
+
 void Turret::update()
 {
+	if (isDestroyed_ == true) return;
 	ai.update();
 }
 

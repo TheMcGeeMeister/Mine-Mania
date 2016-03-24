@@ -48,6 +48,7 @@ Position Entity::getPos()
 System::System()
 {
 	id_index = 0;
+	id_player_index = 0;
 }
 
 System::~System()
@@ -59,21 +60,24 @@ System::~System()
 void System::update()
 {
 	std::list<int> d_queue;
-	for (auto& iter : m_system)
+	if (m_system.empty() == false)
 	{
-		if (iter.second->isKilled() == true)
+		for (auto& iter : m_system)
 		{
-			d_queue.push_back(iter.first);
-			/* Debug */
-			/////////////////////////////////
-			std::fstream file("Logs\\Log.txt", std::ios::app);
-			file << "System: Entity Deleted ID:" << iter.first << std::endl;
-			/////////////////////////////////
-			continue;
-		}
-		else
-		{
-			iter.second->update();
+			if (iter.second->isKilled() == true)
+			{
+				d_queue.push_back(iter.first);
+				/* Debug */
+				/////////////////////////////////
+				std::fstream file("Logs\\Log.txt", std::ios::app);
+				file << "System: Entity Deleted ID:" << iter.first << std::endl;
+				/////////////////////////////////
+				continue;
+			}
+			else
+			{
+				iter.second->update();
+			}
 		}
 	}
 
@@ -106,3 +110,42 @@ int System::addEntity(std::shared_ptr<Entity> entity, std::string txt)
 	/////////////////////////////////
 	return (id_index - 1);
 }
+
+/*int System::addPlayer(std::shared_ptr<Player> player)
+{
+	m_players[id_player_index] = player;
+	id_player_index;
+	
+	/* Debug 
+	/////////////////////////////////
+	std::fstream file("Logs\\Log.txt", std::ios::app);
+	file << "System: Player Created ID:" << id_index << std::endl;
+	/////////////////////////////////
+
+	return (id_player_index - 1);
+}
+
+bool System::getPlayerAt(Position pos, Player & player)
+{
+	for (auto& iter : m_players)
+	{
+		if (iter.second->getHandPosition() == pos)
+		{
+			player = iter.second.get;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool System::playerAt(Position pos)
+{
+	for (auto& iter : m_players)
+	{
+		if (pos == iter.second->getHandPosition())
+		{
+			return true;
+		}
+	}
+	return false;
+}*/

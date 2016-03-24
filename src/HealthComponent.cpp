@@ -57,6 +57,11 @@ bool HealthComponent::isRegenEnabled() const
 	return isRegenEnabled_;
 }
 
+bool HealthComponent::isDead() const
+{
+	return isDead_;
+}
+
 double & HealthComponent::getHealthRef()
 {
 	return health_;
@@ -75,6 +80,10 @@ double & HealthComponent::getHealthRegenRef()
 void HealthComponent::damage(double amount)
 {
 	health_ -= amount;
+	if (health_ < 1)
+	{
+		isDead_ = true;
+	}
 }
 
 void HealthComponent::heal(double amount)
@@ -96,6 +105,7 @@ void HealthComponent::update()
 {
 	if (regenCoolDown.Update() == true)
 	{
+		if (isDead_) return;
 		if (health_ == maxHealth_) return;
 		health_ += healthRegen_;
 		if (health_ > maxHealth_)

@@ -13,8 +13,11 @@ public:
 	void setDirection(DIRECTION direction);
 	void setPosition(Position position);
 	void setRange(int range);
+	void setDamage(int damage);
 	void isDestroyed(bool);
 	void setGraphic(char g);
+
+	int getDamage();
 
 	void clean();
 
@@ -31,6 +34,7 @@ private:
 	Position position;
 	int range;
 	int rangeIndex;
+	int damage;
 	bool isDestroyed_;
 	bool isCleaned_;
 	char graphic_;

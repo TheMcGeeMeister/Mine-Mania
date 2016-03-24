@@ -23,6 +23,9 @@ public:
 	bool Initialize();
 	bool isConnected();
 	bool isPaused();
+	bool isWaiting();
+	bool isPlayerConnected();
+	bool isHost();
 	void UpdateTile(int x, int y);
 	void Log(std::string text);
 private:
@@ -31,5 +34,7 @@ private:
 	bool isHost_;
 	bool isHostChosen_;
 	bool isPaused_;
+	bool isWaiting_;
+	bool isPlayerConnected_;
 };
 

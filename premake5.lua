@@ -62,7 +62,7 @@ solution "Dungeon Keeper"
         optimize "On"
 		
 	project "Game"
-		kind "ConsoleApp"
+		kind "WindowedApp"
 		language "C++"
 		targetdir "bin"
 		includedirs 

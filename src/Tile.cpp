@@ -13,6 +13,8 @@ namespace game
 	extern SimpleNetClient server;
 }
 
+extern void updateTile(Position pos);
+
 Tile::Tile()
 {
 	graphic_ = ' ';
@@ -461,6 +463,7 @@ void Tile::mine(int damage, Player& underlord)
 	{
 		health.getHealthRef() = health.getMaxHealthRef();
 	}
+	updateTile(pos_);
 }
 
 void Tile::removeOverlay()
@@ -585,6 +588,7 @@ void Tile::serialize(stringstream& file)
 {
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
+	file << "Tile" << endl;
 	file << health.getHealth() << endl;
 	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;
@@ -611,6 +615,7 @@ string Tile::serialize(bool)
 	stringstream file;
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
+	file << "Tile" << endl;
 	file << health.getHealth() << endl;
 	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;

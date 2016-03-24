@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Display.h>
+#include "Display.h"
 #include <random>
 #include <time.h>
 #include <Timer.h>
@@ -15,6 +15,8 @@
 #include <fstream>
 #include <conio.h>
 #include <SimpleNetClient.h>
+#include <PlayerHandler.h>
+#include "..\include\game.h"
 
 #define DEFAULT_CLEAR_WIDTH 100
 #define DEFAULT_CLEAR_HEIGHT 36
@@ -28,7 +30,7 @@ namespace game
 	System system;
     TileChangeManager TileHandler;
     RegenManager RegenHandler;
-    Player player;
+	PlayerHandler pHandler; // Player Handler
 	Player enemy;
 	Display game;
 	UserInterface tileUI(30, 10, 0, 30);
@@ -50,6 +52,11 @@ namespace gametiles
 	Tile stone_wall_gold;
 	Tile stone_floor;
 	Tile dirt_wall;
+}
+
+void updateTile(Position pos)
+{
+	game::game.updateTileServer(pos);
 }
 
 bool isExit()
@@ -186,8 +193,12 @@ void initializeWindowProperties()
 	SetConsoleDisplayMode(h, flags, &pos);
 }
 
-void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
+void LOGIC(Timer& InputCoolDown, Display& game)
 {
+	Player& player = game::pHandler.getLocalPlayer();
+	HANDLE h = GetActiveWindow();
+	HANDLE focus = GetFocus();
+	//if (h != focus) { return; }
     if(InputCoolDown.Update()==true)
     {
 		/* Movement */
@@ -218,18 +229,18 @@ void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
 					key = getch();
 				switch (key)
 				{
-				case 'w':game::player.moveHandUp(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 's':game::player.moveHandDown(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 'a':game::player.moveHandLeft(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 'd':game::player.moveHandRight(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 'w':player.moveHandUp(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 's':player.moveHandDown(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 'a':player.moveHandLeft(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 'd':player.moveHandRight(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 'j':game::SlideUI.addSlide("Testing"); InputCoolDown.StartNewTimer(0.075); break;
-				case 'y':game::player.spawnTurret(Position(10, 10)); InputCoolDown.StartNewTimer(0.075); break;
-				case 't':swapConsoleFullScreen(); removeScrollBar(); InputCoolDown.StartNewTimer(0.075); break;
+				case 'y':player.spawnTurret(Position(10, 10)); InputCoolDown.StartNewTimer(0.075); break;
+				case 't':InputCoolDown.StartNewTimer(0.075); break;
 				case 'm':game::server.SendLiteral("12\n9\nTesting"); InputCoolDown.StartNewTimer(0.075); break;
-				case 72:game::player.mineUp(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 80:game::player.mineDown(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 75:game::player.mineLeft(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 77:game::player.mineRight(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 72:player.mineUp(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 80:player.mineDown(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 75:player.mineLeft(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 77:player.mineRight(game); InputCoolDown.StartNewTimer(0.075); break;
 				default: break;
 				}
 			}
@@ -257,7 +268,7 @@ void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
 			InputCoolDown.StartNewTimer(0.075);
 		}*/
 		////////////////////////////////////////////////
-		Position pos = game::player.getHandPosition();
+		Position pos = player.getHandPosition();
         if(GetAsyncKeyState('F'))
         {
 			game.getTileRefAt(pos).isFortified(true);
@@ -267,19 +278,13 @@ void LOGIC(Timer& InputCoolDown, Display& game, Tile& core)
         {
 			if (game.isWalkableTileNear(pos))
 			{
-				game.getTileRefAt(pos).mine(10, game::player);
+				game.getTileRefAt(pos).mine(10, player);
 				InputCoolDown.StartNewTimer(0.075);
 			}
         }
-        if(GetAsyncKeyState('C'))
-        {
-            core.setPos(pos);
-            game.setTileAt(pos, core);
-            InputCoolDown.StartNewTimer(0.075);
-        }
         if(GetAsyncKeyState('V'))
         {
-			game::player.claimOnHand();
+			player.claimOnHand();
 			InputCoolDown.StartNewTimer(0.075);
         }
     }
@@ -298,10 +303,11 @@ void loadScreen(int time, string text)
 
 void updateTileInfo()
 {
+	Player& player = game::pHandler.getLocalPlayer();
 	Display& game = game::game;
 	UserInterface& TileInfo = game::tileUI;
 	std::stringstream health;
-	Tile& tile = game.getTileRefAt(game::player.getHandPosition());
+	Tile& tile = game.getTileRefAt(player.getHandPosition());
 	health << tile.getHealth() << "/" << tile.getMaxHealth();
 	TileInfo.getSectionRef(1).setVar(1, health.str());
 
@@ -322,7 +328,7 @@ void updateTileInfo()
 	}
 
 	std::stringstream gold;
-	gold << game::player.getGoldAmount();
+	gold << player.getGoldAmount();
     TileInfo.getSectionRef(5).setVar(1, gold.str());
 
     TileInfo.update();
@@ -335,6 +341,9 @@ void connectMenu(thread& sThread, bool& threadStarted)
 	ui.push_isection("Address:");
 	ui.push_back("Continue" , true, true);
 	ui.push_back("Return", true, true);
+
+	ui.getSectionRef(1).setIVar("127.0.0.1");
+
 	bool exitFlag = false;
 	while (exitFlag == false)
 	{
@@ -361,14 +370,70 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
 			threadStarted = true;
 		}
-		stringstream msg;
-		msg << GetWorld << End;
-		game::server.SendLiteral(msg.str());
-		while (game::game.isLoaded() == false)
+		Sleep(250);
+		if (game::server.isHost() == false)
 		{
-			loadScreen(100, "Waiting...");
+			std::stringstream msg;
+			msg << SendDefault << End << PlayerConnect << End;
+			game::server.SendLiteral(msg.str());
+			game::Log("Sent: PlayerConnect\n");
+		}
+		else
+		{
+			while (game::server.isPlayerConnected() == false)
+			{
+				loadScreen(100, "Waiting For Player...");
+				Sleep(10);
+			}
+		}
+		if (game::server.isHost() == true)
+		{
+			game::game.newWorldMulti();
+			std::stringstream msg;
+			msg << SendDefault << End
+				<< World << End
+				<< game::game.getWorld() << "End";
+			game::server.SendLiteral(msg.str());
+			msg.str(string());
+
+			Sleep(30);
+
+			Player* other;
+			if (game::pHandler.getPlayer("Other", &other) == true)
+			{
+				msg << SendDefault << End << AddPlayerLocal << End;
+				other->serialize(msg);
+				game::Log("///////////////////////\n" + msg.str() + "///////////////////////");
+				game::server.SendLiteral(msg.str());
+			}
+			else
+			{
+				exit(0);
+			}
+
+			Sleep(10);
+
+			msg.str(string());
+
+			Player& player = game::pHandler.getLocalPlayer();
+			msg << SendDefault << End << AddPlayer << End;
+			player.serialize(msg);
+			game::server.SendLiteral(msg.str());
+
+			Sleep(10);
+
+			msg.str(string());
+
+			msg << SendDefault << End << Start << End;
+			game::server.SendLiteral(msg.str());
+			return;
+		}
+		while (game::server.isWaiting() == true)
+		{
+			loadScreen(50, "Loading...");
 			Sleep(10);
 		}
+		return;
 	}
 }
 
@@ -596,7 +661,9 @@ void newWorldMenu(Display& game)
 			case 2: {
 				thread load(loadScreen, 500, "Loading...");
 				game.newWorld();
-				game::player.setName(NewWorld.getSectionRef(1).getIVar());
+				game::pHandler.getLocalPlayer().setName(NewWorld.getSectionRef(1).getIVar());
+				Player &player = game::pHandler.getLocalPlayer();
+				game::pHandler.addLocalPlayer(player);
 				load.join();
 				exitFlag = true; break;
 			}
@@ -894,7 +961,7 @@ void gameLoop()
     core.isClaimable(false);
     core.setMaxHealth(2500);
     core.setHealth(2500);
-    core.forceClaim(game::player.getName());
+    core.forceClaim(game::pHandler.getLocalPlayer().getName());
 
     Display& game=game::game;
 
@@ -944,13 +1011,14 @@ void gameLoop()
 		{
 			game::server.Continue();
 		}
+		Player& player = game::pHandler.getLocalPlayer();
 		while (isExitGame(game) == false)
 		{
-			LOGIC(InputCoolDown, game, core);
+			LOGIC(InputCoolDown, game);
 			game.update();
 			game::RegenHandler.update(game);
 			game::TileHandler.update(game);
-			game::player.updateMiningUI();
+			player.updateMiningUI();
 			updateTileInfo();
 			game::SlideUI.update();
 			game::ServerUI.update();
@@ -963,9 +1031,10 @@ void gameLoop()
 					for (auto& iter : game::game.getPackets())
 					{
 						stringstream data;
-						data << iter.name << endl;
-						data << iter.data;
-						AI::log("Sending:" + data.str());
+						data << iter.send << endl
+						<< iter.name << endl
+					    << iter.data;
+						//game::log("Sending:" + data.str() + "\nEnd\n");
 						game::server.SendLiteral(data.str());
 					}
 					game::game.clearPackets();
