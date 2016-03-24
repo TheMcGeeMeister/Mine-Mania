@@ -918,7 +918,7 @@ void Display::newWorld()
 
 void Display::newWorldMulti()
 {
-	Position newPos(1, 1);
+	Position newPos(0, 0);
 
 	getSaveSuffix();
 
@@ -994,8 +994,10 @@ void Display::newWorldMulti()
 	}
 	Player other;
 	other.setName("Other");
+	other.setSpawnPos(Position(74, 28));
 
 	game::pHandler.getLocalPlayer().setName("Host");
+	game::pHandler.getLocalPlayer().setSpawnPos(Position(0,1));
 
 	/* Host */
 	startPos(0, 1);

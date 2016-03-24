@@ -71,6 +71,8 @@ class Tile
         void hasGold(bool hasGold);
         void mine(int damage, Player&);
 		void removeOverlay();
+		void updateOverlay(bool enabled, char graphic);
+		void updateOverlayS(bool enabled, char graphic); // Updates Overlay without sending to server
 
         void serialize(fstream& file);
 		void serialize(ofstream& file);

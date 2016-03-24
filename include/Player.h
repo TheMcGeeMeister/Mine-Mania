@@ -24,6 +24,7 @@ class Player : public Entity
         int getMaxGoldAmount();
         int getMaxManaAmount();
         string getName();
+		Position getSpawnPos();
 		//////////////////////////////////
 
         /* Gold Related */
@@ -39,12 +40,15 @@ class Player : public Entity
         void setManaAmount(int amount);
         void setMaxManaAmount(int amount);
         void setName(string name);
+		void setSpawnPos(Position pos);
 		//////////////////////////////////
 
 		/* Stats*/
 		//////////////////////////////////
 		void damage(int amount);
+		void damageS(int amount);
 		void heal(int amount);
+		void healS(int amount);
 		//////////////////////////////////
 
 		/* Hand */
@@ -66,6 +70,8 @@ class Player : public Entity
 		//////////////////////////////////
 		void placeObject(uint16_t objectID);
 		void spawnTurret(Position pos);
+
+		void purchaseTurret();
 		//////////////////////////////////
 
 		void reset();
@@ -89,6 +95,8 @@ class Player : public Entity
 		virtual void kill();
 		virtual void clean();
 
+		void killS();
+
 
     protected:
 
@@ -107,6 +115,7 @@ class Player : public Entity
 
 		Position handPos;
 		Position mineUIPos;
+		Position spawnPos;
 
         string name_;
 

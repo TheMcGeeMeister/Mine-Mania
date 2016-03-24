@@ -221,15 +221,30 @@ void Tile::setObjectId(int id)
 	objectid_ = id;
 }
 
-void Tile::setOverlayEnabled(bool is)
+void Tile::setOverlayEnabled(bool is) // Deprecated Use updateOverlay(bool, char)
 {
 	overlayEnabled_ = is;
+	game::TileHandler.push_back(pos_);
+	stringstream msg;
+	msg << UpdateTileOverlay << End
+		<< pos_.getX() << End
+		<< pos_.getY() << End
+		<< is << End
+		<< (int)overlayGraphic_ << End;
+	game::server.addPacket(msg.str());
 }
 
-void Tile::setOverlayGraphic(char g)
+void Tile::setOverlayGraphic(char g) // Deprecated Use updateOverlay(bool, char)
 {
 	overlayGraphic_ = g;
 	game::TileHandler.push_back(pos_);
+	stringstream msg;
+	msg << UpdateTileOverlay << End
+		<< pos_.getX() << End
+		<< pos_.getY() << End
+		<< overlayEnabled_ << End
+		<< (int)g << End;
+	game::server.addPacket(msg.str());
 }
 
 void Tile::isWall(bool isWall)
@@ -470,6 +485,34 @@ void Tile::removeOverlay()
 {
 	overlayGraphic_ = ' ';
 	overlayEnabled_ = false;
+	game::TileHandler.push_back(pos_);
+	stringstream msg;
+	msg << UpdateTileOverlay << End
+		<< pos_.getX() << End
+		<< pos_.getY() << End
+		<< false << End
+		<< (int)overlayGraphic_ << End;
+	game::server.addPacket(msg.str());
+}
+
+void Tile::updateOverlay(bool enabled, char graphic)
+{
+	overlayGraphic_ = graphic;
+	overlayEnabled_ = enabled;
+	game::TileHandler.push_back(pos_);
+	stringstream msg;
+	msg << UpdateTileOverlay << End
+		<< pos_.getX() << End
+		<< pos_.getY() << End
+		<< enabled << End
+		<< (int)graphic << End;
+	game::server.addPacket(msg.str());
+}
+
+void Tile::updateOverlayS(bool enabled, char graphic)
+{
+	overlayGraphic_ = graphic;
+	overlayEnabled_ = enabled;
 	game::TileHandler.push_back(pos_);
 }
 

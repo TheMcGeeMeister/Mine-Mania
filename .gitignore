@@ -73,3 +73,4 @@ bin/Settings.txt
 bin/Logs/Log.txt
 projects/Backup/Settings.txt
 projects/.vs/Mine-Mania/v14/.suo
+*.suo

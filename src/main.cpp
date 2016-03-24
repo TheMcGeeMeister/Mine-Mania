@@ -237,6 +237,7 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				case 'y':player.spawnTurret(Position(10, 10)); InputCoolDown.StartNewTimer(0.075); break;
 				case 't':InputCoolDown.StartNewTimer(0.075); break;
 				case 'm':game::server.SendLiteral("12\n9\nTesting"); InputCoolDown.StartNewTimer(0.075); break;
+				case 'c':player.purchaseTurret(); InputCoolDown.StartNewTimer(0.075); break;
 				case 72:player.mineUp(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 80:player.mineDown(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 75:player.mineLeft(game); InputCoolDown.StartNewTimer(0.075); break;

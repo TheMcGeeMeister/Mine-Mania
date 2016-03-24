@@ -69,6 +69,10 @@ string Player::getName()
 {
     return name_;
 }
+Position Player::getSpawnPos()
+{
+	return spawnPos;
+}
 ////////////////////////////////////////////////
 
 
@@ -94,7 +98,30 @@ void Player::setName(string name)
 	name_ = name;
 }
 
+void Player::setSpawnPos(Position pos)
+{
+	spawnPos = pos;
+}
+
 void Player::damage(int amount)
+{
+	health.damage(amount);
+	std::stringstream slide;
+	slide << " -" << amount << " Health";
+	game::SlideUI.addSlide(slide.str());
+	if (health.isDead() == true)
+	{
+		game::SlideUI.addSection(name_ + " Died");
+	}
+
+	stringstream msg;
+	msg << DamagePlayer << End
+		<< name_ << End
+		<< amount << End;
+	game::game.addPacket(msg.str());
+}
+
+void Player::damageS(int amount)
 {
 	health.damage(amount);
 	std::stringstream slide;
@@ -107,6 +134,19 @@ void Player::damage(int amount)
 }
 
 void Player::heal(int amount)
+{
+	health.heal(amount);
+	std::stringstream healthSlide;
+	healthSlide << name_ << " +" << amount << " Health";
+	game::SlideUI.addSlide(healthSlide.str());
+
+	stringstream msg;
+	msg << HealPlayer << End
+		<< name_ << End
+		<< amount << End;
+	game::game.addPacket(msg.str());
+}
+void Player::healS(int amount)
 {
 	health.heal(amount);
 	std::stringstream healthSlide;
@@ -288,6 +328,20 @@ void Player::spawnTurret(Position pos)
 	game::system.addEntity(turret, "Turret");
 }
 
+void Player::purchaseTurret()
+{
+	if (goldAmount_ >= 1000)
+	{
+		shared_ptr<Turret> turret = make_shared<Turret>();
+		turret->setPosition(handPos);
+		turret->setGraphic('+');
+		turret->setRange(5);
+		turret->setOwner(name_);
+		game::system.addEntity(turret, "Turret");
+		goldAmount_ -= 1000;
+	}
+}
+
 void Player::reset()
 {
 	goldAmount_ = 100;
@@ -405,6 +459,8 @@ void Player::serialize(fstream& file)
 	file << name_ << endl;
 	file << handPos.getX() << endl;
 	file << handPos.getY() << endl;
+	file << spawnPos.getX() << endl;
+	file << spawnPos.getY() << endl;
 }
 
 void Player::serialize(ofstream& file)
@@ -417,6 +473,8 @@ void Player::serialize(ofstream& file)
 	file << name_ << endl;
 	file << handPos.getX() << endl;
 	file << handPos.getY() << endl;
+	file << spawnPos.getX() << endl;
+	file << spawnPos.getY() << endl;
 }
 
 void Player::serialize(stringstream & file)
@@ -429,12 +487,16 @@ void Player::serialize(stringstream & file)
 	file << name_ << endl;
 	file << handPos.getX() << endl;
 	file << handPos.getY() << endl;
+	file << spawnPos.getX() << endl;
+	file << spawnPos.getY() << endl;
 }
 
 void Player::deserialize(fstream& file)
 {
 	int pos_x;
 	int pos_y;
+	int spos_x;
+	int spos_y;
 	file >> goldAmount_;
 	file >> maxGoldAmount_;
 	file >> manaAmount_;
@@ -442,14 +504,20 @@ void Player::deserialize(fstream& file)
 	file >> name_;
 	file >> pos_x;
 	file >> pos_y;
+	file >> spos_x;
+	file >> spos_y;
 	handPos.setX(pos_x);
 	handPos.setY(pos_y);
+	spawnPos.setX(spos_x);
+	spawnPos.setY(spos_y);
 }
 
 void Player::deserialize(ifstream& file)
 {
 	int pos_x;
 	int pos_y;
+	int spos_x;
+	int spos_y;
 	file >> goldAmount_;
 	file >> maxGoldAmount_;
 	file >> manaAmount_;
@@ -457,8 +525,12 @@ void Player::deserialize(ifstream& file)
 	file >> name_;
 	file >> pos_x;
 	file >> pos_y;
+	file >> spos_y;
+	file >> spos_x;
 	handPos.setX(pos_x);
 	handPos.setY(pos_y);
+	spawnPos.setX(spos_x);
+	spawnPos.setY(spos_y);
 }
 
 void Player::deserialize(stringstream& file)
@@ -466,6 +538,8 @@ void Player::deserialize(stringstream& file)
 	file.clear();
 	int pos_x;
 	int pos_y;
+	int spos_x;
+	int spos_y;
 	file >> goldAmount_;
 	file >> maxGoldAmount_;
 	file >> manaAmount_;
@@ -473,12 +547,22 @@ void Player::deserialize(stringstream& file)
 	file >> name_;
 	file >> pos_x;
 	file >> pos_y;
+	file >> spos_y;
+	file >> spos_x;
 	handPos.setX(pos_x);
 	handPos.setY(pos_y);
+	spawnPos.setX(spos_x);
+	spawnPos.setY(spos_y);
 }
 void Player::update()
 {
 	health.update();
+	if (isDead_)
+	{
+		forceHandPosition(spawnPos, game::game);
+		isDead_ = false;
+		goldAmount_ = 0;
+	}
 }
 bool Player::hasComponent(int id)
 {
@@ -498,6 +582,21 @@ void Player::kill()
 {
 	isDead_ = true;
 	clean();
+
+	forceHandPosition(spawnPos, game::game);
+
+	stringstream msg;
+	msg << KillPlayer << End
+		<< name_ << End;
+	game::game.addPacket(msg.str());
+}
+
+void Player::killS()
+{
+	isDead_ = true;
+	clean();
+
+	forceHandPosition(spawnPos, game::game);
 }
 
 void Player::clean()

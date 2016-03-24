@@ -28,6 +28,11 @@ public:
 	bool isHost();
 	void UpdateTile(int x, int y);
 	void Log(std::string text);
+
+	/* Packets */
+	/////////////////////////
+	void addPacket(std::string packet);
+	/////////////////////////
 private:
 	bool isExit_;
 	bool isConnected_;

@@ -350,6 +350,8 @@ void SimpleNetClient::Do(std::string rMsg)
 			game::game.setTileAtS(tile.getPos(), tile);
 			Log("Tile\n");
 		}
+		/* Updates */
+		////////////////////////////////////////////
 		else if (name == UpdatePlayerPosition)
 		{
 			string name;
@@ -377,6 +379,69 @@ void SimpleNetClient::Do(std::string rMsg)
 			game::game.setTileAt(tile.getPos(), tile);
 			Log("UpdateTile\n");
 		}
+		else if (name == PacketNames::UpdateTileOverlay)
+		{
+			Position pos;
+			int pos_x = 0;
+			int pos_y = 0;
+			bool overlayEnabled = false;
+			int overlayGraphic = ' ';
+			
+			msg >> pos_x;
+			msg >> pos_y;
+			msg >> overlayEnabled;
+			msg >> overlayGraphic;
+
+			pos.setX(pos_x);
+			pos.setY(pos_y);
+
+			Tile& tile = game::game.getTileRefAt(pos);
+
+			tile.updateOverlayS(overlayEnabled, overlayGraphic);
+			Log("UpdateTileOverlay\n");
+		}
+		////////////////////////////////////////////
+
+		/* Player */
+		////////////////////////////////////////////
+		else if (name == DamagePlayer)
+		{
+			int amount;
+			std::string name;
+			msg >> name;
+			msg >> amount;
+			Player* player;
+			if (game::pHandler.getPlayer(name, &player) == true)
+			{
+				player->damageS(amount);
+			}
+		}
+		else if (name == HealPlayer)
+		{
+			int amount;
+			std::string name;
+			msg >> name;
+			msg >> amount;
+			Player* player;
+			if (game::pHandler.getPlayer(name, &player) == true)
+			{
+				player->healS(amount);
+			}
+		}
+		else if (name == KillPlayer)
+		{
+			std::string name;
+			msg >> name;
+			Player* player;
+			if (game::pHandler.getPlayer(name, &player) == true)
+			{
+				player->killS();
+			}
+		}
+		////////////////////////////////////////////
+		
+		/* Adds */
+		////////////////////////////////////////////
 		else if (name == AddPlayer)
 		{
 			//Log("//////////////////\n" + msg.str() + "///////////////////");
@@ -399,6 +464,9 @@ void SimpleNetClient::Do(std::string rMsg)
 			//Log("Local Player Added - " + player.getName());
 			Log("AddPlayerLocal\n");
 		}
+		////////////////////////////////////////////
+
+
 		else if (name == GetWorld)
 		{
 			std::string world = game::game.getWorld();
@@ -589,4 +657,9 @@ void SimpleNetClient::Log(std::string text)
 	file << text << endl;
 	file.close();
 	return;
+}
+
+void SimpleNetClient::addPacket(std::string packet)
+{
+	game::game.addPacket(packet);
 }
