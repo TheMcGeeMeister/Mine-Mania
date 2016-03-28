@@ -3,6 +3,7 @@
 #include <string>
 #include <TurretAIComponent.h>
 #include <Position.h>
+#include <fstream>
 
 class Turret : public Entity
 {
@@ -13,17 +14,19 @@ public:
 
 
 	void setGraphic(char g);
-
 	void setOwner(std::string owner);
-
 	void setPosition(Position pos);
-
 	void setRange(int);
+	void setShootCoolDown(int);
 
 
 	char getGraphic();
 
 	std::string getOwner();
+
+
+	virtual void serialize(std::fstream& file);
+	virtual void deserialize(std::fstream& file);
 
 
 
@@ -32,6 +35,8 @@ public:
 	virtual bool isKilled();
 	virtual void kill();
 	virtual void clean();
+	virtual void setPos(Position pos);
+	virtual Position getPos();
 private:
 	std::string owner;
 

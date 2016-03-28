@@ -1,5 +1,5 @@
 #include "..\include\Bullet.h"
-
+#include <fstream>
 
 Bullet::Bullet()
 {
@@ -43,6 +43,19 @@ void Bullet::setGraphic(char g)
 	ai.setGraphic(g);
 }
 
+void Bullet::serialize(fstream & file)
+{
+	file << "Bullet" << std::endl
+		<< damage << std::endl;
+	ai.serialize(file);
+}
+
+void Bullet::deserialize(fstream & file)
+{
+	file >> damage;
+	ai.deserialize(file);
+}
+
 void Bullet::update()
 {
 	if (ai.isDestroyed() == true)
@@ -72,4 +85,14 @@ void Bullet::kill()
 void Bullet::clean()
 {
 	ai.clean();
+}
+
+void Bullet::setPos(Position pos)
+{
+	ai.setPosition(pos);
+}
+
+Position Bullet::getPos()
+{
+	return ai.getPosition();
 }

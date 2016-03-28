@@ -50,82 +50,9 @@ void TurretAIComponent::setOwner(std::string owner)
 
 void TurretAIComponent::search() // Currently Only Shoots at the Player
 {
-	{ // Old Code
-		/*Position cPos = curPosition_; // Current Position
-		Position pPos = game::player.getHandPosition(); // Player Position
-
-		int player_x = pPos.getX(); // For Readability
-		int player_y = pPos.getY(); // For Readability
-
-		Position uPos = curPosition_; uPos.go(DIRECTION_UP, visionRange_); // Up Position
-		Position dPos = curPosition_; dPos.go(DIRECTION_DOWN, visionRange_); // Down Position
-		Position lPos = curPosition_; lPos.go(DIRECTION_LEFT, visionRange_); // Left Position
-		Position rPos = curPosition_; rPos.go(DIRECTION_RIGHT, visionRange_); // Right Position
-
-		if (player_y >= uPos.getY() && player_y < dPos.getY()) // Player is 3 under, or above turret
-		{
-			if (player_x == cPos.getX())
-			{
-				targetFound_ = true;
-				targetPosition_ = pPos;
-				if (player_y > curPosition_.getY())
-					shoot(DIRECTION_DOWN);
-				else
-					shoot(DIRECTION_UP);
-				return;
-			}
-		}
-		/*else if (player_y <= dPos.getY() && player_y > uPos.getY())
-		{
-			targetFound_ = true;
-			targetPosition_ = pPos;
-			shoot(DIRECTION_UP);
-			return;
-		}
-		else if (player_x >= lPos.getX() && player_x < rPos.getX()) // Player is 3 left, or right of turret
-		{
-			if (player_y == cPos.getY())
-			{
-				targetFound_ = true;
-				targetPosition_ = pPos;
-				if (player_x < curPosition_.getX())
-					shoot(DIRECTION_LEFT);
-				else
-					shoot(DIRECTION_RIGHT);
-
-				return;
-			}
-		}
-		/*else if (player_x <= rPos.getX() && player_x > lPos.getX())
-		{
-			targetFound_ = true;
-			targetPosition_ = pPos;
-			shoot(DIRECTION_RIGHT);
-			return;
-		}*/
-	}
 	bool foundTarget = false;
 	Position pos = curPosition_;
 	Position tPos(0,0); // Target Position;
-
-	/*for (int x = 0; x < 4; x++)
-	{
-		pos = curPosition_;
-		pos.go((DIRECTION)x);
-		searchLine(pos, (DIRECTION)x, visionRange_, tPos, foundTarget);
-		if (foundTarget == true)
-		{
-			targetPosition_ = tPos;
-			shoot((DIRECTION)x);
-
-			/* Debug 
-			//////////////////////
-			std::fstream file("Logs\\Log.txt", std::ios::app);
-			file << "Turret: Shoot: DIRECTION ->" << x << std::endl;
-			//////////////////////
-			return;
-		}
-	}*/
 
 	pos = curPosition_;
 	pos.go(DIRECTION_UP);
@@ -231,7 +158,7 @@ void TurretAIComponent::shoot(DIRECTION direction)
 	bullet->setPosition(nPos);
 	bullet->setGraphic(215);
 
-	game::system.addEntity(bullet);
+	game::system.addEntity(bullet, "Bullet");
 }
 
 Position TurretAIComponent::getPosition()
@@ -242,6 +169,30 @@ Position TurretAIComponent::getPosition()
 std::string TurretAIComponent::getOwner()
 {
 	return owner_;
+}
+
+void TurretAIComponent::serialize(fstream & file)
+{
+	file << visionRange_ << std::endl
+		<< shootCoolDownTime_ << std::endl
+		<< targetFound_ << std::endl
+		<< targetPosition_.getX() << std::endl
+		<< targetPosition_.getY() << std::endl
+		<< curPosition_.getX() << std::endl
+		<< curPosition_.getY() << std::endl
+		<< owner_ << std::endl;
+}
+
+void TurretAIComponent::deserialize(fstream & file)
+{
+	file >> visionRange_
+		>> shootCoolDownTime_
+		>> targetFound_
+		>> targetPosition_.getRefX()
+		>> targetPosition_.getRefY()
+		>> curPosition_.getRefX()
+		>> curPosition_.getRefY()
+		>> owner_;
 }
 
 void TurretAIComponent::update()

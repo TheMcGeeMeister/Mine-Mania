@@ -1,4 +1,7 @@
+#include "LoadEnums.h"
 #include "Display.h"
+#include "Bullet.h"
+#include "Turret.h"
 #include <sstream>
 #include <fstream>
 #include <TileEnums.h>
@@ -643,7 +646,8 @@ void Display::saveWorld()
         }
     }
 	game::pHandler.getLocalPlayer().serialize(file);
-	file << "End";
+	game::system.serialize(file);
+	file << LOAD::END;
     file.close();
 }
 
@@ -673,7 +677,8 @@ void Display::saveWorld(string filename)
 		}
 	}
 	game::pHandler.getLocalPlayer().serialize(file);
-	file << "End";
+	game::system.serialize(file);
+	file << LOAD::END;
 	file.close();
 }
 
@@ -710,12 +715,14 @@ void Display::loadWorld(string filename)
 
 	file.seekp(0, ios_base::beg);
 
-	string text;
+	game::system.clear();
+
+	int text;
 	file >> text;
 
-    while(text!="End")
-    {
-		if (text == "Tile")
+	while (text != LOAD::END)
+	{
+		if (text == LOAD::L_Tile)
 		{
 			file.clear();
 			Tile tile;
@@ -723,15 +730,25 @@ void Display::loadWorld(string filename)
 			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
-		if (text == "Player")
+		if (text == LOAD::L_Player)
 		{
 			game::pHandler.getLocalPlayer().deserialize(file);
-			game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
 		}
-		text = "";
+		if (text == LOAD::L_Bullet)
+		{
+			std::shared_ptr<Bullet> bullet = std::make_shared<Bullet>();
+			bullet->deserialize(file);
+			game::system.addEntity(bullet);
+		}
+		if (text == LOAD::L_Turret)
+		{
+			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
+			turret->deserialize(file);
+			game::system.addEntity(turret);
+		}
 		file.clear();
 		file >> text;
-    }
+	}
 
 	reloadAll_ = true;
 	isLoaded_ = true;
@@ -742,12 +759,12 @@ void Display::loadWorldServer(string data)
 	stringstream msg;
 	msg << data;
 
-	string text;
+	int text;
 	msg >> text;
 
-	while (text != "End")
+	while (text != LOAD::END)
 	{
-		if (text == "Tile")
+		if (text == L_Tile)
 		{
 			msg.clear();
 			Tile tile;
@@ -755,13 +772,12 @@ void Display::loadWorldServer(string data)
 			m_map[tile.getPos()] = tile;
 			msg.clear();
 		}
-		if (text == "Player")
+		if (text == L_Player)
 		{
 			Player player;
 			player.deserialize(msg);
 			game::pHandler.addPlayer(player);
 		}
-		text = "";
 		msg.clear();
 		msg >> text;
 	}
@@ -772,25 +788,25 @@ void Display::loadWorldServer(string data)
 
 void Display::loadWorldServer(stringstream& msg)
 {
-	string text;
+	int text;
 	msg >> text;
-	while (text!="End")
+
+	while (text != LOAD::END)
 	{
-		if (text == "Tile")
+		if (text == L_Tile)
 		{
 			msg.clear();
 			Tile tile;
 			tile.deserialize(msg);
 			m_map[tile.getPos()] = tile;
-		}
-		if (text == "Player")
-		{
 			msg.clear();
+		}
+		if (text == L_Player)
+		{
 			Player player;
 			player.deserialize(msg);
 			game::pHandler.addPlayer(player);
 		}
-		text = "End";
 		msg.clear();
 		msg >> text;
 	}
@@ -815,12 +831,14 @@ void Display::loadWorld()
 
 	file.seekp(0, ios_base::beg);
 
-	string text;
+	int text;
 	file >> text;
 
-	while (text != "End")
+	game::system.clear();
+
+	while (text!=LOAD::END)
 	{
-		if (text == "Tile")
+		if (text == LOAD::L_Tile)
 		{
 			file.clear();
 			Tile tile;
@@ -828,11 +846,22 @@ void Display::loadWorld()
 			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
-		if (text == "Player")
+		if (text == LOAD::L_Player)
 		{
 			game::pHandler.getLocalPlayer().deserialize(file);
 		}
-		text = "";
+		if (text == LOAD::L_Bullet)
+		{
+			std::shared_ptr<Bullet> bullet = std::make_shared<Bullet>();
+			bullet->deserialize(file);	
+			game::system.addEntity(bullet);
+		}
+		if (text == LOAD::L_Turret)
+		{
+			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
+			turret->deserialize(file);
+			game::system.addEntity(turret);
+		}
 		file.clear();
 		file >> text;
 	}
@@ -843,6 +872,8 @@ void Display::loadWorld()
 
 void Display::newWorld()
 {
+	game::system.clear();
+
     Position newPos(1,1);
 
 	getSaveSuffix();
@@ -928,6 +959,8 @@ void Display::newWorld()
 
 void Display::newWorldMulti()
 {
+	game::system.clear();
+
 	Position newPos(0, 0);
 
 	getSaveSuffix();

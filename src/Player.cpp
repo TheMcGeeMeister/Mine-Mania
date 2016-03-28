@@ -1,3 +1,4 @@
+#include "LoadEnums.h"
 #include <Player.h>
 #include <fstream>
 #include <Position.h>
@@ -11,7 +12,7 @@ namespace game
 	extern System system;
 }
 
-Player::Player() : UI(25, 5, 50, 30)
+Player::Player() : UI(23, 5, 50, 30, 1)
 {
     goldAmount_ = 100;
 	maxGoldAmount_ = 10000;
@@ -20,13 +21,14 @@ Player::Player() : UI(25, 5, 50, 30)
 	handPos.setX(0);
 	handPos.setY(0);
     name_="None";
-	moved_ = false;
+	moved_ = true;
 	mined_ = false;
 
-	UI.push_back("Health:", false);
-	UI.push_back("Gold:", false);
-	UI.getSectionRef(1).push_backVar(" ");
+	UI.push_back("Mining", false, true);
+	UI.push_back("Health:", false, true);
+	UI.push_back("Gold:", false, true);
 	UI.getSectionRef(2).push_backVar(" ");
+	UI.getSectionRef(3).push_backVar(" ");
 	UI.isHidden(true);
 	mineUIPos.setX(0);
 	mineUIPos.setY(0);
@@ -85,6 +87,10 @@ Position Player::getSpawnPos()
 {
 	return spawnPos;
 }
+UserInterface & Player::getUIRef()
+{
+	return UI;
+}
 ////////////////////////////////////////////////
 
 
@@ -119,14 +125,13 @@ void Player::damage(int amount)
 {
 	health.damage(amount);
 	std::stringstream slide;
-	slide << " -" << amount << " Health";
+	slide << name_ << " -" << amount << " Health";
 	game::SlideUI.addSlide(slide.str());
 	if (health.isDead() == true)
 	{
 		game::SlideUI.addSlide(name_ + " Died");
-		health.getHealthRef() = health.getMaxHealth();
+		health.reset();
 		forceHandPosition(spawnPos, game::game);
-		health.isDead(false);
 	}
 
 	stringstream msg;
@@ -343,6 +348,7 @@ void Player::spawnTurret(Position pos)
 	turret->setGraphic('+');
 	turret->setRange(5);
 	turret->setOwner(name_);
+	turret->setShootCoolDown(1);
 	game::system.addEntity(turret, "Turret");
 }
 
@@ -350,13 +356,20 @@ void Player::purchaseTurret()
 {
 	if (goldAmount_ >= 1000)
 	{
-		shared_ptr<Turret> turret = make_shared<Turret>();
-		turret->setPosition(handPos);
-		turret->setGraphic('+');
-		turret->setRange(5);
-		turret->setOwner("None");
-		game::system.addEntity(turret, "Turret");
-		goldAmount_ -= 1000;
+		if (game::system.entityAt(handPos) == false)
+		{
+			shared_ptr<Turret> turret = make_shared<Turret>();
+			turret->setPosition(handPos);
+			turret->setGraphic('+');
+			turret->setRange(5);
+			turret->setOwner("None");
+			game::system.addEntity(turret, "Turret");
+			goldAmount_ -= 1000;
+		}
+		else
+		{
+			game::SlideUI.addSlide("Turret Place Failed");
+		}
 	}
 }
 
@@ -374,7 +387,7 @@ void Player::reset()
 
 void Player::updateMiningUI()
 {
-	if (mined_ && moved_==false)
+	if (mined_ == true && moved_ == false)
 	{
 		stringstream health;
 		if (UI.isHidden())
@@ -384,18 +397,18 @@ void Player::updateMiningUI()
 		Tile& tile = game::game.getTileRefAt(mineUIPos);
 
 		health << tile.getHealth() << "/" << tile.getMaxHealth();
-		UI.getSectionRef(1).setVar(1, health.str());
+		UI.getSectionRef(2).setVar(1, health.str());
 
 
 		if (tile.hasGold())
 		{
 			stringstream gold;
 			gold << tile.getGold();
-			UI.getSectionRef(2).isHidden(false);
-			UI.getSectionRef(2).setVar(1, gold.str());
+			UI.getSectionRef(3).isHidden(false);
+			UI.getSectionRef(3).setVar(1, gold.str());
 		}
 		else
-			UI.getSectionRef(2).isHidden(true);
+			UI.getSectionRef(3).isHidden(true);
 	}
 	else
 	{
@@ -470,7 +483,7 @@ void Player::setMaxGoldAmount(int amount)
 ////////////////////////////////////////////////
 void Player::serialize(fstream& file)
 {
-	file << "Player" << endl;
+	file << LOAD::L_Player << endl;
 	file << goldAmount_ << endl;
 	file << maxGoldAmount_ << endl;
 	file << manaAmount_ << endl;
@@ -484,7 +497,7 @@ void Player::serialize(fstream& file)
 
 void Player::serialize(ofstream& file)
 {
-	file << "Player" << endl;
+	file << LOAD::L_Player << endl;
 	file << goldAmount_ << endl;
 	file << maxGoldAmount_ << endl;
 	file << manaAmount_ << endl;
@@ -498,7 +511,7 @@ void Player::serialize(ofstream& file)
 
 void Player::serialize(stringstream & file)
 {
-	file << "Player" << endl;
+	file << LOAD::L_Player << endl;
 	file << goldAmount_ << endl;
 	file << maxGoldAmount_ << endl;
 	file << manaAmount_ << endl;
@@ -628,6 +641,16 @@ void Player::Log(std::string txt)
 void Player::clean()
 {
 	game::game.removeSelectedAtTile(handPos);
+}
+
+void Player::setPos(Position pos)
+{
+	forceHandPosition(pos, game::game);
+}
+
+Position Player::getPos()
+{
+	return handPos;
 }
 
 ////////////////////////////////////////////////

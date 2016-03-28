@@ -28,6 +28,8 @@ public:
 	void heal(double amount);
 	void forceHealth(double amount);
 
+	void reset();
+
 	virtual void update();
 private:
 	double health_;

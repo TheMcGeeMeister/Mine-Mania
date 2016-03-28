@@ -26,6 +26,9 @@ public:
 	DIRECTION getDirection();
 	Position getPosition();
 
+	void serialize(fstream& file);
+	void deserialize(fstream& file);
+
 	virtual void update();
 private:
 	Timer movementCoolDown;

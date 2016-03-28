@@ -106,6 +106,12 @@ void HealthComponent::forceHealth(double amount)
 	if (health_ > maxHealth_) maxHealth_ = amount;
 }
 
+void HealthComponent::reset()
+{
+	health_ = maxHealth_;
+	isDead_ = false;
+}
+
 void HealthComponent::update()
 {
 	if (regenCoolDown.Update() == true)

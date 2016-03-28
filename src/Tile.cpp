@@ -1,3 +1,4 @@
+#include "LoadEnums.h"
 #include <Tile.h>
 #include <game.h>
 #include <sstream>
@@ -541,7 +542,7 @@ void Tile::serialize(fstream& file)
 {
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
-	file << "Tile" << endl;
+	file << LOAD::L_Tile << endl;
 	file << health.getHealth() << endl;
 	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;
@@ -569,7 +570,7 @@ void Tile::serialize(ofstream& file)
 {
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
-	file << "Tile" << endl;
+	file << LOAD::L_Tile << endl;
 	file << health.getHealth() << endl;
 	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;
@@ -597,7 +598,7 @@ void Tile::serialize(stringstream& file)
 {
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
-	file << "Tile" << endl;
+	file << LOAD::L_Tile << endl;
 	file << health.getHealth() << endl;
 	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;
@@ -626,7 +627,7 @@ string Tile::serialize(bool)
 	stringstream file;
 	int pos_x = pos_.getX();
 	int pos_y = pos_.getY();
-	file << "Tile" << endl;
+	file << LOAD::L_Tile << endl;
 	file << health.getHealth() << endl;
 	file << health.getMaxHealth() << endl;
 	file << claimedPercentage_ << endl;

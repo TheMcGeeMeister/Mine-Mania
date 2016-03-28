@@ -33,8 +33,8 @@ namespace game
 	PlayerHandler pHandler; // Player Handler
 	Player enemy;
 	Display game;
-	UserInterface tileUI(30, 10, 0, 30);
-	UserInterface SlideUI(25, 10, 75, 0);
+	UserInterface tileUI(30, 7, 0, 30, 1);
+	UserInterface SlideUI(25, 15, 75, 0, 1);
 	UserInterface ServerUI(18, 3, 75, 27, 1);
 	SimpleNetClient server;
 	bool threadExit;
@@ -74,11 +74,15 @@ bool isExitGame(Display& game)
 		bool exit = false;
 		game::ServerUI.isHidden(true);
 		game::tileUI.isHidden(true);
+		game::SlideUI.isHidden(true);
+		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		exit = pauseGameMenu(game);
 		if (exit == false)
 		{
 			game::ServerUI.isHidden(false);
 			game::tileUI.isHidden(false);
+			game::SlideUI.isHidden(false);
+			game::pHandler.getLocalPlayer().getUIRef().isHidden(false);
 		}
 		return exit;
 	}
@@ -988,6 +992,11 @@ void gameLoop()
 {
 	Timer InputCoolDown;
 	Player& player = game::pHandler.getLocalPlayer();
+
+	game::SlideUI.isHidden(false);
+	game::ServerUI.isHidden(false);
+	game::tileUI.isHidden(false);
+
 	while (isExitGame(game::game) == false)
 	{
 		LOGIC(InputCoolDown, game::game);
@@ -1094,9 +1103,6 @@ void preGameLoop()
 			game::server.Continue();
 		}
 		Player& player = game::pHandler.getLocalPlayer();
-		
-		game::ServerUI.isHidden(false);
-		game::tileUI.isHidden(false);
 
 		gameLoop();
 

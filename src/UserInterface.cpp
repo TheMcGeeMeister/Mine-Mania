@@ -399,7 +399,7 @@ void UserInterface::moveSlideDown()
 	uint16_t theDelete;
 	for (; iter != end; iter++)
 	{
-		if (iter->first == positionVars_.size_y)
+		if (iter->first == positionVars_.size_y - positionVars_.border_width * 2 - 1)
 		{
 			deleteLast = true;
 			theDelete = iter->first;
@@ -675,9 +675,25 @@ extern void setCursorPos(int x, int y);
 
 void UserInterface::slideDraw(uint16_t index, string text)
 {
-
-	setCursorPos(positionVars_.offset_x, index);
-	cout << text << "                  ";
+	std::stringstream line;
+	std::string output;
+	setCursorPos(positionVars_.offset_x + positionVars_.border_width, index + positionVars_.offset_y + positionVars_.border_width);
+	line << text;
+	int length = line.str().length();
+	if (length > positionVars_.size_y)
+	{
+		output = line.str().substr(0, positionVars_.size_x);
+	}
+	else
+	{
+		int spaces = positionVars_.size_x - length;
+		if (spaces > 0)
+		{
+			line << std::string(spaces, ' ');
+		}
+		output = line.str();
+	}
+	std::cout << output;
 }
 
 void UserInterface::slideClear(uint16_t index)

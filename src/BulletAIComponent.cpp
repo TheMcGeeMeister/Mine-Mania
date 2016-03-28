@@ -88,6 +88,38 @@ Position BulletAIComponent::getPosition()
 	return position;
 }
 
+void BulletAIComponent::serialize(fstream & file)
+{
+	file << movementCoolDownTime << std::endl
+		<< direction << std::endl
+		<< position.getX() << std::endl
+		<< position.getY() << std::endl
+		<< range << std::endl
+		<< rangeIndex << std::endl
+		<< damage << std::endl
+		<< isDestroyed_ << std::endl
+		<< isCleaned_ << std::endl
+		<< (int)graphic_ << std::endl;
+}
+
+void BulletAIComponent::deserialize(fstream & file)
+{
+	int direction_;
+	int graphic;
+	file >> movementCoolDownTime
+		>> direction_
+		>> position.getRefX()
+		>> position.getRefY()
+		>> range
+		>> rangeIndex
+		>> damage
+		>> isDestroyed_
+		>> isCleaned_
+		>> graphic;
+	graphic_ = graphic;
+	direction = (DIRECTION)direction_;
+}
+
 void BulletAIComponent::update()
 {
 	if (isDestroyed_ == true) return;

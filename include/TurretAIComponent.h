@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include <Position.h>
 #include <Timer.h>
+#include <fstream>
 
 class TurretAIComponent : public Component
 {
@@ -20,6 +21,9 @@ public:
 
 	Position getPosition();
 	std::string getOwner();
+
+	virtual void serialize(std::fstream& file);
+	virtual void deserialize(std::fstream& file);
 
 	virtual void update();
 private:

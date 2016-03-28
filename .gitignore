@@ -78,3 +78,4 @@ projects/.vs/Mine-Mania/v14/.suo
 *.suo
 *.suo
 projects/.vs/Mine-Mania/v14/.suo
+src/BulletAIComponent.cpp

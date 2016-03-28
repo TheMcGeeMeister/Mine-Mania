@@ -27,6 +27,7 @@ class Player : public Entity
 		int getMaxHealth();
         string getName();
 		Position getSpawnPos();
+		UserInterface& getUIRef();
 		//////////////////////////////////
 
         /* Gold Related */
@@ -96,6 +97,8 @@ class Player : public Entity
 		virtual bool isKilled();
 		virtual void kill();
 		virtual void clean();
+		virtual void setPos(Position pos);
+		virtual Position getPos();
 
 		void killS();
 
