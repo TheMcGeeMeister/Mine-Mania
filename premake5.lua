@@ -1,4 +1,4 @@
-solution "Dungeon Keeper"
+solution "Mine Mania"
  
     ------------------------------------------------------------------
     -- setup common settings
