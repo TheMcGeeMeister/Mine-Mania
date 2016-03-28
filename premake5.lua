@@ -62,7 +62,7 @@ solution "Dungeon Keeper"
         optimize "On"
 		
 	project "Game"
-		kind "WindowedApp"
+		kind "ConsoleApp"
 		language "C++"
 		targetdir "bin"
 		includedirs 
@@ -77,7 +77,7 @@ solution "Dungeon Keeper"
 	project "SimpleNet"
 		kind "ConsoleApp"
 		language "C++"
-		targetdir "pojects/simplenet/bin"
+		targetdir "projects/simplenet/bin"
 		includedirs
 			{
 				"projects/simplenet/include",
