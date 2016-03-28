@@ -100,6 +100,8 @@ private:
 	list<Packet> packetsBuffer_;
     int size_x_, size_y_, offset_x_, offset_y_, borderWidth_;
 
+	void Log(std::string);
+
 
 
     //Windows Console Output Stuff//
@@ -118,7 +120,6 @@ private:
 	int font_;
 	int fontSize_;
 	bool isFullscreen_;
-
     //End//
 
 

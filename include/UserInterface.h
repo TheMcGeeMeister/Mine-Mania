@@ -112,10 +112,18 @@ class UserInterface
 public:
 	UserInterface();
 	UserInterface(unsigned int size_x, unsigned int size_y, unsigned int offset_x, unsigned int offset_y);
+	UserInterface(unsigned int size_x, unsigned int size_y, unsigned int offset_x, unsigned int offset_y, unsigned int border_width);
 	~UserInterface();
 
 	void isHidden(bool isHidden);
 	bool isHidden();
+
+	void setSizeX(unsigned int size_x);
+	void setSizeY(unsigned int size_y);
+	void setOffsetX(unsigned int offset_x);
+	void setOffsetY(unsigned int offset_y);
+	void setBorderWidth(unsigned int border_width);
+	void setAll(unsigned int size_x, unsigned int size_y, unsigned int offset_x, unsigned int offset_y, unsigned int border_width);
 
 	void addSection(Section newSection);
 	void addSection(std::string text);
@@ -150,6 +158,8 @@ public:
 	void update();
 	void reset();
 	void draw(uint16_t index);
+	void drawBorder();
+	void hideBorder();
 	void slideDraw(uint16_t index, std::string text);
 	void slideClear(uint16_t index);
 	void reDrawAll();

@@ -547,6 +547,7 @@ void Tile::serialize(fstream& file)
 	file << claimedPercentage_ << endl;
 	file << gold_ << endl;
 	file << (int)graphic_ << endl;
+	file << (int)overlayGraphic_ << endl;
 	file << claimedBy_ << endl;
 	file << curBeingClaimedBy_ << endl;
 	file << color_ << endl;
@@ -559,27 +560,9 @@ void Tile::serialize(fstream& file)
 	file << isFortified_ << endl;
 	file << isClaimable_ << endl;
 	file << hasGold_ << endl;
+	file << overlayEnabled_ << endl;
 	file << pos_x << endl;
 	file << pos_y << endl;
-	/*file << "Tile" << endl;
-	file.write(reinterpret_cast<char*>(health_), sizeof(char));
-	file.write(reinterpret_cast<char*>(maxHealth_), sizeof(maxHealth_));
-	file.write(reinterpret_cast<char*>(claimedPercentage_), sizeof(claimedPercentage_));
-	file.write(reinterpret_cast<char*>(gold_), sizeof(gold_));
-	file.write(reinterpret_cast<char*>(graphic_), sizeof(graphic_));
-	file << claimedBy_ << endl;
-	file << curBeingClaimedBy_ << endl;
-	file.write(reinterpret_cast<char*>(color_), sizeof(color_));
-	file.write(reinterpret_cast<char*>(background_), sizeof(background_));
-	file.write(reinterpret_cast<char*>(isClaimable_), sizeof(isClaimable_));
-	file.write(reinterpret_cast<char*>(isWalkable_), sizeof(isWalkable_));
-	file.write(reinterpret_cast<char*>(canFlyOver_), sizeof(canFlyOver_));
-	file.write(reinterpret_cast<char*>(isDestructable_), sizeof(isDestructable_));
-	file.write(reinterpret_cast<char*>(isWall_), sizeof(isWall_));
-	file.write(reinterpret_cast<char*>(isClaimable_), sizeof(isClaimable_));
-	file.write(reinterpret_cast<char*>(hasGold_), sizeof(hasGold_));
-	file.write(reinterpret_cast<char*>(pos_x), sizeof(pos_x));
-	file.write(reinterpret_cast<char*>(pos_y), sizeof(pos_y));*/
 }
 
 void Tile::serialize(ofstream& file)
@@ -592,6 +575,7 @@ void Tile::serialize(ofstream& file)
 	file << claimedPercentage_ << endl;
 	file << gold_ << endl;
 	file << (int)graphic_ << endl;
+	file << (int)overlayGraphic_ << endl;
 	file << claimedBy_ << endl;
 	file << curBeingClaimedBy_ << endl;
 	file << color_ << endl;
@@ -604,27 +588,9 @@ void Tile::serialize(ofstream& file)
 	file << isFortified_ << endl;
 	file << isClaimable_ << endl;
 	file << hasGold_ << endl;
+	file << overlayEnabled_ << endl;
 	file << pos_x << endl;
 	file << pos_y << endl;
-	/*file << "Tile" << endl;
-	file.write(reinterpret_cast<char*>(health_), sizeof(char));
-	file.write(reinterpret_cast<char*>(maxHealth_), sizeof(maxHealth_));
-	file.write(reinterpret_cast<char*>(claimedPercentage_), sizeof(claimedPercentage_));
-	file.write(reinterpret_cast<char*>(gold_), sizeof(gold_));
-	file.write(reinterpret_cast<char*>(graphic_), sizeof(graphic_));
-	file << claimedBy_ << endl;
-	file << curBeingClaimedBy_ << endl;
-	file.write(reinterpret_cast<char*>(color_), sizeof(color_));
-	file.write(reinterpret_cast<char*>(background_), sizeof(background_));
-	file.write(reinterpret_cast<char*>(isClaimable_), sizeof(isClaimable_));
-	file.write(reinterpret_cast<char*>(isWalkable_), sizeof(isWalkable_));
-	file.write(reinterpret_cast<char*>(canFlyOver_), sizeof(canFlyOver_));
-	file.write(reinterpret_cast<char*>(isDestructable_), sizeof(isDestructable_));
-	file.write(reinterpret_cast<char*>(isWall_), sizeof(isWall_));
-	file.write(reinterpret_cast<char*>(isClaimable_), sizeof(isClaimable_));
-	file.write(reinterpret_cast<char*>(hasGold_), sizeof(hasGold_));
-	file.write(reinterpret_cast<char*>(pos_x), sizeof(pos_x));
-	file.write(reinterpret_cast<char*>(pos_y), sizeof(pos_y));*/
 }
 
 void Tile::serialize(stringstream& file)
@@ -637,6 +603,7 @@ void Tile::serialize(stringstream& file)
 	file << claimedPercentage_ << endl;
 	file << gold_ << endl;
 	file << (int)graphic_ << endl;
+	file << (int)overlayGraphic_ << endl;
 	file << claimedBy_ << endl;
 	file << curBeingClaimedBy_ << endl;
 	file << color_ << endl;
@@ -649,6 +616,7 @@ void Tile::serialize(stringstream& file)
 	file << isFortified_ << endl;
 	file << isClaimable_ << endl;
 	file << hasGold_ << endl;
+	file << overlayEnabled_ << endl;
 	file << pos_x << endl;
 	file << pos_y << endl;
 }
@@ -664,6 +632,7 @@ string Tile::serialize(bool)
 	file << claimedPercentage_ << endl;
 	file << gold_ << endl;
 	file << (int)graphic_ << endl;
+	file << (int)overlayGraphic_ << endl;
 	file << claimedBy_ << endl;
 	file << curBeingClaimedBy_ << endl;
 	file << color_ << endl;
@@ -676,6 +645,7 @@ string Tile::serialize(bool)
 	file << isFortified_ << endl;
 	file << isClaimable_ << endl;
 	file << hasGold_ << endl;
+	file << overlayEnabled_ << endl;
 	file << pos_x << endl;
 	file << pos_y << endl;
 	return file.str();
@@ -686,11 +656,13 @@ void Tile::deserialize(stringstream& file)
 	int pos_x = 0;
 	int pos_y = 0;
 	int graphic = 0;
+	int overlayGraphic = 0;
 	file >> health.getHealthRef();
 	file >> health.getMaxHealthRef();
 	file >> claimedPercentage_;
 	file >> gold_;
 	file >> graphic;
+	file >> overlayGraphic;
 	file >> claimedBy_;
 	file >> curBeingClaimedBy_;
 	file >> color_;
@@ -703,11 +675,13 @@ void Tile::deserialize(stringstream& file)
 	file >> isFortified_;
 	file >> isClaimable_;
 	file >> hasGold_;
+	file >> overlayEnabled_;
 	file >> pos_x;
 	file >> pos_y;
 	pos_.setX(pos_x);
 	pos_.setY(pos_y);
 	graphic_ = graphic;
+	overlayGraphic_ = overlayGraphic;
 }
 
 void Tile::update()
@@ -720,11 +694,13 @@ void Tile::deserialize(fstream& file)
 	int pos_x = 0;
 	int pos_y = 0;
 	int graphic = 0;
+	int overlayGraphic = 0;
 	file >> health.getHealthRef();
 	file >> health.getMaxHealthRef();
 	file >> claimedPercentage_;
 	file >> gold_;
 	file >> graphic;
+	file >> overlayGraphic;
 	file >> claimedBy_;
 	file >> curBeingClaimedBy_;
 	file >> color_;
@@ -737,33 +713,13 @@ void Tile::deserialize(fstream& file)
 	file >> isFortified_;
 	file >> isClaimable_;
 	file >> hasGold_;
+	file >> overlayEnabled_;
 	file >> pos_x;
 	file >> pos_y;
 	pos_.setX(pos_x);
 	pos_.setY(pos_y);
 	graphic_ = graphic;
-	/*file.read(reinterpret_cast<char*>(&health_), sizeof(health_));
-	file.read(reinterpret_cast<char*>(&maxHealth_), sizeof(maxHealth_));
-	file.read(reinterpret_cast<char*>(&claimedPercentage_), sizeof(claimedPercentage_));
-	file.read(reinterpret_cast<char*>(&gold_), sizeof(gold_));
-	file.read(reinterpret_cast<char*>(&graphic_), sizeof(graphic_));
-	file >> claimedBy_;
-	file >> curBeingClaimedBy_;
-	file.read(reinterpret_cast<char*>(&color_), sizeof(color_));
-	file.read(reinterpret_cast<char*>(&background_), sizeof(background_));
-	file.read(reinterpret_cast<char*>(&isClaimable_), sizeof(isClaimable_));
-	file.read(reinterpret_cast<char*>(&isWalkable_), sizeof(isWalkable_));
-	file.read(reinterpret_cast<char*>(&canFlyOver_), sizeof(canFlyOver_));
-	file.read(reinterpret_cast<char*>(&isDestructable_), sizeof(isDestructable_));
-	file.read(reinterpret_cast<char*>(&isWall_), sizeof(isWall_));
-	file.read(reinterpret_cast<char*>(&isClaimable_), sizeof(isClaimable_));
-	file.read(reinterpret_cast<char*>(&hasGold_), sizeof(hasGold_));
-	file.read(reinterpret_cast<char*>(&pos_x), sizeof(pos_x));
-	file.read(reinterpret_cast<char*>(&pos_y), sizeof(pos_y));
-	graphic_=graphic;
-	pos_.setX(pos_x);
-	pos_.setY(pos_y);
-	return;*/
+	overlayGraphic_ = overlayGraphic;
 }
 
 void Tile::deserialize(ifstream& file)
@@ -771,11 +727,13 @@ void Tile::deserialize(ifstream& file)
 	int pos_x = 0;
 	int pos_y = 0;
 	int graphic = 0;
+	int overlayGraphic = 0;
 	file >> health.getHealthRef();
 	file >> health.getMaxHealthRef();
 	file >> claimedPercentage_;
 	file >> gold_;
 	file >> graphic;
+	file >> overlayGraphic;
 	file >> claimedBy_;
 	file >> curBeingClaimedBy_;
 	file >> color_;
@@ -788,28 +746,11 @@ void Tile::deserialize(ifstream& file)
 	file >> isFortified_;
 	file >> isClaimable_;
 	file >> hasGold_;
+	file >> overlayEnabled_;
 	file >> pos_x;
 	file >> pos_y;
-	/*file.read(reinterpret_cast<char*>(&health_), sizeof(health_));
-	file.read(reinterpret_cast<char*>(&maxHealth_), sizeof(maxHealth_));
-	file.read(reinterpret_cast<char*>(&claimedPercentage_), sizeof(claimedPercentage_));
-	file.read(reinterpret_cast<char*>(&gold_), sizeof(gold_));
-	file.read(reinterpret_cast<char*>(&graphic_), sizeof(graphic_));
-	file >> claimedBy_;
-	file >> curBeingClaimedBy_;
-	file.read(reinterpret_cast<char*>(&color_), sizeof(color_));
-	file.read(reinterpret_cast<char*>(&background_), sizeof(background_));
-	file.read(reinterpret_cast<char*>(&isClaimable_), sizeof(isClaimable_));
-	file.read(reinterpret_cast<char*>(&isWalkable_), sizeof(isWalkable_));
-	file.read(reinterpret_cast<char*>(&canFlyOver_), sizeof(canFlyOver_));
-	file.read(reinterpret_cast<char*>(&isDestructable_), sizeof(isDestructable_));
-	file.read(reinterpret_cast<char*>(&isWall_), sizeof(isWall_));
-	file.read(reinterpret_cast<char*>(&isClaimable_), sizeof(isClaimable_));
-	file.read(reinterpret_cast<char*>(&hasGold_), sizeof(hasGold_));
-	file.read(reinterpret_cast<char*>(&pos_x), sizeof(pos_x));
-	file.read(reinterpret_cast<char*>(&pos_y), sizeof(pos_y));
-	graphic_=graphic;
 	pos_.setX(pos_x);
 	pos_.setY(pos_y);
-	return;*/
+	graphic_ = graphic;
+	overlayGraphic_ = overlayGraphic;
 }

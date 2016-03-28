@@ -4,6 +4,7 @@
 #include <sstream>
 #include <functional>
 #include <fstream>
+#include <BorderEnums.h>
 
 using namespace std;
 
@@ -42,6 +43,23 @@ UserInterface::UserInterface(unsigned int size_x, unsigned int size_y, unsigned 
 	positionVars_.border_width = 0;
 }
 
+UserInterface::UserInterface(unsigned int size_x, unsigned int size_y, unsigned int offset_x, unsigned int offset_y, unsigned int border_width)
+{
+	isHidden_ = false;
+	isPosVariablesSet_ = true;
+	isSelectionAvailable_ = false;
+	isSelectionActivated_ = false;
+	isInIMode_ = false;
+	isSlideUI_ = false;
+	curSelected_ = 0;
+	sectionAmount_ = 0;
+	positionVars_.size_x = size_x;
+	positionVars_.size_y = size_y;
+	positionVars_.offset_x = offset_x;
+	positionVars_.offset_y = offset_y;
+	positionVars_.border_width = border_width;
+}
+
 
 UserInterface::~UserInterface()
 {
@@ -58,6 +76,10 @@ void UserInterface::isHidden(bool isHidden)
 	if (isHidden == false)
 	{
 		reDrawAll();
+		if (positionVars_.border_width > 0)
+		{
+			drawBorder();
+		}
 	}
 	else
 	{
@@ -68,6 +90,40 @@ void UserInterface::isHidden(bool isHidden)
 bool UserInterface::isHidden()
 {
 	return isHidden_;
+}
+
+void UserInterface::setSizeX(unsigned int size_x)
+{
+	positionVars_.size_x = size_x;
+}
+
+void UserInterface::setSizeY(unsigned int size_y)
+{
+	positionVars_.size_y = size_y;
+}
+
+void UserInterface::setOffsetX(unsigned int offset_x)
+{
+	positionVars_.offset_x = offset_x;
+}
+
+void UserInterface::setOffsetY(unsigned int offset_y)
+{
+	positionVars_.offset_y = offset_y;
+}
+
+void UserInterface::setBorderWidth(unsigned int border_width)
+{
+	positionVars_.border_width = border_width;
+}
+
+void UserInterface::setAll(unsigned int size_x, unsigned int size_y, unsigned int offset_x, unsigned int offset_y, unsigned int border_width)
+{
+	positionVars_.size_x = size_x;
+	positionVars_.size_y = size_y;
+	positionVars_.offset_x = offset_x;
+	positionVars_.offset_y = offset_y;
+	positionVars_.border_width = border_width;
 }
 
 void UserInterface::addSection(Section newSection)
@@ -508,31 +564,110 @@ void UserInterface::draw(uint16_t index)
 {
 	if (sections.count(index))
 	{
-		unsigned int offset_y = positionVars_.offset_y + (positionVars_.border_width * 2);
+		unsigned int offset_y = positionVars_.offset_y + (positionVars_.border_width); 
 		offset_y += index - 1;
 		SetCursorPosition(positionVars_.offset_x+positionVars_.border_width, offset_y);
+		stringstream text;
 		if (curSelected_ == index)
 		{
 			if (sections[index].isISection() == true)
 			{
 				if (isInIMode_ == true)
 				{
-					cout << sections[index]() + "_" + "       ";
+					text << sections[index]() + "_";
 				}
 				else
 				{
-					cout << sections[index]() + " <-" + "          ";
+					text << sections[index]() + " <-";
 				}
 			}
 			else
 			{
-				cout << sections[index]() + " <-" + "       ";
+				text << sections[index]() + " <-";
 			}
 		}
 		else
 		{
-			cout << sections[index]() << "          ";
+			text << sections[index]();
 		}
+		int length = text.str().length();
+		int spaces = 0;
+		if (length <= positionVars_.size_x)
+		{
+			if (positionVars_.border_width > 0)
+				spaces = positionVars_.size_x - length;
+			else
+				spaces = positionVars_.size_x - length;
+		}
+		else
+		{
+			text.str(text.str().substr(0, positionVars_.size_x));
+		}
+		if(spaces > 0)
+			text << string(spaces, ' ');
+		cout << text.str();
+	}
+}
+
+void UserInterface::drawBorder()
+{
+	positionVars_.border_width = 1;
+	stringstream txt;
+	for (int y = 0; y < positionVars_.size_y; y++)
+	{
+		SetCursorPosition(positionVars_.offset_x, positionVars_.offset_y+y);
+		if (y == 0)
+		{
+			txt << (char)B_TOP_LEFT_CORNER
+				<< string((positionVars_.size_x), B_HORIZONTAL)
+				<< (char)B_TOP_RIGHT_CORNER;
+			cout << txt.str();
+			txt.str(string());
+			continue;
+		}
+		else if (y == (positionVars_.size_y - 1))
+		{
+			txt << (char)B_BOTTOM_LEFT_CORNER
+				<< string((positionVars_.size_x), B_HORIZONTAL)
+				<< (char)B_BOTTOM_RIGHT_CORNER;
+			cout << txt.str();
+			txt.str(string());
+			continue;
+		}
+		cout << (char)B_VERTICAL;
+		SetCursorPosition(positionVars_.offset_x + positionVars_.border_width + positionVars_.size_x, positionVars_.offset_y+y);
+		cout << (char)B_VERTICAL;
+	}
+}
+
+void UserInterface::hideBorder()
+{
+	positionVars_.border_width = 1;
+	stringstream txt;
+	for (int y = 0; y < positionVars_.size_y; y++)
+	{
+		SetCursorPosition(positionVars_.offset_x, positionVars_.offset_y + y);
+		if (y == 0)
+		{
+			txt << " "
+				<< string((positionVars_.size_x), ' ')
+				<< " ";
+			cout << txt.str();
+			txt.str(string());
+			continue;
+		}
+		else if (y == (positionVars_.size_y - 1))
+		{
+			txt << " "
+				<< string((positionVars_.size_x), ' ')
+				<< " ";
+			cout << txt.str();
+			txt.str(string());
+			continue;
+		}
+		cout << " ";
+		SetCursorPosition(positionVars_.offset_x + positionVars_.border_width + positionVars_.size_x, positionVars_.offset_y + y);
+		cout << " ";
 	}
 }
 
@@ -542,7 +677,7 @@ void UserInterface::slideDraw(uint16_t index, string text)
 {
 
 	setCursorPos(positionVars_.offset_x, index);
-	cout << text << "               ";
+	cout << text << "                  ";
 }
 
 void UserInterface::slideClear(uint16_t index)
@@ -572,13 +707,17 @@ void UserInterface::hide()
 {
 	for (auto& iter : sections)
 	{
-		unsigned int offset_y = positionVars_.offset_y + (positionVars_.border_width * 2);
+		unsigned int offset_y = positionVars_.offset_y + positionVars_.border_width;
 		offset_y += iter.second.getIndex() - 1;
 		SetCursorPosition(positionVars_.offset_x + positionVars_.border_width, offset_y);
 		string text = iter.second();
 		if (iter.second.getIndex() == curSelected_)
 			text += " <-    ";
 		cout << createClearLine(text.length());
+	}
+	if (positionVars_.border_width > 0)
+	{
+		hideBorder();
 	}
 }
 

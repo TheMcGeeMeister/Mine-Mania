@@ -23,6 +23,8 @@ class Player : public Entity
         int getManaAmount();
         int getMaxGoldAmount();
         int getMaxManaAmount();
+		int getHealth();
+		int getMaxHealth();
         string getName();
 		Position getSpawnPos();
 		//////////////////////////////////
@@ -120,5 +122,7 @@ class Player : public Entity
         string name_;
 
 		UserInterface UI;
+
+		void Log(std::string);
 
 };

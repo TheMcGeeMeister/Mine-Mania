@@ -37,6 +37,11 @@ void HealthComponent::isRegenEnabled(bool isRegenEnabled)
 	isRegenEnabled_ = isRegenEnabled;
 }
 
+void HealthComponent::isDead(bool isDead)
+{
+	isDead_ = isDead;
+}
+
 double HealthComponent::getHealth() const
 {
 	return health_;

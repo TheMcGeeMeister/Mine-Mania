@@ -12,6 +12,7 @@ public:
 	void setMaxHealth(double maxHealth);
 	void setHealthRegen(double healthRegen);
 	void isRegenEnabled(bool isRegenEnabled);
+	void isDead(bool isDead);
 
 	double getHealth() const;
 	double getMaxHealth() const;

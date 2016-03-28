@@ -22,11 +22,12 @@ enum BCOLORS
     B_LightGray=BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN,
     B_DarkGray=BACKGROUND_INTENSITY,
 	B_Brown=0,
+	B_Gold=224,
 };
 
 enum TileGraphics
 {
-    TG_Grass=176, TG_Stone=' ', TG_Gold='#', TG_StoneFloor=176,
+    TG_Grass=176, TG_Stone=176, TG_Gold=176, TG_StoneFloor=' ',
 	TG_DirtWall=' '
 };
 
@@ -34,7 +35,7 @@ enum TileGraphicColor
 {
     TGC_Grass=38,
     TGC_Stone=0,
-    TGC_Gold=FOREGROUND_RED  | FOREGROUND_GREEN,
+    TGC_Gold=6,
     TGC_StoneFloor=0,
 	TGC_DirtWall=0
 };

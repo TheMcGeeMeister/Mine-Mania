@@ -11,7 +11,7 @@ namespace game
 	extern System system;
 }
 
-Player::Player() : UI(0, 0, 50, 30)
+Player::Player() : UI(25, 5, 50, 30)
 {
     goldAmount_ = 100;
 	maxGoldAmount_ = 10000;
@@ -30,6 +30,7 @@ Player::Player() : UI(0, 0, 50, 30)
 	UI.isHidden(true);
 	mineUIPos.setX(0);
 	mineUIPos.setY(0);
+	spawnPos(0, 0);
 }
 
 Player::Player(Player & p)
@@ -65,10 +66,21 @@ int Player::getMaxManaAmount()
     return maxManaAmount_;
 }
 
+int Player::getHealth()
+{
+	return health.getHealth();
+}
+
+int Player::getMaxHealth()
+{
+	return health.getMaxHealth();
+}
+
 string Player::getName()
 {
     return name_;
 }
+
 Position Player::getSpawnPos()
 {
 	return spawnPos;
@@ -111,7 +123,10 @@ void Player::damage(int amount)
 	game::SlideUI.addSlide(slide.str());
 	if (health.isDead() == true)
 	{
-		game::SlideUI.addSection(name_ + " Died");
+		game::SlideUI.addSlide(name_ + " Died");
+		health.getHealthRef() = health.getMaxHealth();
+		forceHandPosition(spawnPos, game::game);
+		health.isDead(false);
 	}
 
 	stringstream msg;
@@ -129,7 +144,10 @@ void Player::damageS(int amount)
 	game::SlideUI.addSlide(slide.str());
 	if (health.isDead() == true)
 	{
-		game::SlideUI.addSection(name_ + " Died");
+		game::SlideUI.addSlide(name_ + " Died");
+		health.getHealthRef() = health.getMaxHealth();
+		forceHandPosition(spawnPos, game::game);
+		health.isDead(false);
 	}
 }
 
@@ -245,7 +263,7 @@ void Player::mineUp(Display& game)
 	if (game.isValidPosition(newPos) == false)
 		return;
 	if (game.getTileRefAt(newPos).isWall() == true)
-		game.getTileRefAt(newPos).mine(10, *this);
+		game.getTileRefAt(newPos).mine(25, *this);
 	mineUIPos = newPos;
 	mined_ = true;
 	moved_ = false;
@@ -258,7 +276,7 @@ void Player::mineDown(Display& game)
 	if (game.isValidPosition(newPos) == false)
 		return;
 	if (game.getTileRefAt(newPos).isWall() == true)
-		game.getTileRefAt(newPos).mine(10, *this);
+		game.getTileRefAt(newPos).mine(25, *this);
 	mineUIPos = newPos;
 	mined_ = true;
 	moved_ = false;
@@ -271,7 +289,7 @@ void Player::mineLeft(Display& game)
 	if (game.isValidPosition(newPos) == false)
 		return;
 	if (game.getTileRefAt(newPos).isWall() == true)
-		game.getTileRefAt(newPos).mine(10, *this);
+		game.getTileRefAt(newPos).mine(25, *this);
 	mineUIPos = newPos;
 	mined_ = true;
 	moved_ = false;
@@ -284,7 +302,7 @@ void Player::mineRight(Display& game)
 	if (game.isValidPosition(newPos) == false)
 		return;
 	if (game.getTileRefAt(newPos).isWall() == true)
-		game.getTileRefAt(newPos).mine(10, *this);
+		game.getTileRefAt(newPos).mine(25, *this);
 	mineUIPos = newPos;
 	mined_ = true;
 	moved_ = false;
@@ -336,7 +354,7 @@ void Player::purchaseTurret()
 		turret->setPosition(handPos);
 		turret->setGraphic('+');
 		turret->setRange(5);
-		turret->setOwner(name_);
+		turret->setOwner("None");
 		game::system.addEntity(turret, "Turret");
 		goldAmount_ -= 1000;
 	}
@@ -405,6 +423,7 @@ void Player::operator=(Player & player)
 	isLocal_ = player.isLocal_;
 	handPos = player.handPos;
 	mineUIPos = player.mineUIPos;
+	spawnPos = player.spawnPos;
 	name_ = player.name_;
 }
 
@@ -597,6 +616,13 @@ void Player::killS()
 	clean();
 
 	forceHandPosition(spawnPos, game::game);
+}
+
+void Player::Log(std::string txt)
+{
+	std::fstream file("Logs//Log.txt", std::ios::app);
+
+	file << txt << std::endl;
 }
 
 void Player::clean()

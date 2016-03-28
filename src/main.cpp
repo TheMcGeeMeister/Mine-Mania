@@ -34,8 +34,8 @@ namespace game
 	Player enemy;
 	Display game;
 	UserInterface tileUI(30, 10, 0, 30);
-	UserInterface SlideUI(0, 10, 75, 0);
-	UserInterface ServerUI(0, 10, 75, 28);
+	UserInterface SlideUI(25, 10, 75, 0);
+	UserInterface ServerUI(18, 3, 75, 27, 1);
 	SimpleNetClient server;
 	bool threadExit;
 	int curFont;
@@ -70,7 +70,18 @@ bool isExit()
 bool isExitGame(Display& game)
 {
 	if (GetAsyncKeyState(VK_ESCAPE))
-		return pauseGameMenu(game);
+	{
+		bool exit = false;
+		game::ServerUI.isHidden(true);
+		game::tileUI.isHidden(true);
+		exit = pauseGameMenu(game);
+		if (exit == false)
+		{
+			game::ServerUI.isHidden(false);
+			game::tileUI.isHidden(false);
+		}
+		return exit;
+	}
 	else
 		return false;
 }
@@ -309,7 +320,7 @@ void updateTileInfo()
 	UserInterface& TileInfo = game::tileUI;
 	std::stringstream health;
 	Tile& tile = game.getTileRefAt(player.getHandPosition());
-	health << tile.getHealth() << "/" << tile.getMaxHealth();
+	health << game::pHandler.getLocalPlayer().getHealth() << "/" << game::pHandler.getLocalPlayer().getMaxHealth();
 	TileInfo.getSectionRef(1).setVar(1, health.str());
 
 	TileInfo.getSectionRef(2).setVar(1, tile.getClaimedBy());
@@ -338,7 +349,8 @@ void updateTileInfo()
 void connectMenu(thread& sThread, bool& threadStarted)
 {
 	Sleep(250);
-	UserInterface ui(0, 0, 0, 0);
+	UserInterface ui(30, 9, 0, 0, 1);
+	ui.drawBorder();
 	ui.push_isection("Address:");
 	ui.push_back("Continue" , true, true);
 	ui.push_back("Return", true, true);
@@ -436,17 +448,21 @@ void connectMenu(thread& sThread, bool& threadStarted)
 		}
 		return;
 	}
+	ui.isHidden(true);
+	Sleep(50);
 }
 
-void loadMenu(Display& game)
+bool loadMenu(Display& game)
 {
 	clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 	Sleep(500);
-	UserInterface menu(0, 0, 0, 0);
+	UserInterface menu(30, 9, 0, 0, 1);
 	int worldAmount = game.getSaveAmount();
 	bool exitFlag = false;
 	if (worldAmount == 0)
 	{
+		menu.setBorderWidth(1); menu.setSizeX(30); menu.setSizeY(9);
+		menu.drawBorder();
 		menu.addSection("No Saves...", false, true);
 		menu.addSection("Exit", true, true);
 		while (exitFlag == false)
@@ -475,7 +491,11 @@ void loadMenu(Display& game)
 			menu.addSection(filename.str(), true, true);
 		}
 		menu.addSection("Exit", true, true);
+		if (worldAmount < 6) menu.setSizeY(9);
+		else menu.setSizeY(worldAmount + 3);
+
 	}
+	menu.drawBorder();
 	while (exitFlag == false)
 	{
 		menu.update();
@@ -485,6 +505,8 @@ void loadMenu(Display& game)
 			{
 				clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 				exitFlag = true;
+				Sleep(250);
+				return false;
 				continue;
 			}
 			stringstream filename;
@@ -494,6 +516,8 @@ void loadMenu(Display& game)
 				filename << "Saves\\" << "World" << "0" << menu.getActivatedSection() << ".dat";
 				game.loadWorld(filename.str());
 				exitFlag = true;
+				Sleep(250);
+				return true;
 			}
 			else
 			{
@@ -501,22 +525,26 @@ void loadMenu(Display& game)
 				filename << "Saves\\" << "World" << menu.getActivatedSection() << ".dat";
 				game.loadWorld(filename.str());
 				exitFlag = true;
+				Sleep(250);
+				return true;
  			}
 		}
+		Sleep(10);
 	}
 	menu.isHidden(true);
 	Sleep(250);
-	return;
+	return false;
 }
 
 void saveMenu(Display& game)
 {
 	Sleep(500);
-	UserInterface menu(0, 0, 0, 0);
+	UserInterface menu(30, 9, 0, 0, 1);
 	int worldAmount = game.getSaveAmount();
 	bool exitFlag = false;
 	if (worldAmount == 0)
 	{
+		menu.drawBorder();
 		menu.addSection("New Save", true, true);
 		menu.addSection("1.Exit", true, true);
 		while (exitFlag == false)
@@ -530,6 +558,7 @@ void saveMenu(Display& game)
 				case 2: exitFlag = true; break;
 				}
 			}
+			Sleep(10);
 		}
 	}
 	else
@@ -549,7 +578,10 @@ void saveMenu(Display& game)
 		}
 		menu.addSection("New Save", true, true);
 		menu.addSection("Exit", true, true);
+		if(worldAmount > 5)
+			menu.setSizeY(worldAmount + 4);
 	}
+	menu.drawBorder();
 	while (exitFlag == false)
 	{
 		menu.update();
@@ -580,6 +612,7 @@ void saveMenu(Display& game)
 				exitFlag = true;
 			}
 		}
+		Sleep(10);
 	}
 	menu.isHidden(true);
 	Sleep(250);
@@ -589,7 +622,8 @@ void saveMenu(Display& game)
 void settingsMenu()
 {
 	Sleep(250);
-	UserInterface menu(0, 0, 0, 0);
+	UserInterface menu(30, 9, 0, 0, 1);
+	menu.drawBorder();
 	menu.push_isection("Font Size:");
 	menu.addSection("Font:", true, false);
 	menu.getSectionRef(2).addVar("");
@@ -637,6 +671,7 @@ void settingsMenu()
 				break;
 			}
 		}
+		Sleep(10);
 	}
 	menu.isHidden(true);
 	game::game.setFont(font);
@@ -644,10 +679,11 @@ void settingsMenu()
 	Sleep(250);
 }
 
-void newWorldMenu(Display& game)
+bool newWorldMenu(Display& game)
 {
 	Sleep(250);
-	UserInterface NewWorld(0, 0, 0, 0);
+	UserInterface NewWorld(30, 9, 0, 0, 1);
+	NewWorld.drawBorder();
 	NewWorld.push_isection("Name:");
 	NewWorld.push_back("Continue", true, true);
 	NewWorld.addSection("Exit", true, true);
@@ -667,8 +703,10 @@ void newWorldMenu(Display& game)
 				game::pHandler.addLocalPlayer(player);
 				load.join();
 				exitFlag = true; break;
+				NewWorld.isHidden(true);
+				return true;
 			}
-			case 3: exitFlag = true; break;
+			case 3: exitFlag = true; NewWorld.isHidden(true); return false; break;
 			default: break;
 			}
 		}
@@ -680,7 +718,8 @@ void gameNotLoadedMenu(Display& game)
 {
 	Sleep(250);
 	clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
-	UserInterface menu(0, 0, 0, 0);
+	UserInterface menu(30, 9, 0, 0, 1);
+	menu.drawBorder();
 	menu.addSection("No Game Loaded", false, true);
 	menu.addSection("1.New Game", true, true);
 	menu.addSection("2.Load Game", true, true);
@@ -693,11 +732,12 @@ void gameNotLoadedMenu(Display& game)
 		{
 			switch (menu.getActivatedSection())
 			{
-			case 2: menu.isHidden(true); newWorldMenu(game); clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT); Sleep(250); return; break;
-			case 3: loadMenu(game); clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT); Sleep(250); return; break;
-			case 4: clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT); Sleep(250); return; break;
+			case 2: menu.isHidden(true); newWorldMenu(game); Sleep(250); return; break;
+			case 3: loadMenu(game); menu.isHidden(true); Sleep(250); return; break;
+			case 4: menu.isHidden(true);  Sleep(250); return; break;
 			}
 		}
+		Sleep(10);
 	}
 }
 
@@ -705,7 +745,8 @@ bool pauseGameMenu(Display& game)
 {
 	game.isHidden(true);
 	game::tileUI.isHidden(true);
-	UserInterface ui(0, 0, 0, 0);
+	UserInterface ui(30, 5, 0, 0, 1);
+	ui.drawBorder();
 	ui.push_back("Continue", true, true);
 	ui.push_back("Save", true, true);
 	ui.push_back("Exit", true, true);
@@ -717,11 +758,12 @@ bool pauseGameMenu(Display& game)
 		{
 			switch (ui.getActivatedSection())
 			{
-			case 1: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); game::tileUI.isHidden(false); return false;
-			case 2: {thread load(loadScreen, 500, "Saving..."); game.saveWorld(); ui.reDrawAll(); load.join(); break; }
+			case 1: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return false;
+			case 2: {ui.isHidden(true); thread load(loadScreen, 500, "Saving..."); game.saveWorld(); load.join(); ui.isHidden(false); break; }
 			case 3: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return true;
 			}
 		}
+		Sleep(10);
 	}
 	game.isHidden(false);
 	FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE));
@@ -732,8 +774,9 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 {
     clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
     UserInterface menu;
-	PositionVariables pVar(0, 0, 0, 0);
+	PositionVariables pVar(30, 9, 0, 0);
 	menu.setPositionVariables(pVar);
+	menu.drawBorder();
     menu.addSection("Continue", true, false);
     menu.addSection("Save", true, false);
     menu.addSection("Load", true, false);
@@ -761,11 +804,12 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 				break;
             case 3: // Load
 				menu.isHidden(true);
-				loadMenu(game);
-				menu.isHidden(false);
-				menu.reDrawAll();
-				if (game.isLoaded())
+				if (loadMenu(game) == true)
 					return false;
+				else{
+					menu.isHidden(false);
+					menu.reDrawAll();
+				}
 				break;
 			case 4: // Settings
 				menu.isHidden(true);
@@ -773,14 +817,15 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 				menu.isHidden(false);
 				break;
             case 5: // New
-				menu.isHidden(true); newWorldMenu(game); exitFlag = true; continue; break;
+				menu.isHidden(true); if(newWorldMenu(game) == true) return false; Sleep(100); menu.isHidden(false); continue; break;
 			case 6: // Connect
-				menu.isHidden(true); connectMenu(sThread, threadStarted); exitFlag = true; break;
+				menu.isHidden(true); connectMenu(sThread, threadStarted); menu.isHidden(false); break;
             case 7: // Exit
 				return true; break;
             }
         }
         menu.update();
+		Sleep(10);
     }
     return false;
 }
@@ -941,6 +986,42 @@ namespace AI
 
 void gameLoop()
 {
+	Timer InputCoolDown;
+	Player& player = game::pHandler.getLocalPlayer();
+	while (isExitGame(game::game) == false)
+	{
+		LOGIC(InputCoolDown, game::game);
+		game::game.update();
+		game::RegenHandler.update(game::game);
+		game::TileHandler.update(game::game);
+		player.updateMiningUI();
+		updateTileInfo();
+		game::SlideUI.update();
+		game::ServerUI.update();
+		game::system.update();
+		if (game::server.isConnected() == true)
+		{
+			if (game::game.isPacketsAvailable())
+			{
+				//list<Packet> packets = game::game.getPackets();
+				for (auto& iter : game::game.getPackets())
+				{
+					stringstream data;
+					data << iter.send << endl
+						<< iter.name << endl
+						<< iter.data;
+					//game::log("Sending:" + data.str() + "\nEnd\n");
+					game::server.SendLiteral(data.str());
+				}
+				game::game.clearPackets();
+			}
+		}
+		Sleep(10);
+	}
+}
+
+void preGameLoop()
+{
 	game::game.loadSettings();
 
     Timer InputCoolDown;
@@ -1013,36 +1094,12 @@ void gameLoop()
 			game::server.Continue();
 		}
 		Player& player = game::pHandler.getLocalPlayer();
-		while (isExitGame(game) == false)
-		{
-			LOGIC(InputCoolDown, game);
-			game.update();
-			game::RegenHandler.update(game);
-			game::TileHandler.update(game);
-			player.updateMiningUI();
-			updateTileInfo();
-			game::SlideUI.update();
-			game::ServerUI.update();
-			game::system.update();
-			if (game::server.isConnected() == true)
-			{
-				if (game::game.isPacketsAvailable())
-				{
-					//list<Packet> packets = game::game.getPackets();
-					for (auto& iter : game::game.getPackets())
-					{
-						stringstream data;
-						data << iter.send << endl
-						<< iter.name << endl
-					    << iter.data;
-						//game::log("Sending:" + data.str() + "\nEnd\n");
-						game::server.SendLiteral(data.str());
-					}
-					game::game.clearPackets();
-				}
-			}
-			Sleep(10);
-		}
+		
+		game::ServerUI.isHidden(false);
+		game::tileUI.isHidden(false);
+
+		gameLoop();
+
 		game::server.Pause();
 		clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 		Sleep(250);
@@ -1114,7 +1171,7 @@ int main()
 
 	setFullsreen();
 
-    gameLoop();
+	preGameLoop();
 
 	game::game.saveSettings();
 

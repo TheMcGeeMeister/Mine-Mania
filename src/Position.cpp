@@ -148,9 +148,9 @@ void Position::operator()(int _x, int _y)
 
 void Position::operator=(Position& pos)
 {
-	x_ = pos.x_;
-	y_ = pos.y_;
-	isValid_ = pos.isValid_;
+	x_ = pos.getX();
+	y_ = pos.getY();
+	isValid_ = pos.isValid();
 }
 
 void Position::operator=(const Position& pos)

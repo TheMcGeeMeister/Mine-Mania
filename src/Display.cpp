@@ -347,6 +347,8 @@ bool Display::isValidPosition(Position pos, bool isPlayer)
 			return false;
 		if (getTileRefAt(pos).isWalkable() == false)
 			return false;
+		if (game::pHandler.playerAt(pos) == true)
+			return false;
 	}
 	return true;
 }
@@ -458,6 +460,12 @@ Position Display::getPosDown(Position pos)
             return pos;
         }
     }
+}
+
+void Display::Log(std::string txt)
+{
+	std::fstream file("Logs\\Log.txt", std::ios::app);
+	file << txt << std::endl;
 }
 
 Position Display::getPosLeft(Position pos)
@@ -912,7 +920,9 @@ void Display::newWorld()
     m_map[startPos]=stoneFloor;
     m_map[corePos]=core;
 	isLoaded_ = true;
+	std::stringstream txt;
 	game::pHandler.getLocalPlayer().forceHandPosition(startPos, *this);
+	game::pHandler.getLocalPlayer().setSpawnPos(startPos);
 	reloadAll_ = true;
 }
 

@@ -37,8 +37,7 @@ void BulletAIComponent::setPosition(Position position)
 {
 	game::game.getTileRefAt(this->position).removeOverlay();
 	this->position = position;
-	game::game.getTileRefAt(position).setOverlayEnabled(true);
-	game::game.getTileRefAt(position).setOverlayGraphic(graphic_);
+	game::game.getTileRefAt(position).updateOverlay(true, graphic_);
 }
 
 void BulletAIComponent::setRange(int range)
@@ -60,8 +59,7 @@ void BulletAIComponent::setGraphic(char g)
 {
 	graphic_ = g;
 	Tile& tile = game::game.getTileRefAt(position);
-	tile.setOverlayEnabled(true);
-	tile.setOverlayGraphic(g);
+	tile.updateOverlay(true, g);
 }
 
 int BulletAIComponent::getDamage()
@@ -71,10 +69,6 @@ int BulletAIComponent::getDamage()
 
 void BulletAIComponent::clean()
 {
-	if (isCleaned_ == true)
-	{
-		return;
-	}
 	game::game.getTileRefAt(position).removeOverlay();
 	isCleaned_ = true;
 }
@@ -144,8 +138,7 @@ void BulletAIComponent::update()
 			}
 		}
 
-		tile.setOverlayEnabled(true);
-		tile.setOverlayGraphic(graphic_);
+		tile.updateOverlay(true, graphic_);
 
 		position = nPos;
 
