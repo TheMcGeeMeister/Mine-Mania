@@ -2,6 +2,7 @@
 #define POSITION_H
 #include <utility>
 #include <Direction.h>
+#include <string>
 
 class Position
 {
@@ -39,6 +40,8 @@ class Position
 		void operator=(const Position& pos);
 
 		bool operator==(const Position& pos);
+
+		std::string serializeR();
 
     protected:
 

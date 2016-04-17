@@ -1,12 +1,12 @@
 #include "..\include\HealthComponent.h"
-
+#include <sstream>
 
 
 HealthComponent::HealthComponent()
 {
 	health_ = 100;
 	maxHealth_ = 100;
-	healthRegen_ = 5;
+	healthRegen_ = 1;
 	isRegenEnabled_ = true;
 }
 
@@ -87,6 +87,7 @@ void HealthComponent::damage(double amount)
 	health_ -= amount;
 	if (health_ < 1)
 	{
+		health_ = 0;
 		isDead_ = true;
 	}
 }
@@ -112,6 +113,42 @@ void HealthComponent::reset()
 	isDead_ = false;
 }
 
+void HealthComponent::serialize(std::fstream & file)
+{
+	file << health_ << std::endl
+		<< maxHealth_ << std::endl
+		<< healthRegen_ << std::endl
+		<< isRegenEnabled_ << std::endl
+		<< isDead_ << std::endl;
+}
+
+void HealthComponent::serialize(std::stringstream& stream)
+{
+	stream << health_ << std::endl
+		<< maxHealth_ << std::endl
+		<< healthRegen_ << std::endl
+		<< isRegenEnabled_ << std::endl
+		<< isDead_ << std::endl;
+}
+
+void HealthComponent::deserialize(std::fstream & file)
+{
+	file >> health_
+		>> maxHealth_
+		>> healthRegen_
+		>> isRegenEnabled_
+		>> isDead_;
+}
+
+void HealthComponent::deserialize(std::stringstream & stream)
+{
+	stream >> health_
+		>> maxHealth_
+		>> healthRegen_
+		>> isRegenEnabled_
+		>> isDead_;
+}
+
 void HealthComponent::update()
 {
 	if (regenCoolDown.Update() == true)
@@ -123,6 +160,6 @@ void HealthComponent::update()
 		{
 			health_ = maxHealth_;
 		}
-		regenCoolDown.StartNewTimer(2);
+		regenCoolDown.StartNewTimer(0.250);
 	}
 }

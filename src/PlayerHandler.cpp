@@ -5,9 +5,8 @@
 
 PlayerHandler::PlayerHandler()
 {
-	localPlayerName = "None";
 	Player player;
-	m_players["None"] = player;
+	m_players["Local"] = player;
 }
 
 
@@ -22,9 +21,12 @@ void PlayerHandler::addPlayer(Player& player)
 
 void PlayerHandler::addLocalPlayer(Player player)
 {
-	m_players.erase(localPlayerName);
-	m_players[player.getName()] = player;
-	localPlayerName = player.getName();
+	m_players["Local"] = player;
+}
+
+void PlayerHandler::update()
+{
+	m_players["Local"].update();
 }
 
 bool PlayerHandler::playerAt(Position pos)
@@ -64,13 +66,12 @@ bool PlayerHandler::getPlayer(std::string name, Player** player)
 
 Player & PlayerHandler::getLocalPlayer()
 {
-	return m_players[localPlayerName];
+	return m_players["Local"];
 }
 
 void PlayerHandler::clear()
 {
 	m_players.clear();
-	localPlayerName = "None";
 	Player player;
-	m_players["None"] = player;
+	m_players["Local"] = player;
 }

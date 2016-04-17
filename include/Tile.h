@@ -73,6 +73,7 @@ class Tile
 		void removeOverlay();
 		void updateOverlay(bool enabled, char graphic);
 		void updateOverlayS(bool enabled, char graphic); // Updates Overlay without sending to server
+		void updateServer();
 
         void serialize(fstream& file);
 		void serialize(ofstream& file);

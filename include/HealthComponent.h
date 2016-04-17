@@ -1,6 +1,7 @@
 #pragma once
 #include <Entity.h>
 #include <Timer.h>
+#include <fstream>
 
 class HealthComponent : public Component
 {
@@ -29,6 +30,11 @@ public:
 	void forceHealth(double amount);
 
 	void reset();
+
+	void serialize(std::fstream&);
+	void serialize(std::stringstream&);
+	void deserialize(std::fstream&);
+	void deserialize(std::stringstream&);
 
 	virtual void update();
 private:

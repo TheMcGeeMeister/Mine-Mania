@@ -6,6 +6,8 @@
 #include <fstream>
 #include <TileEnums.h>
 #include <Player.h>
+#include <Common.h>
+#include <Core.h>
 #include "..\Mine-Mania\include\Packet.h"
 #include <PlayerHandler.h>
 
@@ -97,6 +99,14 @@ void Display::updatePos(Position pos_)
 void Display::reloadAll()
 {
     reloadAll_=true;
+}
+
+void Display::cleanOverlays()
+{
+	for (auto& iter : m_map)
+	{
+		iter.second.updateOverlay(false, ' ');
+	}
 }
 
 void Display::setTileAt(Position _pos, Tile _tile)
@@ -696,7 +706,7 @@ string Display::getWorld()
 	{
 		world << iter.second.serialize(true);
 	}
-	world << "End";
+	world << LOAD::END << End;
 	return world.str();
 }
 
@@ -1067,6 +1077,215 @@ void Display::newWorldMulti()
 	reloadAll_ = true;
 }
 
+void Display::newWorldMulti(int pAmount, std::string names[])
+{
+	game::system.clear();
+
+	Position newPos(0, 0);
+
+	getSaveSuffix();
+
+	game::pHandler.getLocalPlayer().reset();
+
+	Tile gold;
+	gold.setGraphic(TG_Gold);
+	gold.setColor(TGC_Gold);
+	gold.setBackground(TGB_Gold);
+	gold.isDestructable(true);
+	gold.isWall(true);
+	gold.isWalkable(false);
+	gold.isClaimable(false);
+	gold.setHealth(150);
+	gold.setMaxHealth(150);
+
+	Tile stoneFloor;
+	stoneFloor.setColor(TGC_StoneFloor);
+	stoneFloor.setGraphic(TG_StoneFloor);
+	stoneFloor.setBackground(TGB_StoneFloor);
+	stoneFloor.isDestructable(false);
+	stoneFloor.isWall(false);
+	stoneFloor.isWalkable(true);
+	stoneFloor.forceClaim(game::pHandler.getLocalPlayer().getName());
+	stoneFloor.isClaimable(true);
+	stoneFloor.setHealth(100);
+	stoneFloor.setMaxHealth(100);
+
+	Tile core;
+	core.setGraphic('C');
+	core.setColor(TC_Gray);
+	core.setBackground(B_DarkGray);
+	core.isWall(false);
+	core.isWalkable(false);
+	core.isDestructable(true);
+	core.isClaimable(false);
+	core.setMaxHealth(2500);
+	core.setHealth(2500);
+	core.setClaimedBy(game::pHandler.getLocalPlayer().getName());
+
+	Tile stone;
+	stone.setGraphic(TG_Stone);
+	stone.setColor(TGC_Stone);
+	stone.setBackground(TGB_Stone);
+	stone.isDestructable(true);
+	stone.setMaxHealth(100);
+	stone.setHealth(100);
+	stone.isWall(true);
+
+	//Position startPos(rand() % 50, rand() % 20);
+	//Position corePos(rand() % 50, rand() % 20);
+	Position startPos(0, 1);
+	Position corePos(0, 0);
+	int key = rand() % 15;
+	for (int x = 0; x < size_x_; x++)
+	{
+		for (int y = 0; y < size_y_; y++)
+		{
+			newPos.setX(x);
+			newPos.setY(y);
+			if ((rand() % 15) == key)
+			{
+				gold.setGoldAmount((rand() % 500) + 101);
+				gold.setPos(newPos);
+				m_map[newPos] = gold;
+			}
+			else
+			{
+				stone.setPos(newPos);
+				m_map[newPos] = stone;
+			}
+		}
+	}
+	/*Player other;
+	other.setName(pName);
+	other.setSpawnPos(Position(74, 28));
+
+	game::pHandler.getLocalPlayer().setName(hName);
+	game::pHandler.getLocalPlayer().setSpawnPos(Position(1, 0));
+
+	/* Host 
+	startPos(0, 1);
+	core.setPos(Position(0, 0));
+	stoneFloor.setPos(Position(0, 1));
+	core.forceClaim(hName);
+	stoneFloor.forceClaim(hName);
+	m_map[startPos] = stoneFloor;
+	m_map[corePos] = core;
+	game::pHandler.getLocalPlayer().forceHandPosition(Position(0, 1), *this);
+	game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
+
+	/* Other 
+	core.setPos(Position(74, 29));
+	stoneFloor.setPos(Position(74, 28));
+	core.forceClaim(pName);
+	stoneFloor.forceClaim(pName);
+	m_map[Position(74, 28)] = stoneFloor;
+	m_map[Position(74, 29)] = core;
+
+	other.forceHandPosition(Position(74, 28), *this);
+	game::pHandler.addPlayer(other);*/
+	std::stringstream msg;
+
+	Core pCore;
+
+	Player host;
+	host.setName(names[0]);
+	host.setSpawnPos(Position(0, 1));
+	core.setPos(Position(0, 0));
+	core.forceClaim(names[0]);
+	stoneFloor.setPos(Position(0, 1));
+	stoneFloor.forceClaim(names[0]);
+	m_map[Position(0, 0)] = core;
+	m_map[Position(0, 1)] = stoneFloor;
+	game::pHandler.addLocalPlayer(host);
+	msg << SendDefault << End
+		<< AddPlayer << End;
+	host.serialize(msg);
+	SendServerLiteral(msg.str());
+	msg.str(string());
+	pCore.setPos(Position(0,1));
+	pCore.setOwner(names[0]);
+
+
+	Core pCore2;
+	Player p2;
+	p2.setName(names[1]);
+	p2.setSpawnPos(Position(74, 28));
+	p2.forceHandPosition(Position(74, 28), *this);
+	core.setPos(Position(74, 29));
+	core.forceClaim(names[1]);
+	stoneFloor.setPos(Position(74, 28));
+	stoneFloor.forceClaim(names[1]);
+	m_map[Position(74, 29)] = core;
+	m_map[Position(74, 28)] = stoneFloor;
+	game::pHandler.addPlayer(p2);
+	pCore2.setPos(Position(74, 28));
+	pCore2.setOwner(names[1]);
+
+	Player p3;
+	Core pCore3;
+	Player p4;
+	Core pCore4;
+
+	if (pAmount > 2)
+	{
+		p3.setName(names[2]);
+		p3.setSpawnPos(Position(74, 1));
+		p3.forceHandPosition(Position(74, 1), *this);
+		core.setPos(Position(74, 0));
+		core.forceClaim(names[2]);
+		stoneFloor.setPos(Position(74, 1));
+		stoneFloor.forceClaim(names[2]);
+		game::pHandler.addPlayer(p3);
+		pCore3.setPos(Position(74, 1));
+		pCore3.setOwner(names[2]);
+		
+
+		if (pAmount == 4)
+		{
+			p4.setName(names[3]);
+			p4.setSpawnPos(Position(0, 28));
+			p4.forceHandPosition(Position(0, 28), *this);
+			core.setPos(Position(0, 29));
+			core.forceClaim(names[3]);
+			stoneFloor.setPos(Position(0, 28));
+			stoneFloor.forceClaim(names[3]);
+			game::pHandler.addPlayer(p4);
+			pCore4.setPos(Position(0, 28));
+			pCore4.setOwner(names[3]);
+		}
+	}
+
+	switch (pAmount)
+	{
+	case 2:{
+		std::stringstream msg;
+		msg << SendDefault << End << AddPlayerLocal << End; p2.serialize(msg); SendServerLiteral(msg.str());
+		break;}
+	case 3:{
+		std::stringstream msg;
+		msg << 1 << End << AddPlayerLocal << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 1 << End << AddPlayer << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << End << AddPlayerLocal << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << End << AddPlayer << End; p2.serialize(msg); SendServerLiteral(msg.str());
+		break;}
+	case 4:{
+		std::stringstream msg;
+		msg << 1 << End << AddPlayerLocal << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 1 << End << AddPlayer << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 1 << End << AddPlayer << End; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << End << AddPlayerLocal << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << End << AddPlayer << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << End << AddPlayer << End; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 3 << End << AddPlayerLocal << End; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 3 << End << AddPlayer << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 3 << End << AddPlayer << End; p3.serialize(msg); SendServerLiteral(msg.str());
+		break;}
+	}
+
+	isLoaded_ = true;
+	reloadAll_ = true;
+}
+
 void Display::getSaveSuffix()
 {
 	int worldAmount = 1;
@@ -1152,13 +1371,14 @@ void Display::saveSettings()
 	{
 		file.open("Settings.txt", ios::app);
 	}
-	file << "Settings" << endl;
-	file << "Font: " << font_ << endl;
-	file << "FontSize: " << fontSize_ << endl;
-	file << "FullScreen: " << isFullscreen_ << endl;
+	file << "Settings" << endl
+	     << "Font: " << font_ << endl
+	     << "FontSize: " << fontSize_ << endl
+	     << "FullScreen: " << isFullscreen_ << endl
+	     << "Name: " << game::pHandler.getLocalPlayer().getName() << endl;
 }
 
-void Display::loadSettings()
+bool Display::loadSettings()
 {
 	fstream file("Settings.txt");
 	if (!file)
@@ -1168,10 +1388,13 @@ void Display::loadSettings()
 		file << "Font: 0" << endl;
 		file << "FontSize: 28" << endl;
 		file << "FullScreen: 1" << endl;
+		file << "Name: Player" << endl;
+		return false;
 	}
 	else
 	{
 		string none;
+		string name;
 		file >> none;
 		file >> none;
 		file >> font_;
@@ -1179,7 +1402,11 @@ void Display::loadSettings()
 		file >> fontSize_;
 		file >> none;
 		file >> isFullscreen_;
+		file >> none;
+		file >> name;
 		setFontInfo(fontSize_, font_);
+		game::pHandler.getLocalPlayer().setName(name);
+		game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
 		if (isFullscreen_)
 		{
 			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1187,6 +1414,7 @@ void Display::loadSettings()
 			COORD pos;
 			SetConsoleDisplayMode(h, flags, &pos);
 		}
+		return true;
 	}
 }
 ///////////////////////////////////

@@ -18,6 +18,8 @@ public:
 
 	void setGraphic(char g);
 
+	DIRECTION getDirection();
+
 	virtual void serialize(fstream&);
 	virtual void deserialize(fstream&);
 
@@ -26,10 +28,12 @@ public:
 	virtual bool isKilled();
 	virtual void kill();
 	virtual void clean();
+	virtual void damage(int damage, std::string name);
 	virtual void setPos(Position pos);
+	virtual void updateOverlay();
 	virtual Position getPos();
 private:
-	double damage;
+	double damage_;
 
 	BulletAIComponent ai;
 };

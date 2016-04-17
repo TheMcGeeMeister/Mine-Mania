@@ -4,11 +4,14 @@
 #include <Display.h>
 #include <TileChangeManager.h>
 #include <fstream>
+#include <SoundManager.h>
+#include <Common.h>
 
 namespace game
 {
 	extern Display game;
 	extern TileChangeManager TileHandler;
+	extern SoundManager m_sounds;
 }
 
 
@@ -17,6 +20,7 @@ Turret::Turret()
 	isDestroyed_ = false;
 	graphic = ' ';
 	owner = "None";
+	health.setMaxHealth(1000);
 }
 
 Turret::Turret(Position position, std::string owner)
@@ -26,11 +30,17 @@ Turret::Turret(Position position, std::string owner)
 	isDestroyed_ = false;
 	graphic = ' ';
 	owner = "None";
+	health.setMaxHealth(1000);
 }
 
 
 Turret::~Turret()
 {
+}
+
+HealthComponent& Turret::getHealthRef()
+{
+	return health;
 }
 
 void Turret::setGraphic(char g)
@@ -79,6 +89,7 @@ void Turret::serialize(fstream & file)
 		<< (int)graphic << std::endl
 		<< isDestroyed_ << std::endl;
 	ai.serialize(file);
+	health.serialize(file);
 }
 
 void Turret::deserialize(fstream & file)
@@ -88,6 +99,7 @@ void Turret::deserialize(fstream & file)
 		>> graphic_
 		>> isDestroyed_;
 	ai.deserialize(file);
+	health.deserialize(file);
 	graphic = graphic_;
 }
 
@@ -124,9 +136,34 @@ void Turret::clean()
 	game::TileHandler.push_back(ai.getPosition());
 }
 
+void Turret::damage(int amount, string name)
+{
+	if (isSetToUpdate() == true)
+	{
+		if (owner == name) return;
+		health.damage(amount);
+		if (health.isDead())
+		{
+			game::m_sounds.PlaySoundR("Destroy");
+			kill();
+		}
+	}
+	else
+	{
+		std::stringstream msg;
+		msg << SendDefault << End << EntityDamage << ai.getPosition().serializeR() << amount << End << name << End;
+		SendServerLiteral(msg.str());
+	}
+}
+
 void Turret::setPos(Position pos)
 {
 	ai.setPosition(pos);
+}
+
+void Turret::updateOverlay()
+{
+	game::game.getTileRefAt(ai.getPosition()).updateOverlay(true, graphic);
 }
 
 Position Turret::getPos()

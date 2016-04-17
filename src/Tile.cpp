@@ -8,10 +8,12 @@
 #include <TileEnums.h>
 #include <Position.h>
 #include <SimpleNetClient.h>
+#include <SoundManager.h>
 
 namespace game
 {
 	extern SimpleNetClient server;
+	extern SoundManager m_sounds;
 }
 
 extern void updateTile(Position pos);
@@ -471,7 +473,16 @@ void Tile::mine(int damage, Player& underlord)
 			underlord.addGold(gold_);
 			hasGold_ = false;
 			gold_ = 0;
+			game::m_sounds.ResetSound("MetalBreak");
+			game::m_sounds.PlaySound("MetalBreak");
 		}
+		else
+		{
+			game::m_sounds.ResetSound("Break");
+			game::m_sounds.PlaySound("Break");
+		}
+
+		game::m_sounds.StopSound("Mining");
 
 		health.getHealthRef() = health.getMaxHealthRef();
 	}
@@ -515,6 +526,14 @@ void Tile::updateOverlayS(bool enabled, char graphic)
 	overlayGraphic_ = graphic;
 	overlayEnabled_ = enabled;
 	game::TileHandler.push_back(pos_);
+}
+
+void Tile::updateServer()
+{
+	stringstream msg;
+	msg << UpdateTile << End;
+	serialize(msg);
+	game::server.addPacket(msg.str());
 }
 
 /*

@@ -9,6 +9,7 @@ InputManager::InputManager()
 {
 	isExit_ = false;
 	isInputAvailable_ = false;
+	isReturnPressed_ = false;
 }
 
 
@@ -45,84 +46,183 @@ void InputManager::start()
 
 			switch (key)
 			{
-			case 'a':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'b':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'c':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'd':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'e':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'f':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'g':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'h':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'i':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'j':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'k':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'l':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'm':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'n':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'o':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'p':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'q':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'r':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 's':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 't':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'u':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'v':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'w':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'x':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'y':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'z':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'A':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'B':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'C':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'D':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'E':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'F':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'G':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'H':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'I':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'J':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'K':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'L':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'M':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'N':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'O':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'P':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'Q':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'R':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'S':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'T':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'U':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'V':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'W':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'X':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'Y':input_.push_back(key); isInputAvailable_ = true;  break;
-			case 'Z':input_.push_back(key); isInputAvailable_ = true;  break;
-			case ',':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '-':input_.push_back(key); isInputAvailable_ = true;  break;
-			case ' ':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '.':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '1':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '2':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '3':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '4':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '5':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '6':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '7':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '8':input_.push_back(key); isInputAvailable_ = true;  break;
-			case '9':input_.push_back(key); isInputAvailable_ = true;  break;
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f':
+			case 'g':
+			case 'h':
+			case 'i':
+			case 'j':
+			case 'k':
+			case 'l':
+			case 'm':
+			case 'n':
+			case 'o':
+			case 'p':
+			case 'q':
+			case 'r':
+			case 's':
+			case 't':
+			case 'u':
+			case 'v':
+			case 'w':
+			case 'x':
+			case 'y':
+			case 'z':
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+			case 'G':
+			case 'H':
+			case 'I':
+			case 'J':
+			case 'K':
+			case 'L':
+			case 'M':
+			case 'N':
+			case 'O':
+			case 'P':
+			case 'Q':
+			case 'R':
+			case 'S':
+			case 'T':
+			case 'U':
+			case 'V':
+			case 'W':
+			case 'X':
+			case 'Y':
+			case 'Z':
+			case ',':
+			case '-':
+			case ' ':
+			case '.':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
 			case '0':input_.push_back(key); isInputAvailable_ = true;  break;
+			case 13: isReturnPressed_ = true; break;
 			default: break;
 			}
 		}
 	//}
 }
 
+void InputManager::update()
+{
+	if (GetActiveWindow() != GetFocus()) return;
+	while (kbhit())
+	{
+		char key = getch();
+
+		switch (key)
+		{
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+		case 'e':
+		case 'f':
+		case 'g':
+		case 'h':
+		case 'i':
+		case 'j':
+		case 'k':
+		case 'l':
+		case 'm':
+		case 'n':
+		case 'o':
+		case 'p':
+		case 'q':
+		case 'r':
+		case 's':
+		case 't':
+		case 'u':
+		case 'v':
+		case 'w':
+		case 'x':
+		case 'y':
+		case 'z':
+		case 'A':
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'E':
+		case 'F':
+		case 'G':
+		case 'H':
+		case 'I':
+		case 'J':
+		case 'K':
+		case 'L':
+		case 'M':
+		case 'N':
+		case 'O':
+		case 'P':
+		case 'Q':
+		case 'R':
+		case 'S':
+		case 'T':
+		case 'U':
+		case 'V':
+		case 'W':
+		case 'X':
+		case 'Y':
+		case 'Z':
+		case ',':
+		case '-':
+		case ' ':
+		case '.':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		case '0':input_.push_back(key); isInputAvailable_ = true;  break;
+		case 13: isReturnPressed_ = true; break;
+		default: break;
+		}
+	}
+}
+
 void InputManager::clear()
 {
 	input_.clear();
+	while (_kbhit())
+	{
+		_getch();
+	}
 }
 
 void InputManager::isExit(bool isExit)
 {
 	isExit_ = isExit;
+}
+
+bool InputManager::isReturnPressed()
+{
+	if (isReturnPressed_ == true)
+	{
+		isReturnPressed_ = false;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

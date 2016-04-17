@@ -3,13 +3,13 @@
 
 Bullet::Bullet()
 {
-	damage = 5;
+	damage_ = 5;
 	ai.setGraphic('@');
 }
 
 Bullet::Bullet(Position sPos, double damage, DIRECTION direction)
 {
-	this->damage = damage;
+	this->damage_ = damage;
 	ai.setDirection(direction);
 	ai.setPosition(sPos);
 }
@@ -20,12 +20,12 @@ Bullet::~Bullet()
 
 void Bullet::setDamage(double damage)
 {
-	this->damage = damage;
+	this->damage_ = damage;
 }
 
 double Bullet::getDamage()
 {
-	return damage;
+	return damage_;
 }
 
 void Bullet::setDirection(DIRECTION direction)
@@ -43,16 +43,21 @@ void Bullet::setGraphic(char g)
 	ai.setGraphic(g);
 }
 
+DIRECTION Bullet::getDirection()
+{
+	return ai.getDirection();
+}
+
 void Bullet::serialize(fstream & file)
 {
 	file << "Bullet" << std::endl
-		<< damage << std::endl;
+		<< damage_ << std::endl;
 	ai.serialize(file);
 }
 
 void Bullet::deserialize(fstream & file)
 {
-	file >> damage;
+	file >> damage_;
 	ai.deserialize(file);
 }
 
@@ -87,9 +92,19 @@ void Bullet::clean()
 	ai.clean();
 }
 
+void Bullet::damage(int damage, std::string name)
+{
+	return;
+}
+
 void Bullet::setPos(Position pos)
 {
 	ai.setPosition(pos);
+}
+
+void Bullet::updateOverlay()
+{
+	ai.updateOverlay();
 }
 
 Position Bullet::getPos()

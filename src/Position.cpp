@@ -172,6 +172,15 @@ bool Position::operator==(const Position & pos)
 	}
 }
 
+std::string Position::serializeR()
+{
+	std::string msg;
+	msg = x_;
+	msg += "\n";
+	msg += y_;
+	msg += "\n";
+}
+
 std::pair<int, int> Position::getPair()
 {
     pair<int, int> newPair;

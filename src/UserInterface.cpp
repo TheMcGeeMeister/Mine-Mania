@@ -8,6 +8,8 @@
 
 using namespace std;
 
+extern void clearInput();
+
 namespace game
 {
 	extern void Log(std::string txt);
@@ -64,10 +66,6 @@ UserInterface::UserInterface(unsigned int size_x, unsigned int size_y, unsigned 
 UserInterface::~UserInterface()
 {
 	iManager.isExit(true);
-	if (iManage.joinable())
-	{
-		iManage.join();
-	}
 }
 
 void UserInterface::isHidden(bool isHidden)
@@ -119,6 +117,7 @@ void UserInterface::setBorderWidth(unsigned int border_width)
 
 void UserInterface::setAll(unsigned int size_x, unsigned int size_y, unsigned int offset_x, unsigned int offset_y, unsigned int border_width)
 {
+	isPosVariablesSet_ = true;
 	positionVars_.size_x = size_x;
 	positionVars_.size_y = size_y;
 	positionVars_.offset_x = offset_x;
@@ -333,6 +332,17 @@ Section UserInterface::getSection(uint16_t sectionIndex)
 	}
 }
 
+bool UserInterface::getSectionRefT(uint16_t sectionIndex, Section ** section)
+{
+	if (sections.count(sectionIndex))
+	{
+		*section = &sections[sectionIndex];
+		return true;
+	}
+	*section = nullptr;
+	return false;
+}
+
 bool UserInterface::isSectionActivated()
 {
 	if (isSelectionActivated_ == true)
@@ -363,7 +373,7 @@ void UserInterface::moveSelectionUp()
 	if (curSelected_ == 0)
 		curSelected_ = sectionAmount_;
 
-	while (sections[curSelected_].isSelectable() != true)
+	while (sections[curSelected_].isSelectable() != true && sections[curSelected_].isHidden() == false)
 	{
 		curSelected_--;
 		if (curSelected_ == 0)
@@ -382,7 +392,7 @@ void UserInterface::moveSelectionDown()
 	if (curSelected_ > sectionAmount_)
 		curSelected_ = 1;
 
-	while (sections[curSelected_].isSelectable() != true)
+	while (sections[curSelected_].isSelectable() != true && sections[curSelected_].isHidden() == false)
 	{
 		curSelected_++;
 		if (curSelected_ > sectionAmount_)
@@ -420,125 +430,123 @@ void UserInterface::update()
 {
 	if (isPosVariablesSet_ == false)
 		return;
-	if (isSlideUI_ == false)
+	if (isHidden_ == false)
 	{
-		for (auto& iter : sections)
+		if (isSlideUI_ == false)
 		{
-			if (iter.second.redraw() == true)
-				redraws.push_back(iter.second.getIndex());
-		}
-		if (redraws.empty() == false)
-		{
-			for (auto& iter : redraws)
+			for (auto& iter : sections)
 			{
-				draw(iter);
+				if (iter.second.redraw() == true)
+					redraws.push_back(iter.second.getIndex());
 			}
-			redraws.clear();
-		}
+			if (redraws.empty() == false)
+			{
+				for (auto& iter : redraws)
+				{
+					draw(iter);
+				}
+				redraws.clear();
+			}
 
-		if (isSelectionAvailable_)
+			if (isSelectionAvailable_)
+			{
+				if (inputCoolDown.Update() == true)
+				{
+					if (isInIMode_ == false)
+					{
+						input.update();
+						if (input.inputAvailable())
+						{
+							char i = input.getInput();
+							if (i == 'w')
+							{
+								moveSelectionUp();
+								inputCoolDown.StartNewTimer(0.100);
+								return;
+							}
+							else if (i == 's')
+							{
+								moveSelectionDown();
+								inputCoolDown.StartNewTimer(0.100);
+								return;
+							}
+						}
+						if (input.isReturnPressed())
+						{
+							if (sections[curSelected_].isISection() == true)
+							{
+								isInIMode_ = true;
+								iManager.clear();
+								iManager.isExit(false);
+								FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+								clearInput();
+								redraws.push_back(curSelected_);
+							}
+							else
+							{
+								isSelectionActivated_ = true;
+							}
+							inputCoolDown.StartNewTimer(0.175);
+							return;
+						}
+					}
+					else
+					{
+						if (iManager.isReturnPressed())
+						{
+							isInIMode_ = false;
+							iManager.clear();
+							iManager.isExit(true);
+							draw(curSelected_);
+							isSelectionActivated_ = true;
+							Sleep(250);
+							return;
+						}
+						if (GetAsyncKeyState(VK_ESCAPE))
+						{
+							isInIMode_ = false;
+							iManager.clear();
+							iManager.isExit(true);
+							draw(curSelected_);
+							isSelectionActivated_ = true;
+							Sleep(250);
+							return;
+						}
+						iManager.update();
+						while (iManager.inputAvailable())
+						{
+							char key = iManager.getInput();
+							string skey;
+							skey.push_back(key);
+							sections[curSelected_].addIText(skey);
+						}
+						if (GetAsyncKeyState(VK_BACK))
+						{
+							sections[curSelected_].removeIText();
+							inputCoolDown.StartNewTimer(0.100);
+						}
+					}
+				}
+			}
+		}
+		else
 		{
 			if (inputCoolDown.Update() == true)
 			{
-				if (isInIMode_ == false)
+				if (SlideSections.empty() == false)
 				{
-					if (GetAsyncKeyState('W'))
-					{
-						moveSelectionUp();
-						inputCoolDown.StartNewTimer(0.175);
-						return;
-					}
-					if (GetAsyncKeyState('S'))
-					{
-						moveSelectionDown();
-						inputCoolDown.StartNewTimer(0.175);
-						return;
-					}
-					if (GetAsyncKeyState(VK_RETURN))
-					{
-						if (sections[curSelected_].isISection() == true)
-						{
-							isInIMode_ = true;
-							iManager.clear();
-							iManager.isExit(false);
-							FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-							redraws.push_back(curSelected_);
-						}
-						else
-						{
-							isSelectionActivated_ = true;
-						}
-						inputCoolDown.StartNewTimer(0.175);
-						return;
-					}
+					moveSlideDown();
+					inputCoolDown.StartNewTimer(0.100);
 				}
-				else
+				if (slideSectionAdd_.empty() == false)
 				{
-					if (GetAsyncKeyState(VK_RETURN))
-					{
-						isInIMode_ = false;
-						iManager.clear();
-						iManager.isExit(true);
-						draw(curSelected_);
-						Sleep(250);
-						if (iManage.joinable())
-						{
-							iManage.join();
-						}
-						FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-						isSelectionActivated_ = true;
-						return;
-					}
-					if (GetAsyncKeyState(VK_ESCAPE))
-					{
-						hide();
-						isInIMode_ = false;
-						iManager.clear();
-						iManager.isExit(true);
-						draw(curSelected_);
-						Sleep(250);
-						if (iManage.joinable())
-						{
-							iManage.join();
-						}
-						FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
-						isSelectionActivated_ = true;
-						return;
-					}
-					iManager.start();
-					while (iManager.inputAvailable())
-					{
-						char key = iManager.getInput();
-						string skey;
-						skey.push_back(key);
-						sections[curSelected_].addIText(skey);
-					}
-					if (GetAsyncKeyState(VK_BACK))
-					{
-						sections[curSelected_].removeIText();
-						inputCoolDown.StartNewTimer(0.100);
-					}
+					SlideSections[0] = slideSectionAdd_.front();
+					slideSectionAdd_.pop_front();
 				}
-			}
-		}
-	}
-	else
-	{
-		if (inputCoolDown.Update() == true)
-		{
-			if (SlideSections.empty() == false)
-			{
-				moveSlideDown();
-				inputCoolDown.StartNewTimer(0.100);
-			}
-			if (slideSectionAdd_.empty() == false)
-			{
-				SlideSections[0] = slideSectionAdd_.front();
-				slideSectionAdd_.pop_front();
-			}
-			for (auto& iter : SlideSections)
-			{
-				slideDraw(iter.first, iter.second);
+				for (auto& iter : SlideSections)
+				{
+					slideDraw(iter.first, iter.second);
+				}
 			}
 		}
 	}
@@ -547,11 +555,15 @@ void UserInterface::update()
 void UserInterface::reset()
 {
 	sections.clear();
+	redraws.clear();
+	slideSectionAdd_.clear();
+	SlideSections.clear();
 	curSelected_ = 0;
 	isSelectionActivated_ = false;
 	isSelectionAvailable_ = false;
 	isHidden_ = false;
-	isPosVariablesSet_ = false;
+	isInIMode_ = false;
+	isSlideUI_ = false;
 	inputCoolDown.StartNewTimer(0.0001);
 	sectionAmount_ = 0;
 	positionVars_.size_x = 0;
@@ -834,6 +846,7 @@ void Section::isHidden(bool isHidden)
 void Section::setText(string text)
 {
 	text_ = text;
+	redraw_ = true;
 }
 
 void Section::setIndex(uint16_t index)

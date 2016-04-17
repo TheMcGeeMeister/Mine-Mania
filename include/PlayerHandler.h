@@ -11,6 +11,8 @@ public:
 	void addPlayer(Player& player);
 	void addLocalPlayer(Player player);
 
+	void update();
+
 
 	bool playerAt(Position pos);
 	bool getPlayerAt(Position pos, Player** player);
@@ -22,7 +24,5 @@ public:
 	void clear();
 private:
 	map <std::string, Player> m_players;
-
-	std::string localPlayerName;
 };
 

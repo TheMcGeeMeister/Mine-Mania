@@ -55,7 +55,6 @@ void TurretAIComponent::search() // Currently Only Shoots at the Player
 	Position tPos(0,0); // Target Position;
 
 	pos = curPosition_;
-	pos.go(DIRECTION_UP);
 	searchLine(pos, DIRECTION_UP, visionRange_, tPos, foundTarget);
 	if (foundTarget == true)
 	{
@@ -66,7 +65,6 @@ void TurretAIComponent::search() // Currently Only Shoots at the Player
 	}
 
 	pos = curPosition_;
-	pos.go(DIRECTION_DOWN);
 	searchLine(pos, DIRECTION_DOWN, visionRange_, tPos, foundTarget);
 
 	if (foundTarget == true)
@@ -78,7 +76,6 @@ void TurretAIComponent::search() // Currently Only Shoots at the Player
 	}
 
 	pos = curPosition_;
-	pos.go(DIRECTION_LEFT);
 	searchLine(pos, DIRECTION_LEFT, visionRange_, tPos, foundTarget);
 
 	if (foundTarget == true)
@@ -90,7 +87,6 @@ void TurretAIComponent::search() // Currently Only Shoots at the Player
 	}
 
 	pos = curPosition_;
-	pos.go(DIRECTION_RIGHT);
 	searchLine(pos, DIRECTION_RIGHT, visionRange_, tPos, foundTarget);
 
 	if (foundTarget == true)
@@ -144,19 +140,14 @@ void TurretAIComponent::searchLine(Position sPos, DIRECTION direction, int amoun
 void TurretAIComponent::shoot(DIRECTION direction)
 {
 	Position nPos = curPosition_; // New Position
-	switch (direction)
-	{
-	case DIRECTION_UP: nPos.go(DIRECTION_UP); break;
-	case DIRECTION_DOWN: nPos.go(DIRECTION_DOWN); break;
-	case DIRECTION_LEFT: nPos.go(DIRECTION_LEFT); break;
-	case DIRECTION_RIGHT: nPos.go(DIRECTION_RIGHT); break;
-	default: return;
-	}
+
+	nPos.go(direction);
 
 	shared_ptr<Bullet> bullet = make_shared<Bullet>();
 	bullet->setDirection(direction);
 	bullet->setPosition(nPos);
-	bullet->setGraphic(215);
+	bullet->setGraphic(250);
+	bullet->addKeyWord(KEYWORD_BULLET);
 
 	game::system.addEntity(bullet, "Bullet");
 }

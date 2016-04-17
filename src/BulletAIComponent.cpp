@@ -1,14 +1,16 @@
 #include "..\include\BulletAIComponent.h"
 #include <Display.h>
 #include <PlayerHandler.h>
+#include <SoundManager.h>
+#include <Common.h>
 
 namespace game
 {
 	extern Display game;
 	extern System system;
 	extern PlayerHandler pHandler;
+	extern SoundManager m_sounds;
 }
-
 
 
 BulletAIComponent::BulletAIComponent()
@@ -60,6 +62,12 @@ void BulletAIComponent::setGraphic(char g)
 	graphic_ = g;
 	Tile& tile = game::game.getTileRefAt(position);
 	tile.updateOverlay(true, g);
+}
+
+void BulletAIComponent::updateOverlay()
+{
+	Tile& tile = game::game.getTileRefAt(position);
+	tile.updateOverlay(true, graphic_);
 }
 
 int BulletAIComponent::getDamage()
@@ -125,31 +133,48 @@ void BulletAIComponent::update()
 	if (isDestroyed_ == true) return;
 	if (movementCoolDown.Update() == true)
 	{
+		/* Check if a player hit the bullet */
+		///////////////////////////////////////////
 		if (game::pHandler.playerAt(position) == true)
 		{
 			Player *player = nullptr;
 			if (game::pHandler.getPlayerAt(position, &player) == true)
 			{
 				if (player == nullptr) return;
+				player->knockbackTo(direction, 1);
+				player->disableMovementFor(0.500);
 				player->damage(damage);
 				isDestroyed(true);
 				clean();
+				game::m_sounds.PlaySoundR("Bullet");
+				std::stringstream msg;
+				msg << SendDefault << End << Sound << End << "Bullet" << End;
+				SendServerLiteral(msg.str());
 				return;
 			}
 		}
+		///////////////////////////////////////////
+
+
+		/* Bullet Moved too far */
+		///////////////////////////////////////////
 		if (rangeIndex == range)
 		{
 			isDestroyed(true);
 			clean();
 			return;
 		}
-		Position nPos = position;
+		///////////////////////////////////////////
+
+
+		Position nPos = position; // New Position 
 		nPos.go(direction);
 		
 		game::game.getTileRefAt(position).removeOverlay();
 		
 		Tile& tile = game::game.getTileRefAt(nPos);
 
+		/* Hit Wall */
 		if (tile.isWall() == true)
 		{
 			isDestroyed(true);
@@ -157,13 +182,32 @@ void BulletAIComponent::update()
 			return;
 		}
 
+		/* Hit Player */
 		if (game::pHandler.playerAt(nPos) == true)
 		{
 			Player *player = nullptr;
 			if (game::pHandler.getPlayerAt(nPos, &player) == true)
 			{
 				if (player == nullptr) return;
+				player->knockbackTo(direction, 1);
+				player->disableMovementFor(1.5);
 				player->damage(damage);
+				game::m_sounds.PlaySoundR("Bullet");
+				std::stringstream msg;
+				msg << SendDefault << End << Sound << End << "Bullet" << End;
+				isDestroyed(true);
+				clean();
+				return;
+			}
+		}
+
+		/* Hit Entity */
+		if (game::system.entityAt(nPos) == true)
+		{
+			Entity *entity = nullptr;
+			if (game::system.getEntityAt(nPos, &entity))
+			{
+				entity->damage(damage, string());
 				isDestroyed(true);
 				clean();
 				return;

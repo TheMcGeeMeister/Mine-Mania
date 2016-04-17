@@ -14,6 +14,7 @@ public:
 	void Send(std::string msg);
 	void Send(Packet msg);
 	void SendLiteral(std::string msg);
+	void SetId(int id);
 	void Do(std::string rMsg);
 	void Do(Packet msg);
 	void Close();
@@ -29,6 +30,8 @@ public:
 	void UpdateTile(int x, int y);
 	void Log(std::string text);
 
+	int getId();
+
 	/* Packets */
 	/////////////////////////
 	void addPacket(std::string packet);
@@ -41,5 +44,7 @@ private:
 	bool isPaused_;
 	bool isWaiting_;
 	bool isPlayerConnected_;
+
+	int id_;
 };
 

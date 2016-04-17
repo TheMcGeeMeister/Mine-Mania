@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include <string>
 #include <TurretAIComponent.h>
+#include <HealthComponent.h>
 #include <Position.h>
 #include <fstream>
 
@@ -12,6 +13,7 @@ public:
 	Turret(Position position, std::string name);
 	~Turret();
 
+	HealthComponent& getHealthRef();
 
 	void setGraphic(char g);
 	void setOwner(std::string owner);
@@ -35,10 +37,14 @@ public:
 	virtual bool isKilled();
 	virtual void kill();
 	virtual void clean();
+	virtual void damage(int amount, std::string name);
 	virtual void setPos(Position pos);
+	virtual void updateOverlay();
 	virtual Position getPos();
 private:
 	std::string owner;
+
+	HealthComponent health;
 
 	char graphic;
 

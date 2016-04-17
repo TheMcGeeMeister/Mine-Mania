@@ -1,5 +1,6 @@
 #include "..\include\Entity.h"
 #include "LoadEnums.h"
+#include "Common.h"
 #include <list>
 #include <fstream>
 
@@ -8,6 +9,7 @@
 Entity::Entity()
 {
 	kill_ = false;
+	isObjectHosted_ = true;
 }
 
 
@@ -16,9 +18,41 @@ Entity::~Entity()
 
 }
 
+void Entity::setToUpdate()
+{
+	isObjectHosted_ = true;
+}
+
+void Entity::setToNoUpdate()
+{
+	isObjectHosted_ = false;
+}
+
 void Entity::setID(int id)
 {
 	id_ = id;
+}
+
+void Entity::addKeyWord(KEYWORD key)
+{
+	keywords_.push_back(key);
+}
+
+bool Entity::isSetToUpdate()
+{
+	return isObjectHosted_;
+}
+
+bool Entity::hasKeyWord(KEYWORD key)
+{
+	for (auto& iter : keywords_)
+	{
+		if (iter == key)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Entity::kill()
@@ -54,19 +88,22 @@ void System::update()
 	{
 		for (auto& iter : m_system)
 		{
-			if (iter.second->isKilled() == true)
+			if (iter.second->isSetToUpdate())
 			{
-				d_queue.push_back(iter.first);
-				/* Debug */
-				/////////////////////////////////
-				std::fstream file("Logs\\Log.txt", std::ios::app);
-				file << "System: Entity Deleted ID:" << iter.first << std::endl;
-				/////////////////////////////////
-				continue;
-			}
-			else
-			{
-				iter.second->update();
+				if (iter.second->isKilled() == true)
+				{
+					d_queue.push_back(iter.first);
+					/* Debug */
+					/////////////////////////////////
+					std::fstream file("Logs\\Log.txt", std::ios::app);
+					file << "System: Entity Deleted ID:" << iter.first << std::endl;
+					/////////////////////////////////
+					continue;
+				}
+				else
+				{
+					iter.second->update();
+				}
 			}
 		}
 	}
@@ -74,6 +111,15 @@ void System::update()
 	for (auto& iter : d_queue)
 	{
 		m_system.erase(iter);
+	}
+}
+
+void System::cleanAndUpdateOverlays() // Disables All Overlays, then calls on the entity's to update them
+{
+	Common::CleanGameOverlay();
+	for (auto& iter : m_system)
+	{
+		iter.second->updateOverlay();
 	}
 }
 
@@ -113,13 +159,13 @@ int System::addEntity(std::shared_ptr<Entity> entity, std::string txt)
 	return (id_index - 1);
 }
 
-bool System::getEntityAt(Position pos, Entity * entity)
+bool System::getEntityAt(Position pos, Entity ** entity)
 {
 	for (auto& iter : m_system)
 	{
 		if (iter.second->getPos() == pos)
 		{
-			entity = iter.second.get();
+			*entity = iter.second.get();
 			return true;
 		}
 	}

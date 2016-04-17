@@ -53,13 +53,13 @@ public:
 	string getWorld();
     void newWorld();
 	void newWorldMulti();
+	void newWorldMulti(int pAmount, std::string names[]);
 	void getSaveSuffix();
 	int getSaveAmount();
 
 	void saveSettings();
-	void loadSettings();
+	bool loadSettings();
     ///////////////////////////////////
-
 
     Tile& getTileRefAt(Position);
 	Tile& getTileRefAt(int x, int y);
@@ -80,6 +80,7 @@ public:
     void update();
     void updatePos(Position);
     void reloadAll();
+	void cleanOverlays(); // Sets all tile overlaysEnabled to false, and sets overlay graphic to ' '
 protected:
 
 private:

@@ -28,6 +28,7 @@ class Player : public Entity
         string getName();
 		Position getSpawnPos();
 		UserInterface& getUIRef();
+		HealthComponent& getHealthRef();
 		//////////////////////////////////
 
         /* Gold Related */
@@ -44,11 +45,12 @@ class Player : public Entity
         void setMaxManaAmount(int amount);
         void setName(string name);
 		void setSpawnPos(Position pos);
+		void setHandPos(Position pos); /* Changes variable without changing map */
 		//////////////////////////////////
 
 		/* Stats*/
 		//////////////////////////////////
-		void damage(int amount);
+		//void damage(int amount);
 		void damageS(int amount);
 		void heal(int amount);
 		void healS(int amount);
@@ -64,8 +66,15 @@ class Player : public Entity
 		void mineDown(Display& game);
 		void mineLeft(Display& game);
 		void mineRight(Display& game);
-		void forceHandPosition(Position newPos, Display& game);
+		void mine(DIRECTION direction);
+		void attack(DIRECTION direction);
+		void forceHandPosition(Position newPos, Display& game); /* Updates Position on map, and changes variable :: Deprecated Use forceHandPositon(Position);*/
+		void forceHandPosition(Position newPos); /*Also updates position on the map*/
 		void claimOnHand();
+		void switchMode();
+		void updateHandPos();
+		void disableMovementFor(int time);
+		void knockbackTo(DIRECTION direction, int amount);
 		Position getHandPosition();
 		//////////////////////////////////
 
@@ -85,10 +94,10 @@ class Player : public Entity
 		/* Serialize / Deserialize */
 		//////////////////////////////////
 		void serialize(fstream& file);
-		void serialize(ofstream& file);
+		//void serialize(ofstream& file);
 		void serialize(stringstream& file);
 		void deserialize(fstream& file);
-		void deserialize(ifstream& file);
+		//void deserialize(ifstream& file);
 		void deserialize(stringstream& file);
 		//////////////////////////////////
 
@@ -97,7 +106,9 @@ class Player : public Entity
 		virtual bool isKilled();
 		virtual void kill();
 		virtual void clean();
-		virtual void setPos(Position pos);
+		virtual void damage(int damage, string name = "");
+		virtual void setPos(Position pos); // Calls forceHandPosition(Position)
+		virtual void updateOverlay();
 		virtual Position getPos();
 
 		void killS();
@@ -110,11 +121,15 @@ class Player : public Entity
         int maxGoldAmount_;
         int manaAmount_;
         int maxManaAmount_;
+		int handMode_;
+		int mineProgress_;
 
 		HealthComponent health;
 
 		bool moved_;
 		bool mined_;
+		bool isMining_;
+		bool isSoundPlaying_;
 		bool isDead_;
 		bool isLocal_;
 
@@ -126,6 +141,14 @@ class Player : public Entity
 
 		UserInterface UI;
 
+		Timer miningStopSound;
+		Timer movementTimer_;
+
 		void Log(std::string);
 
 };
+
+
+
+Player CreatePlayerAt(Position pos, std::string name);
+Player CreatePlayerAndSendAt(Position pos, std::string name, list<int> toSend);

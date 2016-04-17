@@ -16,6 +16,9 @@
 #include <conio.h>
 #include <SimpleNetClient.h>
 #include <PlayerHandler.h>
+#include <Wave.h>
+#include <SoundManager.h>
+#include <Lobby.h>
 #include "..\include\game.h"
 
 #define DEFAULT_CLEAR_WIDTH 100
@@ -33,11 +36,14 @@ namespace game
 	PlayerHandler pHandler; // Player Handler
 	Player enemy;
 	Display game;
-	UserInterface tileUI(30, 7, 0, 30, 1);
+	UserInterface tileUI(30, 8, 0, 30, 1);
 	UserInterface SlideUI(25, 15, 75, 0, 1);
 	UserInterface ServerUI(18, 3, 75, 27, 1);
 	SimpleNetClient server;
+	SoundManager m_sounds;
+	class Lobby lobby;
 	bool threadExit;
+	bool lobbyStart = false;
 	int curFont;
 	void Log(string txt)
 	{
@@ -52,6 +58,14 @@ namespace gametiles
 	Tile stone_wall_gold;
 	Tile stone_floor;
 	Tile dirt_wall;
+}
+
+void clearInput()
+{
+	while (_kbhit())
+	{
+		_getch();
+	}
 }
 
 void updateTile(Position pos)
@@ -82,7 +96,9 @@ bool isExitGame(Display& game)
 			game::ServerUI.isHidden(false);
 			game::tileUI.isHidden(false);
 			game::SlideUI.isHidden(false);
-			game::pHandler.getLocalPlayer().getUIRef().isHidden(false);
+			//game::pHandler.getLocalPlayer().getUIRef().isHidden(false);
+			game::pHandler.getLocalPlayer().updateMiningUI();
+			clearInput();
 		}
 		return exit;
 	}
@@ -213,7 +229,7 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 	Player& player = game::pHandler.getLocalPlayer();
 	HANDLE h = GetActiveWindow();
 	HANDLE focus = GetFocus();
-	//if (h != focus) { return; }
+	if (h != focus) { return; }
     if(InputCoolDown.Update()==true)
     {
 		/* Movement */
@@ -248,61 +264,19 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				case 's':player.moveHandDown(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 'a':player.moveHandLeft(game); InputCoolDown.StartNewTimer(0.075); break;
 				case 'd':player.moveHandRight(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 'j':game::SlideUI.addSlide("Testing"); InputCoolDown.StartNewTimer(0.075); break;
-				case 'y':player.spawnTurret(Position(10, 10)); InputCoolDown.StartNewTimer(0.075); break;
-				case 't':InputCoolDown.StartNewTimer(0.075); break;
-				case 'm':game::server.SendLiteral("12\n9\nTesting"); InputCoolDown.StartNewTimer(0.075); break;
+				case 'f':player.switchMode(); InputCoolDown.StartNewTimer(0.075); break;
 				case 'c':player.purchaseTurret(); InputCoolDown.StartNewTimer(0.075); break;
-				case 72:player.mineUp(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 80:player.mineDown(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 75:player.mineLeft(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 77:player.mineRight(game); InputCoolDown.StartNewTimer(0.075); break;
+				case 'v':player.claimOnHand(); InputCoolDown.StartNewTimer(0.075); break;
+				case 72:player.mine(DIRECTION_UP); InputCoolDown.StartNewTimer(0.075); break;
+				case 80:player.mine(DIRECTION_DOWN); InputCoolDown.StartNewTimer(0.075); break;
+				case 75:player.mine(DIRECTION_LEFT); InputCoolDown.StartNewTimer(0.075); break;
+				case 77:player.mine(DIRECTION_RIGHT); InputCoolDown.StartNewTimer(0.075); break;
 				default: break;
 				}
 			}
 			else
 				x = 3;
 		}
-		////////////////////////////////////////////////
-		/* Mining */
-		////////////////////////////////////////////////
-		/*if (GetAsyncKeyState(VK_UP))
-		{
-			game::player.mineUp(game);
-			InputCoolDown.StartNewTimer(0.075);
-		}else if (GetAsyncKeyState(VK_DOWN))
-		{
-			game::player.mineDown(game);
-			InputCoolDown.StartNewTimer(0.075);
-		}else if (GetAsyncKeyState(VK_LEFT))
-		{
-			game::player.mineLeft(game);
-			InputCoolDown.StartNewTimer(0.075);
-		}else if (GetAsyncKeyState(VK_RIGHT))
-		{
-			game::player.mineRight(game);
-			InputCoolDown.StartNewTimer(0.075);
-		}*/
-		////////////////////////////////////////////////
-		Position pos = player.getHandPosition();
-        if(GetAsyncKeyState('F'))
-        {
-			game.getTileRefAt(pos).isFortified(true);
-            InputCoolDown.StartNewTimer(0.075);
-        }
-        if(GetAsyncKeyState(VK_SPACE))
-        {
-			if (game.isWalkableTileNear(pos))
-			{
-				game.getTileRefAt(pos).mine(10, player);
-				InputCoolDown.StartNewTimer(0.075);
-			}
-        }
-        if(GetAsyncKeyState('V'))
-        {
-			player.claimOnHand();
-			InputCoolDown.StartNewTimer(0.075);
-        }
     }
 }
 
@@ -350,6 +324,58 @@ void updateTileInfo()
     TileInfo.update();
 }
 
+void sendHostInfo()
+{
+	game::game.newWorldMulti();
+	std::stringstream msg;
+	msg << SendDefault << End
+		<< World << End
+		<< game::game.getWorld();
+	game::server.SendLiteral(msg.str());
+	msg.str(string());
+
+	Sleep(30);
+
+	Player* other;
+	if (game::pHandler.getPlayer("Other", &other) == true)
+	{
+		msg << SendDefault << End << AddPlayerLocal << End;
+		other->serialize(msg);
+		game::Log("///////////////////////\n" + msg.str() + "///////////////////////");
+		game::server.SendLiteral(msg.str());
+	}
+	else
+	{
+		exit(0);
+	}
+
+	Sleep(10);
+
+	msg.str(string());
+
+	Player& player = game::pHandler.getLocalPlayer();
+	msg << SendDefault << End << AddPlayer << End;
+	player.serialize(msg);
+	game::server.SendLiteral(msg.str());
+
+	game::Log("Sent: AddPlayer");
+
+	Sleep(10);
+
+	msg.str(string());
+
+	msg << SendDefault << End << Start << End;
+	game::server.SendLiteral(msg.str());
+
+	game::Log("Sent: Start");
+	return;
+}
+
+void lobbyMenu()
+{
+	game::lobby.Go();
+}
+
 void connectMenu(thread& sThread, bool& threadStarted)
 {
 	Sleep(250);
@@ -386,9 +412,12 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			game::server.isExit(false);
 			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
 			threadStarted = true;
+			game::Log("Network Thread Started");
 		}
+		game::lobby.Initialize(game::server.isHost());
+		game::lobby.Go();
 		Sleep(250);
-		if (game::server.isHost() == false)
+		/*if (game::server.isHost() == false)
 		{
 			std::stringstream msg;
 			msg << SendDefault << End << PlayerConnect << End;
@@ -409,7 +438,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			std::stringstream msg;
 			msg << SendDefault << End
 				<< World << End
-				<< game::game.getWorld() << "End";
+				<< game::game.getWorld();
 			game::server.SendLiteral(msg.str());
 			msg.str(string());
 
@@ -437,20 +466,25 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			player.serialize(msg);
 			game::server.SendLiteral(msg.str());
 
+			game::Log("Sent: AddPlayer");
+
 			Sleep(10);
 
 			msg.str(string());
 
 			msg << SendDefault << End << Start << End;
 			game::server.SendLiteral(msg.str());
+			
+			game::Log("Sent: Start");
 			return;
 		}
+		setCursorPos(0, 0);
+		cout << "Loading...";
 		while (game::server.isWaiting() == true)
 		{
-			loadScreen(50, "Loading...");
-			Sleep(10);
+			Sleep(50);
 		}
-		return;
+		return;*/
 	}
 	ui.isHidden(true);
 	Sleep(50);
@@ -633,7 +667,11 @@ void settingsMenu()
 	menu.getSectionRef(2).addVar("");
 	menu.addSection("Fullscreen:", true, false);
 	menu.getSectionRef(3).addVar("");
+	menu.push_isection("Name:");
+	menu.addSection("Volume", true, false);
 	menu.addSection("Exit", true, false);
+
+	menu.getSectionRef(4).setIVar(game::pHandler.getLocalPlayer().getName());
 
 	bool exitFlag = false;
 	
@@ -670,6 +708,12 @@ void settingsMenu()
 				else { isFullScreen = true; menu.getSectionRef(3).setVar(1, "True"); setFullsreen(); menu.reDrawAll(); }
 				break;
 			case 4:
+				game::pHandler.getLocalPlayer().setName(menu.getSectionRef(4).getIVar());
+				break;
+			case 5:
+
+				break;
+			case 6:
 				exitFlag = true; break;
 			default:
 				break;
@@ -823,7 +867,8 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
             case 5: // New
 				menu.isHidden(true); if(newWorldMenu(game) == true) return false; Sleep(100); menu.isHidden(false); continue; break;
 			case 6: // Connect
-				menu.isHidden(true); connectMenu(sThread, threadStarted); menu.isHidden(false); break;
+				menu.isHidden(true); connectMenu(sThread, threadStarted); if (game::server.isConnected() == true) { return false; }
+				else menu.isHidden(false); break;
             case 7: // Exit
 				return true; break;
             }
@@ -996,6 +1041,12 @@ void gameLoop()
 	game::SlideUI.isHidden(false);
 	game::ServerUI.isHidden(false);
 	game::tileUI.isHidden(false);
+	player.getUIRef().isHidden(true);
+
+	clearInput();
+
+	game::m_sounds.StopSound("Menu");
+	game::m_sounds.PlaySoundR("Ambient");
 
 	while (isExitGame(game::game) == false)
 	{
@@ -1008,6 +1059,7 @@ void gameLoop()
 		game::SlideUI.update();
 		game::ServerUI.update();
 		game::system.update();
+		game::pHandler.update();
 		if (game::server.isConnected() == true)
 		{
 			if (game::game.isPacketsAvailable())
@@ -1025,8 +1077,13 @@ void gameLoop()
 				game::game.clearPackets();
 			}
 		}
+		else
+		{
+			game::game.clearPackets();
+		}
 		Sleep(10);
 	}
+	game::m_sounds.StopSound("Ambient");
 }
 
 void preGameLoop()
@@ -1067,7 +1124,9 @@ void preGameLoop()
     TileInfo.getSectionRef(4).push_backVar((int)0);
     TileInfo.addSection("Player Gold:");
     TileInfo.getSectionRef(5).push_backVar("0");
-
+	TileInfo.addSection("Mode:");
+	TileInfo.getSectionRef(6).push_backVar("Mining");
+	
     game.setSizeX(75);
     game.setSizeY(30);
 
@@ -1088,23 +1147,29 @@ void preGameLoop()
 
 		if (game.isLoaded() == false)
 			gameNotLoadedMenu(game);
+
 		if (game.isLoaded() == false)
 			continue;
+
 		game::tileUI.isHidden(false);
-		FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE));
+
 		if (game::server.isConnected() == true && threadStarted == false)
 		{
 			game::server.isExit(false);
 			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
 			threadStarted = true;
 		}
+
 		if (game::server.isPaused())
 		{
 			game::server.Continue();
 		}
+
 		Player& player = game::pHandler.getLocalPlayer();
 
 		gameLoop();
+
+		game::m_sounds.PlaySoundR("Menu");
 
 		game::server.Pause();
 		clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
@@ -1161,6 +1226,28 @@ void initializeStdTiles()
 	dirt_wall.isClaimable(false);
 }
 
+void loadSounds()
+{
+	if (game::m_sounds.AddSound("Menu", "Sounds//Loop.wav"))
+	{
+		game::m_sounds.SetInfinite("Menu");
+		game::m_sounds.PlaySound("Menu");
+	}
+
+	game::m_sounds.AddSound("Mining", "Sounds//Mining.wav");
+	game::m_sounds.AddSound("Bullet", "Sounds//Hit.wav");
+	game::m_sounds.AddSound("Place", "Sounds//Tap.wav");
+	game::m_sounds.AddSound("Break", "Sounds//Break.wav");
+	game::m_sounds.AddSound("Destroy", "Sounds//Destroy.wav");
+	game::m_sounds.AddSound("Money", "Sounds//Money.wav");
+	game::m_sounds.AddSound("MetalBreak", "Sounds//MetalBreak.wav");
+	game::m_sounds.AddSound("Notification", "Sounds//Notification.wav");
+	game::m_sounds.AddSound("Ambient", "Sounds//Game.wav");
+
+	game::m_sounds.SetInfinite("Mining");
+	game::m_sounds.SetInfinite("Ambient");
+}
+
 int main()
 {
     CONSOLE_CURSOR_INFO cursorInfo;
@@ -1177,30 +1264,21 @@ int main()
 
 	setFullsreen();
 
+	game::m_sounds.Initialize();
+
+	loadSounds();
+
 	preGameLoop();
 
 	game::game.saveSettings();
 
 	setCursorPos(0, 0);
-	/*while (isExit() == false)
-	{
-		if (kbhit())
-		{
-			getch();
-			stringstream msg;
-			msg << "SendHost\n";
-			msg << "MSG\n" ;
-			msg << "Testing\n";
-			msg << "Ending\n";
-			string key;
-			string remainder;
-			string newKey;
-			msg >> key;
-			cout << "Key:" << key << endl;
-			cout << "Remainder:" << msg.rdbuf() << endl;
 
- 		}
-	}*/
+	//release the engine, NOT the voices!
+	m_sound::g_engine->Release();
+
+	//again, for COM
+	CoUninitialize();
 
     return 0;
 }

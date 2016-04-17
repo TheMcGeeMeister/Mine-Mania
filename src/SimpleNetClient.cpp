@@ -13,6 +13,9 @@
 #include <Display.h>
 #include <UserInterface.h>
 #include <PlayerHandler.h>
+#include <Lobby.h>
+#include <Entity.h>
+#include <SoundManager.h>
 #include "..\Mine-Mania\include\Packet.h"
 
 namespace game
@@ -21,6 +24,12 @@ namespace game
 	extern PlayerHandler pHandler;
 	extern UserInterface SlideUI;
 	extern UserInterface ServerUI;
+	extern UserInterface lobbyinfo;
+	extern UserInterface lobbylist;
+	extern System system;
+	extern SoundManager m_sounds;
+	extern bool lobbyStart;
+	extern class Lobby lobby;
 }
 
 namespace SimpleNet
@@ -37,6 +46,7 @@ SimpleNetClient::SimpleNetClient()
 	isWaiting_ = true;
 	isPlayerConnected_ = false;
 	SimpleNet::ConnectSocket = INVALID_SOCKET;
+	id_ = 0;
 }
 
 
@@ -262,7 +272,7 @@ void SimpleNetClient::Send(std::string msg)
 	}
 	else
 	{
-		cMsg << SendHost << endl;
+		cMsg << SendDefault << endl;
 	}
 	cMsg << msg;
 	send(SimpleNet::ConnectSocket, cMsg.str().c_str(), cMsg.str().length(), NULL);
@@ -311,6 +321,11 @@ void SimpleNetClient::SendLiteral(std::string msg)
 	}
 }
 
+void SimpleNetClient::SetId(int id)
+{
+	id_ = id;
+}
+
 void SimpleNetClient::Do(std::string rMsg)
 {
 	int loopLimit = 1000;
@@ -321,6 +336,12 @@ void SimpleNetClient::Do(std::string rMsg)
 	msg >> name;
 	while (msg)
 	{
+		if (name == Sound)
+		{
+			std::string name;
+			msg >> name;
+			game::m_sounds.PlaySoundR(name);
+		}
 		if (name == SetSelected)
 		{
 			int posX;
@@ -352,6 +373,22 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		/* Updates */
 		////////////////////////////////////////////
+		else if (name == UpdatePlayer)
+		{
+			msg >> name;
+			if (name == Health)
+			{
+				int health;
+				string player_name;
+				msg >> player_name;
+				msg >> health;
+				Player *player;
+				if (game::pHandler.getPlayer(player_name, &player))
+				{
+					player->getHealthRef().setHealth(health);
+				}
+			}
+		}
 		else if (name == UpdatePlayerPosition)
 		{
 			string name;
@@ -449,6 +486,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			std::string null;
 			msg >> null;
 			player.deserialize(msg);
+			player.updateHandPos();
 			game::pHandler.addPlayer(player);
 			//Log("Player Added - " + player.getName());
 			Log("AddPlayer\n");
@@ -460,9 +498,34 @@ void SimpleNetClient::Do(std::string rMsg)
 			std::string null;
 			msg >> null;
 			player.deserialize(msg);
+			player.updateHandPos();
 			game::pHandler.addLocalPlayer(player);
 			//Log("Local Player Added - " + player.getName());
 			Log("AddPlayerLocal\n");
+		}
+		////////////////////////////////////////////
+
+		/* Entity*/
+		////////////////////////////////////////////
+		else if (name == EntityDamage)
+		{
+			int x;
+			int y;
+			int damage;
+			std::string name;
+			msg >> x
+				>> y
+				>> damage
+				>> name;
+			Entity *entity;
+			if (game::system.getEntityAt(Position(x, y), &entity))
+			{
+				entity->damage(damage, name);
+			}
+		}
+		else if (name == EntityAdd)
+		{
+
 		}
 		////////////////////////////////////////////
 
@@ -474,7 +537,6 @@ void SimpleNetClient::Do(std::string rMsg)
 			wMsg << SendDefault << endl;
 			wMsg << World << endl;
 			wMsg << world << endl;
-			wMsg << "End" << endl;
 			SendLiteral(wMsg.str());
 			Log("GetWorld\n");
 		}
@@ -485,12 +547,14 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		else if (name == SetHost)
 		{
+			msg >> id_;
 			isHost_ = true;
 			isHostChosen_ = true;
 			Log("SetHost\n");
 		}
 		else if (name == SetPlayer)
 		{
+			msg >> id_;
 			isHost_ = false;
 			isHostChosen_ = true;
 			Log("SetPlayer\n");
@@ -508,6 +572,70 @@ void SimpleNetClient::Do(std::string rMsg)
 		{
 			isWaiting_ = false;
 			Log("Start\n");
+		}
+		else if (name == Lobby)
+		{
+			msg >> name;
+			if (name == LobbyAdd)
+			{
+				int id;
+				bool isReady;
+				std::string name;
+				msg >> name;
+				msg >> isReady;
+				msg >> id;
+				game::lobby.AddPlayer(id, name, isReady);
+				Log("Lobby Add\n");
+			}
+			else if (name == LobbyName)
+			{
+				int id;
+				std::string name;
+				msg >> name;
+				msg >> id;
+				game::lobby.PlayerChangeName(id, name);
+				Log("Lobby Name\n");
+			}
+			else if (name == LobbyReady)
+			{
+				int id;
+				msg >> id;
+				game::lobby.PlayerReady(id);
+				Log("Lobby Ready\n");
+			}
+			else if (name == LobbyUnReady)
+			{
+				int id;
+				msg >> id;
+				game::lobby.PlayerUnReady(id);
+				Log("Lobby UnReady\n");
+			}
+			else if (name == LobbyLeave)
+			{
+				std::string name;
+				msg >> name;
+				game::lobby.RemovePlayer(name);
+				Log("Lobby Leave\n");
+			}
+			else if (name == LobbyGetInfo)
+			{
+				int id;
+				msg >> id;
+				std::stringstream nMsg;
+				nMsg << id << End
+					<< Lobby << End
+					<< LobbyAdd << End
+					<< game::pHandler.getLocalPlayer().getName() << End
+					<< game::lobby.isReady() << End
+					<< id_ << End;
+				SendLiteral(nMsg.str());
+				Log("Lobby GetInfo\n");
+			}
+			else if (name == LobbyStart)
+			{
+				game::lobby.Start();
+				Log("Lobby Start\n");
+			}
 		}
 		else
 		{
@@ -657,6 +785,11 @@ void SimpleNetClient::Log(std::string text)
 	file << text << endl;
 	file.close();
 	return;
+}
+
+int SimpleNetClient::getId()
+{
+	return id_;
 }
 
 void SimpleNetClient::addPacket(std::string packet)

@@ -145,6 +145,8 @@ public:
 	Section& getSectionRef(uint16_t sectionIndex);
 	Section getSection(uint16_t sectionIndex);
 
+	bool getSectionRefT(uint16_t sectionIndex, Section** section); // Trys to get the section ref, but can fail if it doesn't exist without crashing
+
 	bool isSectionActivated();
 	int getActivatedSection();
 
@@ -175,8 +177,7 @@ private:
 	bool isSlideUI_;
 
 	InputManager iManager;
-
-	std::thread iManage;
+	InputManager input;
 
 	std::map<uint16_t, Section> sections; // DFNC - Doesn't Follow Naming Convention
 	std::vector<uint16_t> redraws; // DFNC - Doesn't Follow Naming Convention

@@ -16,6 +16,7 @@ public:
 	void setDamage(int damage);
 	void isDestroyed(bool);
 	void setGraphic(char g);
+	void updateOverlay();
 
 	int getDamage();
 

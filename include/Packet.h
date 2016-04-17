@@ -7,9 +7,13 @@
 
 enum PacketNames
 {
-	None, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
+	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
 
 	UpdatePlayerPosition, UpdateTile, UpdateTileChar, UpdateTileColor, UpdateTileHealth, UpdateTileOverlay, UpdateTileClaim,
+
+	UpdatePlayer, Health,
+
+	EntityDamage, EntityAdd,
 
 	DamagePlayer, HealPlayer, KillPlayer,
 
@@ -18,6 +22,8 @@ enum PacketNames
 	WaitingPlayer, Start,
 
 	PlayerConnect,
+
+	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,
 
 	PacketEnd = -255
 };
