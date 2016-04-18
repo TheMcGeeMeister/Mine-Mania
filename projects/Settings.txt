@@ -1,5 +1,0 @@
-Settings
-Font: 1
-FontSize: 28
-FullScreen: 1
-Name: Josh
