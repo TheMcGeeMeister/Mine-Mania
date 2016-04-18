@@ -1,6 +1,7 @@
 #include "..\include\TurretAIComponent.h"
 #include "..\include\BulletAIComponent.h"
 #include "..\include\Bullet.h"
+#include "SoundManager.h"
 #include <Display.h>
 #include <Player.h>
 #include <fstream>
@@ -13,6 +14,7 @@ namespace game
 	extern Player player;
 	extern System system;
 	extern PlayerHandler pHandler;
+	extern SoundManager m_sounds;
 }
 
 
@@ -150,6 +152,8 @@ void TurretAIComponent::shoot(DIRECTION direction)
 	bullet->addKeyWord(KEYWORD_BULLET);
 
 	game::system.addEntity(bullet, "Bullet");
+
+	game::m_sounds.PlaySoundR("TurretShoot");
 }
 
 Position TurretAIComponent::getPosition()

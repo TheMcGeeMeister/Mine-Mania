@@ -2,11 +2,13 @@
 #include <Display.h>
 #include <SimpleNetClient.h>
 #include <Bullet.h>
+#include <Entity.h>
 
 namespace game
 {
 	extern SimpleNetClient server;
 	extern Display game;
+	extern System system;
 }
 
 void SendServerLiteral(std::string msg)
@@ -32,6 +34,30 @@ namespace Common
 	{
 		game::game.cleanOverlays();
 	}
+
+	bool ShootFrom(Position pos, int direction)
+	{
+		Position nPos = pos;
+
+		nPos.go((DIRECTION)direction);
+
+		if (game::game.getTileRefAt(nPos).isWalkable() == true)
+		{
+			if (game::system.entityAt(nPos) == false)
+			{
+				shared_ptr<Bullet> bullet = make_shared<Bullet>();
+				bullet->setDirection((DIRECTION)direction);
+				bullet->setPosition(nPos);
+				bullet->setGraphic(250);
+				bullet->addKeyWord(KEYWORD_BULLET);
+
+				game::system.addEntity(bullet, "Bullet");
+				return true;
+			}
+		}
+		return false;
+	}
+
 	int GetBulletDamage(Entity * entity)
 	{
 		Bullet* bullet = dynamic_cast<Bullet*>(entity);

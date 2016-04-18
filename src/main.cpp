@@ -234,23 +234,6 @@ void LOGIC(Timer& InputCoolDown, Display& game)
     {
 		/* Movement */
 		////////////////////////////////////////////////
-        /*if(GetAsyncKeyState('W'))
-        {
-			game::player.moveHandUp(game);
-            InputCoolDown.StartNewTimer(0.075);
-        }else if(GetAsyncKeyState('S'))
-        {
-			game::player.moveHandDown(game);
-            InputCoolDown.StartNewTimer(0.075);
-        }else if(GetAsyncKeyState('A'))
-        {
-			game::player.moveHandLeft(game);
-            InputCoolDown.StartNewTimer(0.075);
-        }else if(GetAsyncKeyState('D'))
-        {
-			game::player.moveHandRight(game);
-            InputCoolDown.StartNewTimer(0.075);
-        }*/
 		for (int x = 0; x < 3; x++)
 		{
 			if (kbhit())
@@ -267,10 +250,14 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				case 'f':player.switchMode(); InputCoolDown.StartNewTimer(0.075); break;
 				case 'c':player.purchaseTurret(); InputCoolDown.StartNewTimer(0.075); break;
 				case 'v':player.claimOnHand(); InputCoolDown.StartNewTimer(0.075); break;
+				case 'b':player.purchaseBullet(); InputCoolDown.StartNewTimer(0.075); break;
 				case 72:player.mine(DIRECTION_UP); InputCoolDown.StartNewTimer(0.075); break;
 				case 80:player.mine(DIRECTION_DOWN); InputCoolDown.StartNewTimer(0.075); break;
 				case 75:player.mine(DIRECTION_LEFT); InputCoolDown.StartNewTimer(0.075); break;
 				case 77:player.mine(DIRECTION_RIGHT); InputCoolDown.StartNewTimer(0.075); break;
+				case '1':player.switchModeTo(0); break;
+				case '2':player.switchModeTo(1); break;
+				case '3':player.switchModeTo(2); break;
 				default: break;
 				}
 			}
@@ -307,15 +294,7 @@ void updateTileInfo()
 	claimed << tile.getClaimedPercentage() << "%";
 	TileInfo.getSectionRef(3).setVar(1, claimed.str());
 
-	if (tile.hasGold())
-	{
-		TileInfo.getSectionRef(4).isHidden(false);
-		TileInfo.getSectionRef(4).setVar(1, tile.getGold());
-	}
-	else
-	{
-		TileInfo.getSectionRef(4).isHidden(true);
-	}
+	TileInfo.getSectionRef(4).setVar(1, player.getAmmoAmount());
 
 	std::stringstream gold;
 	gold << player.getGoldAmount();
@@ -1116,14 +1095,14 @@ void preGameLoop()
 	UserInterface& TileInfo = game::tileUI;
     TileInfo.addSection("Health:");
     TileInfo.getSectionRef(1).push_backVar("100/100");
-    TileInfo.addSection("Owner:");
+    TileInfo.addSection("Tile Owner:");
     TileInfo.getSectionRef(2).push_backVar(" ");
     TileInfo.addSection("Claimed:");
     TileInfo.getSectionRef(3).push_backVar(" ");
-    TileInfo.addSection("Gold:");
+    TileInfo.addSection("Ammo:");
     TileInfo.getSectionRef(4).push_backVar((int)0);
     TileInfo.addSection("Player Gold:");
-    TileInfo.getSectionRef(5).push_backVar("0");
+    TileInfo.getSectionRef(5).push_backVar(" ");
 	TileInfo.addSection("Mode:");
 	TileInfo.getSectionRef(6).push_backVar("Mining");
 	
@@ -1243,6 +1222,7 @@ void loadSounds()
 	game::m_sounds.AddSound("MetalBreak", "Sounds//MetalBreak.wav");
 	game::m_sounds.AddSound("Notification", "Sounds//Notification.wav");
 	game::m_sounds.AddSound("Ambient", "Sounds//Game.wav");
+	game::m_sounds.AddSound("TurretShoot", "Sounds//TurretShoot.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");

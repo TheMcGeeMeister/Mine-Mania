@@ -1088,9 +1088,9 @@ string Section::operator()()
 				text << " <";
 				switch (iter.second.getVarIndex())
 				{
-				case 1: text << iter.second.getInt();
-				case 2: text << iter.second.getDou();
-				case 3: text << iter.second.getStr();
+				case 1: text << iter.second.getInt(); break;
+				case 2: text << iter.second.getDou(); break;
+				case 3: text << iter.second.getStr(); break;
 				}
 				text << ">";
 			}

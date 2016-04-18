@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <Windows.h>
+#include <Position.h>
 
 class Entity;
 
@@ -18,6 +19,7 @@ void CreateMultiplayerWorld(int player_amount, std::string names[]);
 namespace Common
 {
 	extern void CleanGameOverlay();
+	extern bool ShootFrom(Position pos, int direction);
 	extern int GetBulletDamage(Entity* entity);
 	extern int GetBulletDirection(Entity* entity);
 }

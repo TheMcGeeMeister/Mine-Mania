@@ -23,6 +23,7 @@ class Player : public Entity
         int getManaAmount();
         int getMaxGoldAmount();
         int getMaxManaAmount();
+		int getAmmoAmount();
 		int getHealth();
 		int getMaxHealth();
         string getName();
@@ -42,7 +43,8 @@ class Player : public Entity
         /* Setters */
 		//////////////////////////////////
         void setManaAmount(int amount);
-        void setMaxManaAmount(int amount);
+		void setMaxManaAmount(int amount);
+		void setAmmoAmount(int amount);
         void setName(string name);
 		void setSpawnPos(Position pos);
 		void setHandPos(Position pos); /* Changes variable without changing map */
@@ -72,6 +74,7 @@ class Player : public Entity
 		void forceHandPosition(Position newPos); /*Also updates position on the map*/
 		void claimOnHand();
 		void switchMode();
+		void switchModeTo(int mode);
 		void updateHandPos();
 		void disableMovementFor(int time);
 		void knockbackTo(DIRECTION direction, int amount);
@@ -84,6 +87,7 @@ class Player : public Entity
 		void spawnTurret(Position pos);
 
 		void purchaseTurret();
+		void purchaseBullet();
 		//////////////////////////////////
 
 		void reset();
@@ -123,6 +127,7 @@ class Player : public Entity
         int maxManaAmount_;
 		int handMode_;
 		int mineProgress_;
+		int ammo_;
 
 		HealthComponent health;
 
@@ -143,6 +148,7 @@ class Player : public Entity
 
 		Timer miningStopSound;
 		Timer movementTimer_;
+		Timer shootTimer_;
 
 		void Log(std::string);
 

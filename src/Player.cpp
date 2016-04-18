@@ -17,12 +17,18 @@ namespace game
 	extern SoundManager m_sounds;
 }
 
+enum PLAYER_MODE
+{
+	MODE_PLACING, MODE_MINING_, MODE_SHOOTING,
+};
+
 Player::Player() : UI(23, 5, 50, 30, 1)
 {
     goldAmount_ = 100;
 	maxGoldAmount_ = 10000;
     manaAmount_ = 500;
     maxManaAmount_ = 500;
+	ammo_ = 0;
 	handPos.setX(0);
 	handPos.setY(0);
     name_="None";
@@ -76,6 +82,11 @@ int Player::getMaxManaAmount()
     return maxManaAmount_;
 }
 
+int Player::getAmmoAmount()
+{
+	return ammo_;
+}
+
 int Player::getHealth()
 {
 	return health.getHealth();
@@ -120,6 +131,11 @@ void Player::setMaxManaAmount(int amount)
     {
         manaAmount_=maxManaAmount_;
     }
+}
+
+void Player::setAmmoAmount(int amount)
+{
+	ammo_ = amount;
 }
 
 void Player::setName(string name)
@@ -464,7 +480,7 @@ void Player::mine(DIRECTION direction)
 			}
 		}
 	}
-	else
+	else if(handMode_ == 1)
 	{
 		if (moved_ == true)
 		{
@@ -496,6 +512,22 @@ void Player::mine(DIRECTION direction)
 				}
 				mineProgress_ = 0;
 			}
+		}
+	}
+	else if (handMode_ = 2)
+	{
+		if (ammo_ > 0)
+		{
+			if (shootTimer_.Update() == true)
+			{
+				if (Common::ShootFrom(handPos, direction))
+				{
+					shootTimer_.StartNewTimer(0.5);
+					game::m_sounds.PlaySoundR("TurretShoot");
+					ammo_--;
+				}
+			}
+			
 		}
 	}
 }
@@ -535,10 +567,26 @@ void Player::switchMode()
 		handMode_ = 1;
 		game::tileUI.getSectionRef(6).setVar(1, "Placing");
 	}
+	else if(handMode_ == 1)
+	{
+		handMode_ = 2;
+		game::tileUI.getSectionRef(6).setVar(1, "Weapon");
+	}
 	else
 	{
 		handMode_ = 0;
 		game::tileUI.getSectionRef(6).setVar(1, "Mining");
+	}
+}
+
+void Player::switchModeTo(int mode)
+{
+	handMode_ = mode;
+	switch (mode)
+	{
+	case 0:game::tileUI.getSectionRef(6).setVar(1, "Mining"); break;
+	case 1:game::tileUI.getSectionRef(6).setVar(1, "Placing"); break;
+	case 2:game::tileUI.getSectionRef(6).setVar(1, "Weapon"); break;
 	}
 }
 
@@ -625,6 +673,16 @@ void Player::purchaseTurret()
 		{
 			game::SlideUI.addSlide("Turret Place Failed");
 		}
+	}
+}
+
+void Player::purchaseBullet()
+{
+	if (goldAmount_ >= 100)
+	{
+		ammo_++;
+		goldAmount_ -= 100;
+		game::m_sounds.PlaySoundR("Money");
 	}
 }
 
@@ -743,6 +801,7 @@ void Player::serialize(fstream& file)
 	file << maxGoldAmount_ << endl;
 	file << manaAmount_ << endl;
 	file << maxManaAmount_ << endl;
+	file << ammo_ << endl;
 	file << name_ << endl;
 	file << handPos.getX() << endl;
 	file << handPos.getY() << endl;
@@ -772,6 +831,7 @@ void Player::serialize(stringstream & file)
 	file << maxGoldAmount_ << endl;
 	file << manaAmount_ << endl;
 	file << maxManaAmount_ << endl;
+	file << ammo_ << endl;
 	file << name_ << endl;
 	file << handPos.getX() << endl;
 	file << handPos.getY() << endl;
@@ -790,6 +850,7 @@ void Player::deserialize(fstream& file)
 	file >> maxGoldAmount_;
 	file >> manaAmount_;
 	file >> maxManaAmount_;
+	file >> ammo_;
 	file >> name_;
 	file >> pos_x;
 	file >> pos_y;
@@ -834,6 +895,7 @@ void Player::deserialize(stringstream& file)
 	file >> maxGoldAmount_;
 	file >> manaAmount_;
 	file >> maxManaAmount_;
+	file >> ammo_;
 	file >> name_;
 	file >> pos_x;
 	file >> pos_y;
