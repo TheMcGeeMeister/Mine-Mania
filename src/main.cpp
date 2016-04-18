@@ -921,6 +921,8 @@ void preGameLoop()
 {
 	game::game.loadSettings();
 
+	game::m_sounds.SetVolume((double)game::game.getVolume() / 100);
+
     Timer InputCoolDown;
     Position newPos(1,1);
 	game::SlideUI.initializeSlideUI();

@@ -1420,7 +1420,7 @@ bool Display::loadSettings()
 		file << "FontSize: " << 28 << endl;
 		file << "FullScreen: " << 0 << endl;
 		file << "Name: Player" << endl;
-		file << "Volume: " << 100 << endl;
+		file << "Volume: " << 50 << endl;
 		return false;
 	}
 	else
