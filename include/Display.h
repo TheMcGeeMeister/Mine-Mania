@@ -25,6 +25,7 @@ public:
     void setSizeY(int y);
 	void setFont(int font);
 	void setFontSize(int fontSize);
+	void setVolume(int volume);
 	void isHidden(bool hidden);
 	void isFullScreen(bool is);
 
@@ -75,6 +76,7 @@ public:
 	int getMaxHeight();
 	int getWidth();
 	int getHeight();
+	int getVolume();
 
 	void claimNameChange(string currentName, string newName);
 
@@ -124,6 +126,7 @@ private:
 
 	int font_;
 	int fontSize_;
+	int volume_;
 	bool isFullscreen_;
     //End//
 

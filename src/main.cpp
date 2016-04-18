@@ -648,6 +648,7 @@ void settingsMenu()
 	menu.getSectionRef(3).addVar("");
 	menu.push_isection("Name:");
 	menu.addSection("Volume", true, false);
+	menu.getSectionRef(5).addVar(game::game.getVolume());
 	menu.addSection("Exit", true, false);
 
 	menu.getSectionRef(4).setIVar(game::pHandler.getLocalPlayer().getName());
@@ -657,6 +658,7 @@ void settingsMenu()
 	bool isFullScreen = game::game.isFullScreen();
 	int font = game::game.getFont();
 	int fontSize = game::game.getFontSize();
+	int volume = game::game.getVolume();
 	string fontTxt;
 	if (font == 0) { fontTxt = "Consolas"; }
 	else { fontTxt = "Lucida Console"; }
@@ -690,7 +692,9 @@ void settingsMenu()
 				game::pHandler.getLocalPlayer().setName(menu.getSectionRef(4).getIVar());
 				break;
 			case 5:
-
+				volume == 100 ? volume = 0 : volume++;
+				menu.getSectionRef(5).setVar(1, volume);
+				game::m_sounds.SetVolume((double)volume / 100);
 				break;
 			case 6:
 				exitFlag = true; break;
@@ -703,6 +707,8 @@ void settingsMenu()
 	menu.isHidden(true);
 	game::game.setFont(font);
 	game::game.setFontSize(fontSize);
+	game::game.setVolume(volume);
+	game::m_sounds.SetVolume(volume / 100);
 	Sleep(250);
 }
 

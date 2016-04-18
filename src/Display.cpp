@@ -166,6 +166,11 @@ void Display::setFontSize(int fontSize)
 	}
 }
 
+void Display::setVolume(int volume)
+{
+	volume_ = volume;
+}
+
 void Display::isHidden(bool hidden)
 {
 	isHidden_ = hidden;
@@ -602,6 +607,11 @@ int Display::getWidth()
 int Display::getHeight()
 {
 	return size_y_;
+}
+
+int Display::getVolume()
+{
+	return volume_;
 }
 
 int Display::getMaxWidth()
@@ -1395,7 +1405,8 @@ void Display::saveSettings()
 	     << "Font: " << font_ << endl
 	     << "FontSize: " << fontSize_ << endl
 	     << "FullScreen: " << isFullscreen_ << endl
-	     << "Name: " << game::pHandler.getLocalPlayer().getName() << endl;
+	     << "Name: " << game::pHandler.getLocalPlayer().getName() << endl
+		 << "Volume: " << volume_ << endl;
 }
 
 bool Display::loadSettings()
@@ -1405,10 +1416,11 @@ bool Display::loadSettings()
 	{
 		file.open("Settings.txt", ios::app);
 		file << "Settings" << endl;
-		file << "Font: 0" << endl;
-		file << "FontSize: 28" << endl;
-		file << "FullScreen: 1" << endl;
+		file << "Font: " << 1 << endl;
+		file << "FontSize: " << 28 << endl;
+		file << "FullScreen: " << 0 << endl;
 		file << "Name: Player" << endl;
+		file << "Volume: " << 100 << endl;
 		return false;
 	}
 	else
@@ -1424,6 +1436,8 @@ bool Display::loadSettings()
 		file >> isFullscreen_;
 		file >> none;
 		file >> name;
+		file >> none;
+		file >> volume_;
 		setFontInfo(fontSize_, font_);
 		game::pHandler.getLocalPlayer().setName(name);
 		game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
