@@ -594,6 +594,26 @@ int Display::getFontSize()
 	return fontSize_;
 }
 
+int Display::getWidth()
+{
+	return size_x_;
+}
+
+int Display::getHeight()
+{
+	return size_y_;
+}
+
+int Display::getMaxWidth()
+{
+	return size_x_ + offset_x_;
+}
+
+int Display::getMaxHeight()
+{
+	return size_y_ + offset_y_;
+}
+
 void Display::claimNameChange(string currentName, string newName)
 {
 	for (auto& iter : m_map)

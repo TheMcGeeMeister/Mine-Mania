@@ -71,6 +71,10 @@ public:
 
 	int getFont();
 	int getFontSize();
+	int getMaxWidth();
+	int getMaxHeight();
+	int getWidth();
+	int getHeight();
 
 	void claimNameChange(string currentName, string newName);
 

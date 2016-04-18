@@ -1,4 +1,5 @@
 #include "Position.h"
+#include "Common.h"
 
 using namespace std;
 
@@ -85,20 +86,37 @@ void Position::decrementY(int i)
 void Position::up()
 {
 	if (y_ == 0)
+	{
+		isValid_ = false;
 		return;
+	}
 	else
+	{
 		y_--;
+		return;
+	}
 }
 
 void Position::down()
 {
 	y_++;
+	if (y_ == Common::GetDisplayMaxHeight())
+	{
+		isValid_ = false;
+	}
+	else
+	{
+		return;
+	}
 }
 
 void Position::left()
 {
 	if (x_ == 0)
+	{
+		isValid_ = false;
 		return;
+	}
 	else
 		x_--;
 }
@@ -106,9 +124,17 @@ void Position::left()
 void Position::right()
 {
 	x_++;
+	if (x_ == Common::GetDisplayMaxWidth())
+	{
+		isValid_ = false;
+	}
+	else
+	{
+		return;
+	}
 }
 
-void Position::go(DIRECTION direction)
+bool Position::go(DIRECTION direction)
 {
 	switch (direction)
 	{
@@ -117,9 +143,10 @@ void Position::go(DIRECTION direction)
 	case DIRECTION_LEFT: left(); break;
 	case DIRECTION_RIGHT: right(); break;
 	}
+	return isValid_;
 }
 
-void Position::go(DIRECTION direction, int amount)
+bool Position::go(DIRECTION direction, int amount)
 {
 	switch(direction)
 	{
@@ -128,6 +155,7 @@ void Position::go(DIRECTION direction, int amount)
 	case DIRECTION_LEFT:x_ -= amount; if (x_ < 0) x_ = 0;  break;
 	case DIRECTION_RIGHT:x_ += amount; break;
 	}
+	return isValid_;
 }
 
 bool Position::operator<(const Position& r) const

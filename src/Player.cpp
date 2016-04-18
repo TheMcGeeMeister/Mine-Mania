@@ -520,7 +520,7 @@ void Player::mine(DIRECTION direction)
 		{
 			if (shootTimer_.Update() == true)
 			{
-				if (Common::ShootFrom(handPos, direction))
+				if (Common::ShootFrom(handPos, direction, 50))
 				{
 					shootTimer_.StartNewTimer(0.5);
 					game::m_sounds.PlaySoundR("TurretShoot");

@@ -58,6 +58,30 @@ namespace Common
 		return false;
 	}
 
+	bool ShootFrom(Position pos, int direction, int bullet_range)
+	{
+		Position nPos = pos;
+
+		nPos.go((DIRECTION)direction);
+
+		if (game::game.getTileRefAt(nPos).isWalkable() == true)
+		{
+			if (game::system.entityAt(nPos) == false)
+			{
+				shared_ptr<Bullet> bullet = make_shared<Bullet>();
+				bullet->setDirection((DIRECTION)direction);
+				bullet->setPosition(nPos);
+				bullet->setGraphic(250);
+				bullet->setBulletRange(bullet_range);
+				bullet->addKeyWord(KEYWORD_BULLET);
+
+				game::system.addEntity(bullet, "Bullet");
+				return true;
+			}
+		}
+		return false;
+	}
+
 	int GetBulletDamage(Entity * entity)
 	{
 		Bullet* bullet = dynamic_cast<Bullet*>(entity);
@@ -75,5 +99,13 @@ namespace Common
 			return 0;
 		}
 		return bullet->getDirection();
+	}
+	int GetDisplayMaxWidth()
+	{
+		return game::game.getMaxWidth();
+	}
+	int GetDisplayMaxHeight()
+	{
+		return game::game.getMaxHeight();
 	}
 }

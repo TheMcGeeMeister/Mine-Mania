@@ -20,6 +20,9 @@ namespace Common
 {
 	extern void CleanGameOverlay();
 	extern bool ShootFrom(Position pos, int direction);
+	extern bool ShootFrom(Position pos, int direction, int bullet_range);
 	extern int GetBulletDamage(Entity* entity);
 	extern int GetBulletDirection(Entity* entity);
+	extern int GetDisplayMaxWidth();
+	extern int GetDisplayMaxHeight();
 }

@@ -133,29 +133,6 @@ void BulletAIComponent::update()
 	if (isDestroyed_ == true) return;
 	if (movementCoolDown.Update() == true)
 	{
-		/* Check if a player hit the bullet */
-		///////////////////////////////////////////
-		if (game::pHandler.playerAt(position) == true)
-		{
-			Player *player = nullptr;
-			if (game::pHandler.getPlayerAt(position, &player) == true)
-			{
-				if (player == nullptr) return;
-				player->knockbackTo(direction, 1);
-				player->disableMovementFor(0.500);
-				player->damage(damage);
-				isDestroyed(true);
-				clean();
-				game::m_sounds.PlaySoundR("Bullet");
-				std::stringstream msg;
-				msg << SendDefault << End << Sound << End << "Bullet" << End;
-				SendServerLiteral(msg.str());
-				return;
-			}
-		}
-		///////////////////////////////////////////
-
-
 		/* Bullet Moved too far */
 		///////////////////////////////////////////
 		if (rangeIndex == range)
@@ -168,7 +145,12 @@ void BulletAIComponent::update()
 
 
 		Position nPos = position; // New Position 
-		nPos.go(direction);
+		if (nPos.go(direction) == false)
+		{
+			isDestroyed(true);
+			clean();
+			return;
+		}
 		
 		game::game.getTileRefAt(position).removeOverlay();
 		

@@ -23,6 +23,11 @@ void Bullet::setDamage(double damage)
 	this->damage_ = damage;
 }
 
+void Bullet::setBulletRange(int range)
+{
+	ai.setRange(range);
+}
+
 double Bullet::getDamage()
 {
 	return damage_;

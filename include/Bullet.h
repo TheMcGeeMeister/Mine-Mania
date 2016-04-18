@@ -10,6 +10,7 @@ public:
 	~Bullet();
 
 	void setDamage(double damage);
+	void setBulletRange(int range);
 	
 	double getDamage();
 
