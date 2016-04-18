@@ -1069,6 +1069,7 @@ void loadSounds()
 	game::m_sounds.AddSound("Notification", "Sounds//Notification.wav");
 	game::m_sounds.AddSound("Ambient", "Sounds//Game.wav");
 	game::m_sounds.AddSound("TurretShoot", "Sounds//TurretShoot.wav");
+	game::m_sounds.AddSound("NoAmmo", "Sounds//NoAmmo.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");

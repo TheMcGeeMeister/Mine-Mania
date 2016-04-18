@@ -529,6 +529,10 @@ void Player::mine(DIRECTION direction)
 			}
 			
 		}
+		else
+		{
+			game::m_sounds.PlaySoundR("NoAmmo");
+		}
 	}
 }
 
