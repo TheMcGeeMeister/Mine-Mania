@@ -20,6 +20,8 @@ A: Left
 
 D: Right
 
+Enter: Continue(In Menu's)
+
 1: Switch Mode to Mining
 
 2: Switch Mode to Placing
