@@ -11,13 +11,13 @@
 #include <sstream>
 #include <fstream>
 #include <Display.h>
-#include <UserInterface.h>
-#include <PlayerHandler.h>
 #include <Lobby.h>
 #include <Bullet.h>
 #include <Entity.h>
+#include <Packet.h>
+#include <UserInterface.h>
+#include <PlayerHandler.h>
 #include <SoundManager.h>
-#include "..\Mine-Mania\include\Packet.h"
 
 namespace game
 {

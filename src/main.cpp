@@ -96,7 +96,6 @@ bool isExitGame(Display& game)
 			game::ServerUI.isHidden(false);
 			game::tileUI.isHidden(false);
 			game::SlideUI.isHidden(false);
-			//game::pHandler.getLocalPlayer().getUIRef().isHidden(false);
 			game::pHandler.getLocalPlayer().updateMiningUI();
 			clearInput();
 		}
