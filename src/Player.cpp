@@ -34,7 +34,9 @@ Player::Player() : UI(23, 5, 50, 30, 1)
     name_="None";
 	moved_ = true;
 	mined_ = false;
-	isSoundPlaying_ = false;
+	isSoundPlayingM_ = false;
+
+	turret_sound.SetSound("TurretPlayerHit");
 
 	handMode_ = 0;
 
@@ -175,9 +177,9 @@ void Player::damage(int amount, string name)
 	}
 
 	stringstream msg;
-	msg << DamagePlayer << End
-		<< name_ << End
-		<< amount << End;
+	msg << DamagePlayer << EndLine
+		<< name_ << EndLine
+		<< amount << EndLine;
 	game::game.addPacket(msg.str());
 }
 
@@ -203,9 +205,9 @@ void Player::heal(int amount)
 	game::SlideUI.addSlide(healthSlide.str());
 
 	stringstream msg;
-	msg << HealPlayer << End
-		<< name_ << End
-		<< amount << End;
+	msg << HealPlayer << EndLine
+		<< name_ << EndLine
+		<< amount << EndLine;
 	game::game.addPacket(msg.str());
 }
 void Player::healS(int amount)
@@ -240,7 +242,7 @@ void Player::moveHandUp(Display& game)
 			entity->kill();
 			game::m_sounds.PlaySoundR("Bullet");
 			std::stringstream msg;
-			msg << SendDefault << End << Sound << End << "Bullet" << End;
+			msg << SendDefault << EndLine  << Sound << EndLine  << "Bullet" << EndLine ;
 		}
 		return;
 	}
@@ -279,7 +281,7 @@ void Player::moveHandDown(Display& game)
 			entity->kill();
 			game::m_sounds.PlaySoundR("Bullet");
 			std::stringstream msg;
-			msg << SendDefault << End << Sound << End << "Bullet" << End;
+			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
 		}
 		return;
 	}
@@ -318,7 +320,7 @@ void Player::moveHandLeft(Display& game)
 			entity->kill();
 			game::m_sounds.PlaySoundR("Bullet");
 			std::stringstream msg;
-			msg << SendDefault << End << Sound << End << "Bullet" << End;
+			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
 		}
 		return;
 	}
@@ -357,7 +359,7 @@ void Player::moveHandRight(Display& game)
 			entity->kill();
 			game::m_sounds.PlaySoundR("Bullet");
 			std::stringstream msg;
-			msg << SendDefault << End << Sound << End << "Bullet" << End;
+			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
 		}
 		return;
 	}
@@ -451,6 +453,7 @@ void Player::mine(DIRECTION direction)
 			if (game::system.getEntityAt(newPos, &entity))
 			{
 				entity->damage(25, name_);
+				turret_sound.SetTimer(0.200);
 			}
 		}
 		else
@@ -466,17 +469,17 @@ void Player::mine(DIRECTION direction)
 			moved_ = false;
 			if (game::game.getTileRefAt(newPos).isWall() == true)
 			{
-				if (isSoundPlaying_ == false)
+				if (isSoundPlayingM_ == false)
 				{
 					game::m_sounds.ResetSound("Mining");
 					game::m_sounds.PlaySound("Mining");
-					isSoundPlaying_ = true;
+					isSoundPlayingM_ = true;
 					miningStopSound.StartNewTimer(0.200);
 				}
 			}
 			else
 			{
-				isSoundPlaying_ = false;
+				isSoundPlayingM_ = false;
 			}
 		}
 	}
@@ -670,6 +673,7 @@ void Player::purchaseTurret()
 			turret->setRange(8);
 			turret->setOwner("Name");
 			game::system.addEntity(turret, "Turret");
+			Common::SendTurret(turret.get());
 			goldAmount_ -= 1000;
 			game::m_sounds.PlaySoundR("Money");
 		}
@@ -925,11 +929,12 @@ void Player::update()
 			<< health.getHealth() << std::endl;
 		game::game.addPacket(msg.str());
 	}
-	if (miningStopSound.Update() == true && isSoundPlaying_ == true)
+	if (miningStopSound.Update() == true && isSoundPlayingM_ == true)
 	{
 		game::m_sounds.StopSound("Mining");
-		isSoundPlaying_ = false;
+		isSoundPlayingM_ = false;
 	}
+	turret_sound.Update();
 }
 
 bool Player::hasComponent(int id)
@@ -954,8 +959,8 @@ void Player::kill()
 	forceHandPosition(spawnPos, game::game);
 
 	stringstream msg;
-	msg << KillPlayer << End
-		<< name_ << End;
+	msg << KillPlayer << EndLine
+		<< name_ << EndLine;
 	game::game.addPacket(msg.str());
 }
 
@@ -1014,7 +1019,7 @@ Player CreatePlayerAndSendAt(Position pos, std::string name, list<int> toSend) /
 	std::stringstream msg;
 	for (auto& iter : toSend)
 	{
-		msg << iter << End << AddPlayer << End;
+		msg << iter << EndLine << AddPlayer << EndLine;
 		NewPlayer.serialize(msg);
 		SendServerLiteral(msg.str());
 		msg.str(string());

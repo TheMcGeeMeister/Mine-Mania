@@ -82,6 +82,27 @@ std::string Turret::getOwner()
 	return owner;
 }
 
+void Turret::serialize(std::stringstream& file)
+{
+	file << LOAD::L_Turret << std::endl
+		<< owner << std::endl
+		<< (int)graphic << std::endl
+		<< isDestroyed_ << std::endl;
+	ai.serialize(file);
+	health.serialize(file);
+}
+
+void Turret::deserialize(std::stringstream& file)
+{
+	int graphic_;
+	file >> owner
+		>> graphic_
+		>> isDestroyed_;
+	ai.deserialize(file);
+	health.deserialize(file);
+	graphic = graphic_;
+}
+
 void Turret::serialize(fstream & file)
 {
 	file << LOAD::L_Turret << std::endl
@@ -151,7 +172,7 @@ void Turret::damage(int amount, string name)
 	else
 	{
 		std::stringstream msg;
-		msg << SendDefault << End << EntityDamage << ai.getPosition().serializeR() << amount << End << name << End;
+		msg << SendDefault << EndLine  << EntityDamage << ai.getPosition().serializeR() << amount << EndLine  << name << EndLine ;
 		SendServerLiteral(msg.str());
 	}
 }

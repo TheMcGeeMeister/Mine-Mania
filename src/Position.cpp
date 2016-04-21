@@ -1,5 +1,8 @@
 #include "Position.h"
 #include "Common.h"
+#include <sstream>
+
+#define EndLine "\n"
 
 using namespace std;
 
@@ -202,11 +205,9 @@ bool Position::operator==(const Position & pos)
 
 std::string Position::serializeR()
 {
-	std::string msg;
-	msg = x_;
-	msg += "\n";
-	msg += y_;
-	msg += "\n";
+	std::stringstream msg;
+	msg << x_ << EndLine << y_ << EndLine;
+	return msg.str();
 }
 
 std::pair<int, int> Position::getPair()

@@ -28,12 +28,15 @@ public:
 	Position getPosition();
 
 	void serialize(fstream& file);
+	void serialize(std::stringstream& file);
 	void deserialize(fstream& file);
+	void deserialize(std::stringstream& file);
 
 	virtual void update();
 private:
 	Timer movementCoolDown;
 	double movementCoolDownTime;
+	double realMovementCoolDownTime;
 	DIRECTION direction;
 	Position position;
 	int range;

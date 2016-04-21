@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 
-#define End "\n"
+#define EndLine "\n"
 
 enum PacketNames
 {
@@ -13,7 +13,9 @@ enum PacketNames
 
 	UpdatePlayer, Health,
 
-	EntityDamage, EntityAdd,
+	EntityDamage, EntityKill, EntityUpdatePosition,
+	
+	EntityAdd, EBullet, ETurret,
 
 	DamagePlayer, HealPlayer, KillPlayer,
 

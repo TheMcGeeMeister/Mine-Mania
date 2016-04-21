@@ -2,7 +2,11 @@
 #include <Display.h>
 #include <SimpleNetClient.h>
 #include <Bullet.h>
+#include <Turret.h>
 #include <Entity.h>
+#include <Packet.h>
+
+#define EndLine "\n"
 
 namespace game
 {
@@ -35,6 +39,20 @@ namespace Common
 		game::game.cleanOverlays();
 	}
 
+	void SendBullet(Bullet* bullet)
+	{
+		std::stringstream msg;
+		msg << SendDefault << EndLine << EntityAdd << EndLine << EBullet << EndLine; bullet->serialize(msg);
+		game::server.SendLiteral(msg.str());
+	}
+
+	void SendTurret(Turret* turret)
+	{
+		std::stringstream msg;
+		msg << SendDefault << EndLine << EntityAdd << EndLine << ETurret << EndLine; turret->serialize(msg);
+		game::server.SendLiteral(msg.str());
+	}
+
 	bool ShootFrom(Position pos, int direction)
 	{
 		Position nPos = pos;
@@ -52,6 +70,8 @@ namespace Common
 				bullet->addKeyWord(KEYWORD_BULLET);
 
 				game::system.addEntity(bullet, "Bullet");
+
+				SendBullet(bullet.get());
 				return true;
 			}
 		}

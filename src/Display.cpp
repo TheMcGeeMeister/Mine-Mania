@@ -724,19 +724,17 @@ void Display::saveWorld(string filename)
 
 string Display::getWorld()
 {
-	// DEBUG
-	////////////////
 	if (isLoaded_ == false)
 	{
-		loadWorld();
+		return string((char*)LOAD::END);
 	}
-	////////////////
+
 	stringstream world;
 	for (auto& iter : m_map)
 	{
 		world << iter.second.serialize(true);
 	}
-	world << LOAD::END << End;
+	world << LOAD::END << EndLine ;
 	return world.str();
 }
 
@@ -760,7 +758,7 @@ void Display::loadWorld(string filename)
 	int text;
 	file >> text;
 
-	while (text != LOAD::END)
+	while (text != LOAD::END )
 	{
 		if (text == LOAD::L_Tile)
 		{
@@ -1185,34 +1183,6 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 			}
 		}
 	}
-	/*Player other;
-	other.setName(pName);
-	other.setSpawnPos(Position(74, 28));
-
-	game::pHandler.getLocalPlayer().setName(hName);
-	game::pHandler.getLocalPlayer().setSpawnPos(Position(1, 0));
-
-	/* Host 
-	startPos(0, 1);
-	core.setPos(Position(0, 0));
-	stoneFloor.setPos(Position(0, 1));
-	core.forceClaim(hName);
-	stoneFloor.forceClaim(hName);
-	m_map[startPos] = stoneFloor;
-	m_map[corePos] = core;
-	game::pHandler.getLocalPlayer().forceHandPosition(Position(0, 1), *this);
-	game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
-
-	/* Other 
-	core.setPos(Position(74, 29));
-	stoneFloor.setPos(Position(74, 28));
-	core.forceClaim(pName);
-	stoneFloor.forceClaim(pName);
-	m_map[Position(74, 28)] = stoneFloor;
-	m_map[Position(74, 29)] = core;
-
-	other.forceHandPosition(Position(74, 28), *this);
-	game::pHandler.addPlayer(other);*/
 	std::stringstream msg;
 
 	Core pCore;
@@ -1227,8 +1197,8 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	m_map[Position(0, 0)] = core;
 	m_map[Position(0, 1)] = stoneFloor;
 	game::pHandler.addLocalPlayer(host);
-	msg << SendDefault << End
-		<< AddPlayer << End;
+	msg << SendDefault << EndLine 
+		<< AddPlayer << EndLine ;
 	host.serialize(msg);
 	SendServerLiteral(msg.str());
 	msg.str(string());
@@ -1289,26 +1259,26 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	{
 	case 2:{
 		std::stringstream msg;
-		msg << SendDefault << End << AddPlayerLocal << End; p2.serialize(msg); SendServerLiteral(msg.str());
+		msg << SendDefault << EndLine  << AddPlayerLocal << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str());
 		break;}
 	case 3:{
 		std::stringstream msg;
-		msg << 1 << End << AddPlayerLocal << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 1 << End << AddPlayer << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << End << AddPlayerLocal << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << End << AddPlayer << End; p2.serialize(msg); SendServerLiteral(msg.str());
+		msg << 1 << EndLine  << AddPlayerLocal << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 1 << EndLine  << AddPlayer << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << EndLine  << AddPlayerLocal << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << EndLine  << AddPlayer << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str());
 		break;}
 	case 4:{
 		std::stringstream msg;
-		msg << 1 << End << AddPlayerLocal << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 1 << End << AddPlayer << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 1 << End << AddPlayer << End; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << End << AddPlayerLocal << End; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << End << AddPlayer << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << End << AddPlayer << End; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 3 << End << AddPlayerLocal << End; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 3 << End << AddPlayer << End; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 3 << End << AddPlayer << End; p3.serialize(msg); SendServerLiteral(msg.str());
+		msg << 1 << EndLine  << AddPlayerLocal << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 1 << EndLine  << AddPlayer << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 1 << EndLine  << AddPlayer << EndLine ; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << EndLine  << AddPlayerLocal << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << EndLine  << AddPlayer << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 2 << EndLine  << AddPlayer << EndLine ; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 3 << EndLine  << AddPlayerLocal << EndLine ; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 3 << EndLine  << AddPlayer << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
+		msg << 3 << EndLine  << AddPlayer << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str());
 		break;}
 	}
 

@@ -4,6 +4,8 @@
 #include <Position.h>
 
 class Entity;
+class Turret;
+class Bullet;
 
 enum COLOR
 {
@@ -19,6 +21,8 @@ void CreateMultiplayerWorld(int player_amount, std::string names[]);
 namespace Common
 {
 	extern void CleanGameOverlay();
+	extern void SendBullet(Bullet* bullet);
+	extern void SendTurret(Turret* turret);
 	extern bool ShootFrom(Position pos, int direction);
 	extern bool ShootFrom(Position pos, int direction, int bullet_range);
 	extern int GetBulletDamage(Entity* entity);

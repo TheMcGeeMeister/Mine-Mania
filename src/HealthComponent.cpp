@@ -8,6 +8,7 @@ HealthComponent::HealthComponent()
 	maxHealth_ = 100;
 	healthRegen_ = 1;
 	isRegenEnabled_ = true;
+	isDead_ = false;
 }
 
 

@@ -16,6 +16,7 @@ namespace game
 BulletAIComponent::BulletAIComponent()
 {
 	movementCoolDownTime = 0.100;
+	realMovementCoolDownTime = movementCoolDownTime;
 	range = 10;
 	rangeIndex = 0;
 	damage = 10;
@@ -33,6 +34,14 @@ BulletAIComponent::~BulletAIComponent()
 void BulletAIComponent::setDirection(DIRECTION direction)
 {
 	this->direction = direction;
+	if (direction == DIRECTION_LEFT | DIRECTION_RIGHT)
+	{
+		realMovementCoolDownTime = movementCoolDownTime / 2;
+	}
+	else
+	{
+		realMovementCoolDownTime = movementCoolDownTime;
+	}
 }
 
 void BulletAIComponent::setPosition(Position position)
@@ -108,9 +117,45 @@ void BulletAIComponent::serialize(fstream & file)
 		<< isDestroyed_ << std::endl
 		<< isCleaned_ << std::endl
 		<< (int)graphic_ << std::endl;
+
+	realMovementCoolDownTime = movementCoolDownTime / 2;
+}
+
+void BulletAIComponent::serialize(std::stringstream & file)
+{
+	file << movementCoolDownTime << std::endl
+		<< direction << std::endl
+		<< position.getX() << std::endl
+		<< position.getY() << std::endl
+		<< range << std::endl
+		<< rangeIndex << std::endl
+		<< damage << std::endl
+		<< isDestroyed_ << std::endl
+		<< isCleaned_ << std::endl
+		<< (int)graphic_ << std::endl;
+
+	realMovementCoolDownTime = movementCoolDownTime / 2;
 }
 
 void BulletAIComponent::deserialize(fstream & file)
+{
+	int direction_;
+	int graphic;
+	file >> movementCoolDownTime
+		>> direction_
+		>> position.getRefX()
+		>> position.getRefY()
+		>> range
+		>> rangeIndex
+		>> damage
+		>> isDestroyed_
+		>> isCleaned_
+		>> graphic;
+	graphic_ = graphic;
+	direction = (DIRECTION)direction_;
+}
+
+void BulletAIComponent::deserialize(std::stringstream & file)
 {
 	int direction_;
 	int graphic;
@@ -176,7 +221,7 @@ void BulletAIComponent::update()
 				player->damage(damage);
 				game::m_sounds.PlaySoundR("Bullet");
 				std::stringstream msg;
-				msg << SendDefault << End << Sound << End << "Bullet" << End;
+				msg << SendDefault << EndLine  << Sound << EndLine  << "Bullet" << EndLine;
 				isDestroyed(true);
 				clean();
 				return;
@@ -198,9 +243,15 @@ void BulletAIComponent::update()
 
 		tile.updateOverlay(true, graphic_);
 
+		std::stringstream msg;
+
+		msg << SendDefault << EndLine << EntityUpdatePosition << EndLine << position.serializeR() << nPos.serializeR();
+
+		SendServerLiteral(msg.str());
+
 		position = nPos;
 
 		rangeIndex++;
-		movementCoolDown.StartNewTimer(movementCoolDownTime);
+		movementCoolDown.StartNewTimer(realMovementCoolDownTime);
 	}
 }

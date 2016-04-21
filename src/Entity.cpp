@@ -1,9 +1,10 @@
 #include "..\include\Entity.h"
 #include "LoadEnums.h"
+#include "Packet.h"
 #include "Common.h"
 #include <list>
 #include <fstream>
-
+#include <sstream>
 
 
 Entity::Entity()
@@ -73,6 +74,7 @@ bool Entity::isKilled()
 System::System()
 {
 	id_index = 0;
+	updateServer_ = false;
 }
 
 System::~System()
@@ -84,25 +86,58 @@ System::~System()
 void System::update()
 {
 	std::list<int> d_queue;
-	if (m_system.empty() == false)
+	if (updateServer_ == false)
 	{
-		for (auto& iter : m_system)
+		if (m_system.empty() == false)
 		{
-			if (iter.second->isSetToUpdate())
+			for (auto& iter : m_system)
 			{
-				if (iter.second->isKilled() == true)
+				if (iter.second->isSetToUpdate())
 				{
-					d_queue.push_back(iter.first);
-					/* Debug */
-					/////////////////////////////////
-					std::fstream file("Logs\\Log.txt", std::ios::app);
-					file << "System: Entity Deleted ID:" << iter.first << std::endl;
-					/////////////////////////////////
-					continue;
+					if (iter.second->isKilled() == true)
+					{
+						d_queue.push_back(iter.first);
+						/* Debug */
+						/////////////////////////////////
+						std::fstream file("Logs\\Log.txt", std::ios::app);
+						file << "System: Entity Deleted ID:" << iter.first << std::endl;
+						/////////////////////////////////
+						continue;
+					}
+					else
+					{
+						iter.second->update();
+					}
 				}
-				else
+			}
+		}
+	}
+	else
+	{
+		if (m_system.empty() == false)
+		{
+			std::stringstream msg;
+			for (auto& iter : m_system)
+			{
+				if (iter.second->isSetToUpdate())
 				{
-					iter.second->update();
+					if (iter.second->isKilled() == true)
+					{
+						d_queue.push_back(iter.first);
+						/* Debug */
+						/////////////////////////////////
+						std::fstream file("Logs\\Log.txt", std::ios::app);
+						file << "System: Entity Deleted ID:" << iter.first << std::endl;
+						/////////////////////////////////
+						msg << SendDefault << EndLine  << EntityKill << EndLine  << iter.second->getPos().serializeR();
+						SendServerLiteral(msg.str());
+						msg.str(std::string());
+						continue;
+					}
+					else
+					{
+						iter.second->update();
+					}
 				}
 			}
 		}
@@ -112,6 +147,11 @@ void System::update()
 	{
 		m_system.erase(iter);
 	}
+}
+
+void System::setUpdateServer(bool serverUpdate)
+{
+	updateServer_ = serverUpdate;
 }
 
 void System::cleanAndUpdateOverlays() // Disables All Overlays, then calls on the entity's to update them

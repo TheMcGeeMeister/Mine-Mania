@@ -14,6 +14,7 @@
 #include <UserInterface.h>
 #include <PlayerHandler.h>
 #include <Lobby.h>
+#include <Bullet.h>
 #include <Entity.h>
 #include <SoundManager.h>
 #include "..\Mine-Mania\include\Packet.h"
@@ -525,7 +526,25 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		else if (name == EntityAdd)
 		{
-
+			msg >> name;
+			if (name == EBullet)
+			{
+				shared_ptr<Bullet> bullet = make_shared<Bullet>();
+				int none;
+				msg >> none;
+				bullet->deserialize(msg);
+				bullet->setToNoUpdate();
+				game::system.addEntity(bullet);
+			}
+			else if (name == ETurret)
+			{
+				shared_ptr<Turret> turret = make_shared<Turret>();
+				int none;
+				msg >> none;
+				turret->deserialize(msg);
+				turret->setToNoUpdate();
+				game::system.addEntity(turret);
+			}
 		}
 		////////////////////////////////////////////
 
@@ -622,12 +641,12 @@ void SimpleNetClient::Do(std::string rMsg)
 				int id;
 				msg >> id;
 				std::stringstream nMsg;
-				nMsg << id << End
-					<< Lobby << End
-					<< LobbyAdd << End
-					<< game::pHandler.getLocalPlayer().getName() << End
-					<< game::lobby.isReady() << End
-					<< id_ << End;
+				nMsg << id << EndLine 
+					<< Lobby << EndLine 
+					<< LobbyAdd << EndLine 
+					<< game::pHandler.getLocalPlayer().getName() << EndLine 
+					<< game::lobby.isReady() << EndLine 
+					<< id_ << EndLine ;
 				SendLiteral(nMsg.str());
 				Log("Lobby GetInfo\n");
 			}

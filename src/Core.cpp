@@ -68,8 +68,8 @@ void Core::clean()
 
 void Core::serialize(std::fstream & file)
 {
-	file << (int)graphic_ << End
-		<< isDead_ << End;
+	file << (int)graphic_ << EndLine 
+		<< isDead_ << EndLine ;
 	health_.serialize(file);
 }
 
@@ -95,7 +95,7 @@ void Core::damage(int damage, std::string name)
 	else
 	{
 		std::stringstream msg;
-		msg << SendDefault << End << EntityDamage << pos_.serializeR() << damage << End << name << End;
+		msg << SendDefault << EndLine  << EntityDamage << pos_.serializeR() << damage << EndLine  << name << EndLine ;
 		SendServerLiteral(msg.str());
 	}
 }

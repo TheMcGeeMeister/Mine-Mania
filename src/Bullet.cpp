@@ -1,4 +1,5 @@
 #include "..\include\Bullet.h"
+#include "LoadEnums.h"
 #include <fstream>
 
 Bullet::Bullet()
@@ -16,6 +17,7 @@ Bullet::Bullet(Position sPos, double damage, DIRECTION direction)
 
 Bullet::~Bullet()
 {
+
 }
 
 void Bullet::setDamage(double damage)
@@ -53,9 +55,22 @@ DIRECTION Bullet::getDirection()
 	return ai.getDirection();
 }
 
+void Bullet::serialize(std::stringstream & file)
+{
+	file << L_Bullet << std::endl
+		<< damage_ << std::endl;
+	ai.serialize(file);
+}
+
+void Bullet::deserialize(std::stringstream & file)
+{
+	file >> damage_;
+	ai.deserialize(file);
+}
+
 void Bullet::serialize(fstream & file)
 {
-	file << "Bullet" << std::endl
+	file << L_Bullet << std::endl
 		<< damage_ << std::endl;
 	ai.serialize(file);
 }

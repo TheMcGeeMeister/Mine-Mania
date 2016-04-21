@@ -5,6 +5,7 @@
 #include <Position.h>
 #include <UserInterface.h>
 #include <HealthComponent.h>
+#include <SoundPlayer.h>
 
 using namespace std;
 
@@ -130,11 +131,12 @@ class Player : public Entity
 		int ammo_;
 
 		HealthComponent health;
+		SoundPlayer turret_sound;
 
 		bool moved_;
 		bool mined_;
 		bool isMining_;
-		bool isSoundPlaying_;
+		bool isSoundPlayingM_; // Mining Sound Playing
 		bool isDead_;
 		bool isLocal_;
 

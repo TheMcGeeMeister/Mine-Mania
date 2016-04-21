@@ -1,25 +1,25 @@
 #include <iostream>
-#include "Display.h"
 #include <random>
-#include <time.h>
-#include <Timer.h>
-#include <sstream>
-#include <TileChangeManager.h>
-#include <RegenManager.h>
-#include <TileEnums.h>
-#include <Player.h>
-#include <Tile.h>
 #include <thread>
-#include <UserInterface.h>
-#include <PositionVariables.h>
 #include <fstream>
+#include <sstream>
 #include <conio.h>
-#include <SimpleNetClient.h>
-#include <PlayerHandler.h>
-#include <Wave.h>
-#include <SoundManager.h>
-#include <Lobby.h>
-#include "..\include\game.h"
+#include <time.h>
+#include <game.h>
+#include <Timer.h> // Timer utility class
+#include <Player.h> // Player Class
+#include <Tile.h> // Tile Class
+#include <Lobby.h> // Multiplayer Lobby Class
+#include <Wave.h> // Sound Class
+#include <Display.h> // Main Class For Display, Loading/Saving
+#include <TileEnums.h> // Tile Colors, Graphics..etc..
+#include <RegenManager.h> // Idk if this is even used but it was used for handling regen
+#include <SoundManager.h> // Sound Mananger Class
+#include <UserInterface.h> // UI used by all selections, and menus
+#include <PlayerHandler.h> // Updates all the players
+#include <SimpleNetClient.h> // Server class
+#include <PositionVariables.h> // Holds on size, and offset
+#include <TileChangeManager.h> // Updates the Display with changes
 
 #define DEFAULT_CLEAR_WIDTH 100
 #define DEFAULT_CLEAR_HEIGHT 36
@@ -33,7 +33,7 @@ namespace game
 	System system;
     TileChangeManager TileHandler;
     RegenManager RegenHandler;
-	PlayerHandler pHandler; // Player Handler
+	PlayerHandler pHandler;
 	Player enemy;
 	Display game;
 	UserInterface tileUI(30, 8, 0, 30, 1);
@@ -307,8 +307,8 @@ void sendHostInfo()
 {
 	game::game.newWorldMulti();
 	std::stringstream msg;
-	msg << SendDefault << End
-		<< World << End
+	msg << SendDefault << EndLine 
+		<< World << EndLine 
 		<< game::game.getWorld();
 	game::server.SendLiteral(msg.str());
 	msg.str(string());
@@ -318,7 +318,7 @@ void sendHostInfo()
 	Player* other;
 	if (game::pHandler.getPlayer("Other", &other) == true)
 	{
-		msg << SendDefault << End << AddPlayerLocal << End;
+		msg << SendDefault << EndLine  << AddPlayerLocal << EndLine ;
 		other->serialize(msg);
 		game::Log("///////////////////////\n" + msg.str() + "///////////////////////");
 		game::server.SendLiteral(msg.str());
@@ -333,7 +333,7 @@ void sendHostInfo()
 	msg.str(string());
 
 	Player& player = game::pHandler.getLocalPlayer();
-	msg << SendDefault << End << AddPlayer << End;
+	msg << SendDefault << EndLine  << AddPlayer << EndLine ;
 	player.serialize(msg);
 	game::server.SendLiteral(msg.str());
 
@@ -343,7 +343,7 @@ void sendHostInfo()
 
 	msg.str(string());
 
-	msg << SendDefault << End << Start << End;
+	msg << SendDefault << EndLine  << Start << EndLine ;
 	game::server.SendLiteral(msg.str());
 
 	game::Log("Sent: Start");
@@ -399,7 +399,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 		/*if (game::server.isHost() == false)
 		{
 			std::stringstream msg;
-			msg << SendDefault << End << PlayerConnect << End;
+			msg << SendDefault << EndLine  << PlayerConnect << EndLine ;
 			game::server.SendLiteral(msg.str());
 			game::Log("Sent: PlayerConnect\n");
 		}
@@ -415,8 +415,8 @@ void connectMenu(thread& sThread, bool& threadStarted)
 		{
 			game::game.newWorldMulti();
 			std::stringstream msg;
-			msg << SendDefault << End
-				<< World << End
+			msg << SendDefault << EndLine 
+				<< World << EndLine 
 				<< game::game.getWorld();
 			game::server.SendLiteral(msg.str());
 			msg.str(string());
@@ -426,7 +426,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			Player* other;
 			if (game::pHandler.getPlayer("Other", &other) == true)
 			{
-				msg << SendDefault << End << AddPlayerLocal << End;
+				msg << SendDefault << EndLine  << AddPlayerLocal << EndLine ;
 				other->serialize(msg);
 				game::Log("///////////////////////\n" + msg.str() + "///////////////////////");
 				game::server.SendLiteral(msg.str());
@@ -441,7 +441,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			msg.str(string());
 
 			Player& player = game::pHandler.getLocalPlayer();
-			msg << SendDefault << End << AddPlayer << End;
+			msg << SendDefault << EndLine  << AddPlayer << EndLine ;
 			player.serialize(msg);
 			game::server.SendLiteral(msg.str());
 
@@ -451,7 +451,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 
 			msg.str(string());
 
-			msg << SendDefault << End << Start << End;
+			msg << SendDefault << EndLine  << Start << EndLine ;
 			game::server.SendLiteral(msg.str());
 			
 			game::Log("Sent: Start");
@@ -1078,6 +1078,7 @@ void loadSounds()
 	game::m_sounds.AddSound("Ambient", "Sounds//Game.wav");
 	game::m_sounds.AddSound("TurretShoot", "Sounds//TurretShoot.wav");
 	game::m_sounds.AddSound("NoAmmo", "Sounds//NoAmmo.wav");
+	game::m_sounds.AddSound("TurretPlayerHit", "Sounds//TurretPlayerHit.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");
@@ -1109,7 +1110,7 @@ int main()
 
 	setCursorPos(0, 0);
 
-	//release the engine, NOT the voices!
+	//release the engine
 	m_sound::g_engine->Release();
 
 	//again, for COM

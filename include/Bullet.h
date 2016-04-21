@@ -21,6 +21,9 @@ public:
 
 	DIRECTION getDirection();
 
+	void serialize(std::stringstream&);
+	void deserialize(std::stringstream&);
+
 	virtual void serialize(fstream&);
 	virtual void deserialize(fstream&);
 

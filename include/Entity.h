@@ -55,6 +55,8 @@ private:
 	bool kill_;
 	bool isObjectHosted_;
 	std::list<KEYWORD> keywords_;
+
+	static bool isServerConnected_;
 };
 
 class System
@@ -64,6 +66,8 @@ public:
 	~System();
 
 	void update();
+
+	void setUpdateServer(bool serverUpdate);
 
 	void cleanAndUpdateOverlays();
 
@@ -81,5 +85,6 @@ public:
 private:
 	int id_index;
 	std::map<int, std::shared_ptr<Entity>> m_system;
+	bool updateServer_;
 };
 

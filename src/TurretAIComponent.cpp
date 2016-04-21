@@ -6,6 +6,7 @@
 #include <Player.h>
 #include <fstream>
 #include <PlayerHandler.h>
+#include <Common.h>
 
 
 namespace game
@@ -151,7 +152,19 @@ void TurretAIComponent::shoot(DIRECTION direction)
 	bullet->setGraphic(250);
 	bullet->addKeyWord(KEYWORD_BULLET);
 
+	Player* player = nullptr;
+
+	if (game::pHandler.getPlayerAt(nPos, &player))
+	{
+		player->damage(25, owner_);
+		game::m_sounds.PlaySoundR("TurretShoot");
+		bullet->clean();
+		return;
+	}
+
 	game::system.addEntity(bullet, "Bullet");
+
+	Common::SendBullet(bullet.get());
 
 	game::m_sounds.PlaySoundR("TurretShoot");
 }
@@ -164,6 +177,30 @@ Position TurretAIComponent::getPosition()
 std::string TurretAIComponent::getOwner()
 {
 	return owner_;
+}
+
+void TurretAIComponent::serialize(std::stringstream & file)
+{
+	file << visionRange_ << std::endl
+		<< shootCoolDownTime_ << std::endl
+		<< targetFound_ << std::endl
+		<< targetPosition_.getX() << std::endl
+		<< targetPosition_.getY() << std::endl
+		<< curPosition_.getX() << std::endl
+		<< curPosition_.getY() << std::endl
+		<< owner_ << std::endl;
+}
+
+void TurretAIComponent::deserialize(std::stringstream & file)
+{
+	file >> visionRange_
+		>> shootCoolDownTime_
+		>> targetFound_
+		>> targetPosition_.getRefX()
+		>> targetPosition_.getRefY()
+		>> curPosition_.getRefX()
+		>> curPosition_.getRefY()
+		>> owner_;
 }
 
 void TurretAIComponent::serialize(fstream & file)

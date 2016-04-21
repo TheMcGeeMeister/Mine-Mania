@@ -26,6 +26,9 @@ public:
 
 	std::string getOwner();
 
+	void serialize(std::stringstream& file);
+	void deserialize(std::stringstream& file);
+
 
 	virtual void serialize(std::fstream& file);
 	virtual void deserialize(std::fstream& file);

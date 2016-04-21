@@ -229,11 +229,11 @@ void Tile::setOverlayEnabled(bool is) // Deprecated Use updateOverlay(bool, char
 	overlayEnabled_ = is;
 	game::TileHandler.push_back(pos_);
 	stringstream msg;
-	msg << UpdateTileOverlay << End
-		<< pos_.getX() << End
-		<< pos_.getY() << End
-		<< is << End
-		<< (int)overlayGraphic_ << End;
+	msg << UpdateTileOverlay << EndLine 
+		<< pos_.getX() << EndLine 
+		<< pos_.getY() << EndLine 
+		<< is << EndLine 
+		<< (int)overlayGraphic_ << EndLine ;
 	game::server.addPacket(msg.str());
 }
 
@@ -242,11 +242,11 @@ void Tile::setOverlayGraphic(char g) // Deprecated Use updateOverlay(bool, char)
 	overlayGraphic_ = g;
 	game::TileHandler.push_back(pos_);
 	stringstream msg;
-	msg << UpdateTileOverlay << End
-		<< pos_.getX() << End
-		<< pos_.getY() << End
-		<< overlayEnabled_ << End
-		<< (int)g << End;
+	msg << UpdateTileOverlay << EndLine 
+		<< pos_.getX() << EndLine 
+		<< pos_.getY() << EndLine 
+		<< overlayEnabled_ << EndLine 
+		<< (int)g << EndLine ;
 	game::server.addPacket(msg.str());
 }
 
@@ -499,11 +499,11 @@ void Tile::removeOverlay()
 	overlayEnabled_ = false;
 	game::TileHandler.push_back(pos_);
 	stringstream msg;
-	msg << UpdateTileOverlay << End
-		<< pos_.getX() << End
-		<< pos_.getY() << End
-		<< false << End
-		<< (int)overlayGraphic_ << End;
+	msg << UpdateTileOverlay << EndLine 
+		<< pos_.getX() << EndLine 
+		<< pos_.getY() << EndLine 
+		<< false << EndLine 
+		<< (int)overlayGraphic_ << EndLine ;
 	game::server.addPacket(msg.str());
 }
 
@@ -513,11 +513,11 @@ void Tile::updateOverlay(bool enabled, char graphic)
 	overlayEnabled_ = enabled;
 	game::TileHandler.push_back(pos_);
 	stringstream msg;
-	msg << UpdateTileOverlay << End
-		<< pos_.getX() << End
-		<< pos_.getY() << End
-		<< enabled << End
-		<< (int)graphic << End;
+	msg << UpdateTileOverlay << EndLine 
+		<< pos_.getX() << EndLine 
+		<< pos_.getY() << EndLine 
+		<< enabled << EndLine 
+		<< (int)graphic << EndLine ;
 	game::server.addPacket(msg.str());
 }
 
@@ -531,7 +531,7 @@ void Tile::updateOverlayS(bool enabled, char graphic)
 void Tile::updateServer()
 {
 	stringstream msg;
-	msg << UpdateTile << End;
+	msg << UpdateTile << EndLine ;
 	serialize(msg);
 	game::server.addPacket(msg.str());
 }

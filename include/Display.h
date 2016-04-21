@@ -51,6 +51,8 @@ public:
 	void loadWorldServer(stringstream& data);
     void saveWorld();
 	void saveWorld(string filename);
+	void saveMultiplayerWorld(string filename);
+	void saveMultiplayerWorld();
 	string getWorld();
     void newWorld();
 	void newWorldMulti();
