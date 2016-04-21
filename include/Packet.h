@@ -26,8 +26,6 @@ enum PacketNames
 	PlayerConnect,
 
 	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,
-
-	PacketEnd = -255
 };
 
 class Packet
