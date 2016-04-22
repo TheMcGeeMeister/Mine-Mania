@@ -99,6 +99,16 @@ int Player::getMaxHealth()
 	return health.getMaxHealth();
 }
 
+int Player::getLevel()
+{
+	return stats.getLevel();
+}
+
+int Player::getMaxLevel()
+{
+	return stats.getMaxLevel();
+}
+
 string Player::getName()
 {
     return name_;
@@ -461,7 +471,12 @@ void Player::mine(DIRECTION direction)
 			if (game::game.isValidPosition(newPos) == false)
 				return;
 			if (game::game.getTileRefAt(newPos).isWall() == true)
-				game::game.getTileRefAt(newPos).mine(25, *this);
+			{
+				if (game::game.getTileRefAt(newPos).mine(25, *this))
+				{
+					stats.addExp(10);
+				}
+			}
 			else
 				return;
 			mineUIPos = newPos;

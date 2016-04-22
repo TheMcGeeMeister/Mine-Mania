@@ -69,7 +69,7 @@ class Tile
         void claim(int amount, string claimer);
         void forceClaim(string claim);
         void hasGold(bool hasGold);
-        void mine(int damage, Player&);
+        bool mine(int damage, Player&);
 		void removeOverlay();
 		void updateOverlay(bool enabled, char graphic);
 		void updateOverlayS(bool enabled, char graphic); // Updates Overlay without sending to server

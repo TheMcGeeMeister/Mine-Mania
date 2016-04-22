@@ -445,14 +445,14 @@ void Tile::hasGold(bool hasGold)
 	hasGold_ = hasGold;
 }
 
-void Tile::mine(int damage, Player& underlord)
+bool Tile::mine(int damage, Player& underlord)
 {
 	if (isWall_ == false)
-		return;
+		return false;
 
 	if (isDestructable_ == false)
 		if (damage > 0)
-			return;
+			return false;
 
 	health.getHealthRef() -= damage;
 
@@ -485,12 +485,15 @@ void Tile::mine(int damage, Player& underlord)
 		game::m_sounds.StopSound("Mining");
 
 		health.getHealthRef() = health.getMaxHealthRef();
+		updateTile(pos_);
+		return true;
 	}
 	else if (health.getHealthRef() > health.getMaxHealthRef())
 	{
 		health.getHealthRef() = health.getMaxHealthRef();
 	}
 	updateTile(pos_);
+	return false;
 }
 
 void Tile::removeOverlay()

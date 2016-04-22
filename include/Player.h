@@ -5,6 +5,7 @@
 #include <Position.h>
 #include <UserInterface.h>
 #include <HealthComponent.h>
+#include <PlayerStatComponent.h>
 #include <SoundPlayer.h>
 
 using namespace std;
@@ -27,6 +28,8 @@ class Player : public Entity
 		int getAmmoAmount();
 		int getHealth();
 		int getMaxHealth();
+		int getLevel();
+		int getMaxLevel();
         string getName();
 		Position getSpawnPos();
 		UserInterface& getUIRef();
@@ -131,6 +134,7 @@ class Player : public Entity
 		int ammo_;
 
 		HealthComponent health;
+		PlayerStatComponent stats;
 		SoundPlayer turret_sound;
 
 		bool moved_;
