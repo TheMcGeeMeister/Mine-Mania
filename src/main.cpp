@@ -242,14 +242,14 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 					key = getch();
 				switch (key)
 				{
-				case 'w':player.moveHandUp(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 's':player.moveHandDown(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 'a':player.moveHandLeft(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 'd':player.moveHandRight(game); InputCoolDown.StartNewTimer(0.075); break;
-				case 'f':player.switchMode(); InputCoolDown.StartNewTimer(0.075); break;
-				case 'c':player.purchaseTurret(); InputCoolDown.StartNewTimer(0.075); break;
+				case 'w':player.moveHand(DIRECTION_UP); InputCoolDown.StartNewTimer(0.075); break;
+				case 's':player.moveHand(DIRECTION_DOWN); InputCoolDown.StartNewTimer(0.075); break;
+				case 'a':player.moveHand(DIRECTION_LEFT); InputCoolDown.StartNewTimer(0.075); break;
+				case 'd':player.moveHand(DIRECTION_RIGHT); InputCoolDown.StartNewTimer(0.075); break;
+				case 'f':player.switchMode(); break;
+				case 'c':player.purchaseTurret(); break;
 				case 'v':player.claimOnHand(); InputCoolDown.StartNewTimer(0.075); break;
-				case 'b':player.purchaseBullet(); InputCoolDown.StartNewTimer(0.075); break;
+				case 'b':player.purchaseBullet(); break;
 				case 72:player.mine(DIRECTION_UP); InputCoolDown.StartNewTimer(0.075); break;
 				case 80:player.mine(DIRECTION_DOWN); InputCoolDown.StartNewTimer(0.075); break;
 				case 75:player.mine(DIRECTION_LEFT); InputCoolDown.StartNewTimer(0.075); break;
@@ -261,9 +261,9 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				}
 			}
 			else
-				x = 3;
+				break;
 		}
-    }
+	}
 }
 
 void loadScreen(int time, string text)
@@ -1078,6 +1078,7 @@ void loadSounds()
 	game::m_sounds.AddSound("TurretShoot", "Sounds//TurretShoot.wav");
 	game::m_sounds.AddSound("NoAmmo", "Sounds//NoAmmo.wav");
 	game::m_sounds.AddSound("TurretPlayerHit", "Sounds//TurretPlayerHit.wav");
+	game::m_sounds.AddSound("LevelUp", "Sounds//LevelUp.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");

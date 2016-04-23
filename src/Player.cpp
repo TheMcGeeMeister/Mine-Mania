@@ -232,6 +232,45 @@ void Player::healS(int amount)
 
 /* Hand*/
 ////////////////////////////////////////////////
+void Player::moveHand(DIRECTION direction)
+{
+	if (movementTimer_.Update() == false) return;
+	Position newPos = handPos;
+	newPos.go(direction);
+	/* Collision Checking */
+	///////////////////////////////////
+	if (game::game.isValidPosition(newPos, true) == false)
+		return;
+	Entity* entity;
+	if (game::system.getEntityAt(newPos, &entity))
+	{
+		if (entity->hasKeyWord(KEYWORD_BULLET))
+		{
+			damage(Common::GetBulletDamage(entity));
+			forceHandPosition(newPos);
+			knockbackTo((DIRECTION)Common::GetBulletDirection(entity), 1);
+			entity->kill();
+			game::m_sounds.PlaySoundR("Bullet");
+			std::stringstream msg;
+			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
+		}
+		return;
+	}
+	///////////////////////////////////
+	game::game.removeSelectedAtTile(handPos);
+	game::game.setTileAsSelected(newPos);
+	handPos = newPos;
+	moved_ = true;
+	mined_ = false;
+	std::stringstream msg;
+	msg << UpdatePlayerPosition << endl
+		<< name_ << endl
+		<< newPos.getX() << endl
+		<< newPos.getY() << endl;
+	game::game.addPacket(msg.str());
+	return;
+}
+
 void Player::moveHandUp(Display& game)
 {
 	if (movementTimer_.Update() == false) return;
@@ -474,7 +513,14 @@ void Player::mine(DIRECTION direction)
 			{
 				if (game::game.getTileRefAt(newPos).mine(25, *this))
 				{
-					stats.addExp(10);
+					if (stats.addExp(10))
+					{
+						game::m_sounds.PlaySoundR("LevelUp");
+						health.setMaxHealth(health.getMaxHealth() + 10);
+						std::stringstream lvlmsg;
+						lvlmsg << "Level Up! >> " << stats.getLevel();
+						game::SlideUI.addSlide(lvlmsg.str());
+					}
 				}
 			}
 			else
@@ -831,6 +877,7 @@ void Player::serialize(fstream& file)
 	file << spawnPos.getX() << endl;
 	file << spawnPos.getY() << endl;
 	health.serialize(file);
+	stats.serialize(file);
 }
 
 /*void Player::serialize(ofstream& file)
@@ -861,6 +908,7 @@ void Player::serialize(stringstream & file)
 	file << spawnPos.getX() << endl;
 	file << spawnPos.getY() << endl;
 	health.serialize(file);
+	stats.serialize(file);
 }
 
 void Player::deserialize(fstream& file)
@@ -884,6 +932,7 @@ void Player::deserialize(fstream& file)
 	spawnPos.setX(spos_x);
 	spawnPos.setY(spos_y);
 	health.deserialize(file);
+	stats.deserialize(file);
 }
 
 /*void Player::deserialize(ifstream& file)
@@ -929,6 +978,7 @@ void Player::deserialize(stringstream& file)
 	spawnPos.setX(spos_x);
 	spawnPos.setY(spos_y);
 	health.deserialize(file);
+	stats.deserialize(file);
 }
 
 void Player::update()

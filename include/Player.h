@@ -68,6 +68,7 @@ class Player : public Entity
 		void moveHandDown(Display& game);
 		void moveHandLeft(Display& game);
 		void moveHandRight(Display& game);
+		void moveHand(DIRECTION direction);
 		void mineUp(Display& game);
 		void mineDown(Display& game);
 		void mineLeft(Display& game);

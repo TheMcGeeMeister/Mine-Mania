@@ -1,7 +1,8 @@
 #include "..\include\PlayerStatComponent.h"
-#include "..\include\PlayerStatComponent.h"
+#include <sstream>
+#include <fstream>
 
-
+#define EndLine "\n"
 
 PlayerStatComponent::PlayerStatComponent()
 {
@@ -76,6 +77,62 @@ double PlayerStatComponent::getSpeedMultiplyer()
 void PlayerStatComponent::update()
 {
 	return;
+}
+
+void PlayerStatComponent::serialize(std::stringstream & file)
+{
+	file << level_ << EndLine
+		<< maxLevel_ << EndLine
+		<< exp_ << EndLine
+		<< expNeed_ << EndLine
+		<< strength_ << EndLine
+		<< stamina_ << EndLine
+		<< maxStamina_ << EndLine
+		<< magicka_ << EndLine
+		<< maxMagicka_ << EndLine
+		<< speed_ << EndLine;
+}
+
+void PlayerStatComponent::serialize(std::fstream & file)
+{
+	file << level_ << EndLine
+		<< maxLevel_ << EndLine
+		<< exp_ << EndLine
+		<< expNeed_ << EndLine
+		<< strength_ << EndLine
+		<< stamina_ << EndLine
+		<< maxStamina_ << EndLine
+		<< magicka_ << EndLine
+		<< maxMagicka_ << EndLine
+		<< speed_ << EndLine;
+}
+
+void PlayerStatComponent::deserialize(std::stringstream & file)
+{
+	file >> level_
+		>> maxLevel_
+		>> exp_
+		>> expNeed_
+		>> strength_
+		>> stamina_
+		>> maxStamina_
+		>> magicka_
+		>> maxMagicka_
+		>> speed_;
+}
+
+void PlayerStatComponent::deserialize(std::fstream & file)
+{
+	file >> level_
+		>> maxLevel_
+		>> exp_
+		>> expNeed_
+		>> strength_
+		>> stamina_
+		>> maxStamina_
+		>> magicka_
+		>> maxMagicka_
+		>> speed_;
 }
 
 bool PlayerStatComponent::addExp(double exp)

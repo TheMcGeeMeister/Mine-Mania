@@ -32,6 +32,11 @@ public:
 	void setSpeed(double speed);
 
 	virtual void update();
+
+	void serialize(std::stringstream& file);
+	void serialize(std::fstream& file);
+	void deserialize(std::stringstream& file);
+	void deserialize(std::fstream& file);
 private:
 	int level_;
 	int maxLevel_;
