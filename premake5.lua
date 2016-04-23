@@ -28,7 +28,8 @@ solution "Mine Mania"
     links
     {
         "ws2_32",
-        "winmm"
+        "winmm",
+		"xaudio2"
     }
     end
 	
@@ -67,12 +68,12 @@ solution "Mine Mania"
 		targetdir "bin"
 		includedirs 
            { 
-               "include"
+               "Core/**"
            }
 		files 
            { 
-               "include/**.h", 
-               "src/**.cpp",
+               "Core/**.h", 
+               "Core/**.cpp",
            }
 	project "SimpleNet"
 		kind "ConsoleApp"

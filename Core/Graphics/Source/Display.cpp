@@ -8,7 +8,7 @@
 #include <Player.h>
 #include <Common.h>
 #include <Core.h>
-#include "..\Mine-Mania\include\Packet.h"
+#include <Packet.h>
 #include <PlayerHandler.h>
 
 namespace game

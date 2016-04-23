@@ -7,7 +7,7 @@
 #include <list>
 #include <iostream>
 #include <sstream>
-#include "..\Mine-Mania\include\Packet.h"
+#include <Packet.h>
 #include <Direction.h>
 
 using namespace std;
