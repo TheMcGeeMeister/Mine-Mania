@@ -1,10 +1,10 @@
-#include "..\include\Lobby.h"
 #include <sstream>
 #include <Windows.h>
-#include <SimpleNetClient.h>
-#include <PlayerHandler.h>
-#include <Common.h>
-#include <Display.h>
+#include "Lobby.h"
+#include "SimpleNetClient.h"
+#include "PlayerHandler.h"
+#include "Common.h"
+#include "Display.h"
 
 namespace game
 {

@@ -1,12 +1,12 @@
-#include "LoadEnums.h"
-#include <Player.h>
 #include <fstream>
-#include <Position.h>
-#include <Display.h>
 #include <sstream>
-#include <SoundManager.h>
-#include <TileEnums.h>
-#include <Common.h>
+#include "LoadEnums.h"
+#include "Player.h"
+#include "Position.h"
+#include "Display.h"
+#include "SoundManager.h"
+#include "TileEnums.h"
+#include "Common.h"
 
 namespace game
 {

@@ -1,10 +1,9 @@
 #pragma once
-
 #include <iostream>
 #include <string>
 #include <windows.h>
-#include <Position.h>
-#include <HealthComponent.h>
+#include "Position.h"
+#include "HealthComponent.h"
 
 class Player;
 

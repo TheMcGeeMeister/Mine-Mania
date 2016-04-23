@@ -1,9 +1,8 @@
-#include "..\include\InputManager.h"
 #include <time.h>
 #include <conio.h>
 #include <random>
 #include <windows.h>
-
+#include "InputManager.h"
 
 InputManager::InputManager()
 {

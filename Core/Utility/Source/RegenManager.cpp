@@ -1,6 +1,6 @@
 #include "RegenManager.h"
-#include <Tile.h>
-#include <Display.h>
+#include "Tile.h"
+#include "Display.h"
 
 RegenManager::RegenManager()
 {

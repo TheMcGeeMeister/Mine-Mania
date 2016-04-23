@@ -2,7 +2,7 @@
 #include <string>
 #include <map>
 #include <xaudio2.h>
-#include <Wave.h>
+#include "Wave.h"
 
 class SoundManager
 {

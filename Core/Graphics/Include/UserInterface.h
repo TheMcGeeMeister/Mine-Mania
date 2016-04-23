@@ -1,13 +1,12 @@
 #pragma once
-
 #include <string>
-#include <Position.h>
-#include <PositionVariables.h>
-#include <map>
-#include <Timer.h>
-#include <vector>
-#include <InputManager.h>
 #include <thread>
+#include <vector>
+#include <map>
+#include "Position.h"
+#include "PositionVariables.h"
+#include "Timer.h"
+#include "InputManager.h"
 
 class Variable
 {

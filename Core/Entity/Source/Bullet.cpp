@@ -1,6 +1,6 @@
-#include "..\include\Bullet.h"
-#include "LoadEnums.h"
 #include <fstream>
+#include "Bullet.h"
+#include "LoadEnums.h"
 
 Bullet::Bullet()
 {

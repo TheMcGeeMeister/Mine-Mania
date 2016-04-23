@@ -1,6 +1,6 @@
 #pragma once
-#include <BulletAIComponent.h>
-#include <Position.h>
+#include "BulletAIComponent.h"
+#include "Position.h"
 
 class Bullet : public Entity
 {

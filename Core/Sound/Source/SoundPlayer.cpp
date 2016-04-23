@@ -1,4 +1,4 @@
-#include "..\include\SoundPlayer.h"
+#include "SoundPlayer.h"
 #include "SoundManager.h"
 
 namespace game

@@ -1,7 +1,7 @@
 #pragma once
-#include <Entity.h>
-#include <Timer.h>
 #include <fstream>
+#include "Entity.h"
+#include "Timer.h"
 
 class HealthComponent : public Component
 {

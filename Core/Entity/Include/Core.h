@@ -1,6 +1,6 @@
 #pragma once
 #include "Entity.h"
-#include <HealthComponent.h>
+#include "HealthComponent.h"
 
 class Core :
 	public Entity

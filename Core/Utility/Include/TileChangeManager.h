@@ -1,7 +1,6 @@
-#ifndef TILECHANGEMANAGER_H
-#define TILECHANGEMANAGER_H
+#pragma once
 #include <List>
-#include <Position.h>
+#include "Position.h"
 
 class Display;
 
@@ -17,5 +16,3 @@ class TileChangeManager
     private:
         std::list<Position> Changes;
 };
-
-#endif // TILECHANGEMANAGER_H

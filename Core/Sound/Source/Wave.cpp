@@ -1,4 +1,4 @@
-#include <Wave.h>
+#include "Wave.h"
 
 namespace m_sound
 {

@@ -1,6 +1,6 @@
+#include <sstream>
 #include "Position.h"
 #include "Common.h"
-#include <sstream>
 
 #define EndLine "\n"
 

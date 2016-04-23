@@ -1,10 +1,10 @@
-#include "..\include\UserInterface.h"
 #include <Windows.h>
 #include <iostream>
 #include <sstream>
 #include <functional>
 #include <fstream>
-#include <BorderEnums.h>
+#include "BorderEnums.h"
+#include "UserInterface.h"
 
 using namespace std;
 

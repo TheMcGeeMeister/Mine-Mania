@@ -5,21 +5,21 @@
 #include <sstream>
 #include <conio.h>
 #include <time.h>
-#include <game.h>
-#include <Timer.h> // Timer utility class
-#include <Player.h> // Player Class
-#include <Tile.h> // Tile Class
-#include <Lobby.h> // Multiplayer Lobby Class
-#include <Wave.h> // Sound Class
-#include <Display.h> // Main Class For Display, Loading/Saving
-#include <TileEnums.h> // Tile Colors, Graphics..etc..
-#include <RegenManager.h> // Idk if this is even used but it was used for handling regen
-#include <SoundManager.h> // Sound Mananger Class
-#include <UserInterface.h> // UI used by all selections, and menus
-#include <PlayerHandler.h> // Updates all the players
-#include <SimpleNetClient.h> // Server class
-#include <PositionVariables.h> // Holds on size, and offset
-#include <TileChangeManager.h> // Updates the Display with changes
+#include "game.h"
+#include "Timer.h" // Timer utility class
+#include "Player.h" // Player Class
+#include "Tile.h" // Tile Class
+#include "Lobby.h" // Multiplayer Lobby Class
+#include "Wave.h" // Sound Class
+#include "Display.h" // Main Class For Display, Loading/Saving
+#include "TileEnums.h" // Tile Colors, Graphics..etc..
+#include "RegenManager.h" // Idk if this is even used but it was used for handling regen
+#include "SoundManager.h" // Sound Mananger Class
+#include "UserInterface.h" // UI used by all selections, and menus
+#include "PlayerHandler.h" // Updates all the players
+#include "SimpleNetClient.h" // Server class
+#include "PositionVariables.h" // Holds on size, and offset
+#include "TileChangeManager.h" // Updates the Display with changes
 
 #define DEFAULT_CLEAR_WIDTH 100
 #define DEFAULT_CLEAR_HEIGHT 36

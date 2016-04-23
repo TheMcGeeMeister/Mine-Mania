@@ -1,10 +1,10 @@
-#include "..\include\Entity.h"
-#include "LoadEnums.h"
-#include "Packet.h"
-#include "Common.h"
 #include <list>
 #include <fstream>
 #include <sstream>
+#include "Entity.h"
+#include "LoadEnums.h"
+#include "Packet.h"
+#include "Common.h"
 
 
 Entity::Entity()

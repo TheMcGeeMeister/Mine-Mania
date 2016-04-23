@@ -1,7 +1,7 @@
 #ifndef GAME_H_INCLUDED
 #define GAME_H_INCLUDED
-#include <TileChangeManager.h>
-#include <RegenManager.h>
+#include "TileChangeManager.h"
+#include "RegenManager.h"
 
 class Tile;
 

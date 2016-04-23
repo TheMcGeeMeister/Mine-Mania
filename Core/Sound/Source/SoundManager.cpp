@@ -1,5 +1,5 @@
-#include "..\include\SoundManager.h"
-#include <Wave.h>
+#include "SoundManager.h"
+#include "Wave.h"
 
 SoundManager::SoundManager()
 {

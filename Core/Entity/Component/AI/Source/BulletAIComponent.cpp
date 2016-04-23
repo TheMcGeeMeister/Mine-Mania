@@ -1,8 +1,8 @@
-#include "..\include\BulletAIComponent.h"
-#include <Display.h>
-#include <PlayerHandler.h>
-#include <SoundManager.h>
-#include <Common.h>
+#include "BulletAIComponent.h"
+#include "Display.h"
+#include "PlayerHandler.h"
+#include "SoundManager.h"
+#include "Common.h"
 
 namespace game
 {

@@ -1,14 +1,13 @@
 #pragma once
-
-#include <Position.h>
-#include <Tile.h>
 #include <map>
 #include <windows.h>
 #include <list>
 #include <iostream>
 #include <sstream>
-#include <Packet.h>
-#include <Direction.h>
+#include "Packet.h"
+#include "Direction.h"
+#include "Position.h"
+#include "Tile.h"
 
 using namespace std;
 

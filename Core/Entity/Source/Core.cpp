@@ -1,6 +1,6 @@
-#include "..\include\Core.h"
-#include <Display.h>
-#include <Common.h>
+#include "Core.h"
+#include "Display.h"
+#include "Common.h"
 
 namespace game
 {

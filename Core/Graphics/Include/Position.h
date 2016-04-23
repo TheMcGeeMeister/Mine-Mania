@@ -1,8 +1,8 @@
 #ifndef POSITION_H
 #define POSITION_H
 #include <utility>
-#include <Direction.h>
 #include <string>
+#include "Direction.h"
 
 class Position
 {

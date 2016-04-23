@@ -1,10 +1,10 @@
 #pragma once
-#include "Entity.h"
 #include <string>
-#include <TurretAIComponent.h>
-#include <HealthComponent.h>
-#include <Position.h>
 #include <fstream>
+#include "Entity.h"
+#include "TurretAIComponent.h"
+#include "HealthComponent.h"
+#include "Position.h"
 
 class Turret : public Entity
 {

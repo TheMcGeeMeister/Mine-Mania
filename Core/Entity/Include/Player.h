@@ -1,12 +1,11 @@
 #pragma once
-
-#include <Turret.h>
 #include <string>
-#include <Position.h>
-#include <UserInterface.h>
-#include <HealthComponent.h>
-#include <PlayerStatComponent.h>
-#include <SoundPlayer.h>
+#include "Turret.h"
+#include "Position.h"
+#include "UserInterface.h"
+#include "HealthComponent.h"
+#include "PlayerStatComponent.h"
+#include "SoundPlayer.h"
 
 using namespace std;
 

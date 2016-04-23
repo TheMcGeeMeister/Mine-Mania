@@ -1,5 +1,5 @@
-#include "..\include\HealthComponent.h"
 #include <sstream>
+#include "HealthComponent.h"
 
 
 HealthComponent::HealthComponent()

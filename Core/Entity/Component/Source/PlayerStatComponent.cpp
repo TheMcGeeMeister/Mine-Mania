@@ -1,6 +1,6 @@
-#include "..\include\PlayerStatComponent.h"
 #include <sstream>
 #include <fstream>
+#include "PlayerStatComponent.h"
 
 #define EndLine "\n"
 

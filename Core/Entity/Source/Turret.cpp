@@ -1,11 +1,11 @@
-#include "..\include\Turret.h"
-#include "LoadEnums.h"
-#include <ObjectIds.h>
-#include <Display.h>
-#include <TileChangeManager.h>
 #include <fstream>
-#include <SoundManager.h>
-#include <Common.h>
+#include "Turret.h"
+#include "LoadEnums.h"
+#include "ObjectIds.h"
+#include "Display.h"
+#include "TileChangeManager.h"
+#include "SoundManager.h"
+#include "Common.h"
 
 namespace game
 {

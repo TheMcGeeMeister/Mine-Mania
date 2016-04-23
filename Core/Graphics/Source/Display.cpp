@@ -1,15 +1,15 @@
+#include <sstream>
+#include <fstream>
+#include "TileEnums.h"
+#include "Player.h"
+#include "Common.h"
+#include "Core.h"
+#include "Packet.h"
+#include "PlayerHandler.h"
 #include "LoadEnums.h"
 #include "Display.h"
 #include "Bullet.h"
 #include "Turret.h"
-#include <sstream>
-#include <fstream>
-#include <TileEnums.h>
-#include <Player.h>
-#include <Common.h>
-#include <Core.h>
-#include <Packet.h>
-#include <PlayerHandler.h>
 
 namespace game
 {

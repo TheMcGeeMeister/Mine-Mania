@@ -1,8 +1,7 @@
-#ifndef REGENMANAGER_H
-#define REGENMANAGER_H
+#pragma once
 #include <list>
-#include <Timer.h>
-#include <Position.h>
+#include "Timer.h"
+#include "Position.h"
 
 class Display;
 
@@ -22,5 +21,3 @@ class RegenManager
         Timer RegenCoolDown;
 
 };
-
-#endif // REGENMANAGER_H

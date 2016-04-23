@@ -1,12 +1,11 @@
-#include "..\include\TurretAIComponent.h"
-#include "..\include\BulletAIComponent.h"
-#include "..\include\Bullet.h"
-#include "SoundManager.h"
-#include <Display.h>
-#include <Player.h>
 #include <fstream>
-#include <PlayerHandler.h>
-#include <Common.h>
+#include "TurretAIComponent.h"
+#include "Bullet.h"
+#include "SoundManager.h"
+#include "Display.h"
+#include "Player.h"
+#include "PlayerHandler.h"
+#include "Common.h"
 
 
 namespace game

@@ -1,8 +1,8 @@
 #pragma once
-#include "Entity.h"
-#include <Position.h>
-#include <Timer.h>
 #include <fstream>
+#include "Entity.h"
+#include "Position.h"
+#include "Timer.h"
 
 class TurretAIComponent : public Component
 {

@@ -1,5 +1,4 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 #include <time.h>
 #include <fstream>
 
@@ -15,5 +14,3 @@ class Timer
     private:
         int Clock_End;
 };
-
-#endif // TIMER_H
