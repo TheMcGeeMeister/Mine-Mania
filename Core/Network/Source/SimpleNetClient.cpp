@@ -343,7 +343,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			msg >> name;
 			game::m_sounds.PlaySoundR(name);
 		}
-		if (name == SetSelected)
+		else if (name == SetSelected)
 		{
 			int posX;
 			int posY;
@@ -544,6 +544,20 @@ void SimpleNetClient::Do(std::string rMsg)
 				turret->deserialize(msg);
 				turret->setToNoUpdate();
 				game::system.addEntity(turret);
+			}
+		}
+		else if (name == EntityUpdatePosition)
+		{
+			int id;
+			int x;
+			int y;
+			msg >> id;
+			msg >> x;
+			msg >> y;
+			Entity* entity;
+			if (game::system.getEntity(id, &entity))
+			{
+				entity->setPos(Position(x, y));
 			}
 		}
 		////////////////////////////////////////////

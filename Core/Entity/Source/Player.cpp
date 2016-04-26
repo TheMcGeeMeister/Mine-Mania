@@ -696,6 +696,7 @@ void Player::knockbackTo(DIRECTION direction, int amount)
 		}
 	}
 	forceHandPosition(cPos);
+	updatePosition();
 }
 
 Position Player::getHandPosition()
@@ -753,6 +754,13 @@ void Player::purchaseBullet()
 		goldAmount_ -= 100;
 		game::m_sounds.PlaySoundR("Money");
 	}
+}
+
+void Player::updatePosition()
+{
+	std::stringstream msg;
+	msg << SendDefault << EndLine << UpdatePlayerPosition << EndLine << name_ << EndLine << handPos.serializeR();
+	SendServerLiteral(msg.str());
 }
 
 void Player::reset()
@@ -1055,6 +1063,11 @@ void Player::setPos(Position pos)
 }
 
 void Player::updateOverlay()
+{
+	return;
+}
+
+void Player::updateID()
 {
 	return;
 }

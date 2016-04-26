@@ -187,6 +187,11 @@ void Turret::updateOverlay()
 	game::game.getTileRefAt(ai.getPosition()).updateOverlay(true, graphic);
 }
 
+void Turret::updateID()
+{
+	return;
+}
+
 Position Turret::getPos()
 {
 	return ai.getPosition();

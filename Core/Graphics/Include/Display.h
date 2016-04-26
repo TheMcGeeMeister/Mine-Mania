@@ -36,6 +36,7 @@ public:
 	bool isValidPosition(Position pos, bool player);
 	bool isValidPosition(Position pos);
 	bool isFullScreen();
+	bool isLoadedMultiplayer();
 
 	void updateTileServer(Position pos);
 
@@ -50,8 +51,6 @@ public:
 	void loadWorldServer(stringstream& data);
     void saveWorld();
 	void saveWorld(string filename);
-	void saveMultiplayerWorld(string filename);
-	void saveMultiplayerWorld();
 	string getWorld();
     void newWorld();
 	void newWorldMulti();
@@ -123,11 +122,13 @@ private:
 	bool isHidden_;
     bool reloadAll_;
 	bool isLoaded_;
+	bool isMultiplayer_;
 	string saveSuffix_;
 
 	int font_;
 	int fontSize_;
 	int volume_;
+	int playerAmount_;
 	bool isFullscreen_;
     //End//
 

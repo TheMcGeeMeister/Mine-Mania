@@ -28,6 +28,7 @@ Display::Display()
 	isLoaded_ = false;
 	isBorderUsed_ = false;
 	isHidden_ = false;
+	isMultiplayer_ = false;
 	borderWidth_ = 0;
 	offset_x_ = 0;
 	offset_y_ = 0;
@@ -390,6 +391,11 @@ bool Display::isFullScreen()
 	return isFullscreen_;
 }
 
+bool Display::isLoadedMultiplayer()
+{
+	return isMultiplayer_;
+}
+
 void Display::updateTileServer(Position pos)
 {
 	Packet msg;
@@ -673,6 +679,11 @@ void Display::saveWorld()
     }
     Position pos;
 
+	if (isMultiplayer_)
+		file << L_Multi << EndLine;
+	else
+		file << L_Solo << EndLine;
+
     for(int x=0;x<size_x_;x++)
     {
         for(int y=0;y<size_y_;y++)
@@ -685,7 +696,7 @@ void Display::saveWorld()
 			tile.serialize(file);
         }
     }
-	game::pHandler.getLocalPlayer().serialize(file);
+	game::pHandler.serializeAll(file);
 	game::system.serialize(file);
 	file << LOAD::END;
     file.close();
@@ -704,6 +715,13 @@ void Display::saveWorld(string filename)
 	}
 	Position pos;
 
+	if (isMultiplayer_)
+		file << L_Multi << EndLine;
+	else
+		file << L_Solo << EndLine;
+
+	file << playerAmount_ << EndLine;
+
 	for (int x = 0; x<size_x_; x++)
 	{
 		for (int y = 0; y<size_y_; y++)
@@ -716,7 +734,7 @@ void Display::saveWorld(string filename)
 			tile.serialize(file);
 		}
 	}
-	game::pHandler.getLocalPlayer().serialize(file);
+	game::pHandler.serializeAll(file);
 	game::system.serialize(file);
 	file << LOAD::END;
 	file.close();
@@ -758,6 +776,19 @@ void Display::loadWorld(string filename)
 	int text;
 	file >> text;
 
+	if (text == L_Solo)
+	{
+		isMultiplayer_ = false;
+	}
+	else
+	{
+		isMultiplayer_ = true;
+	}
+
+	file >> text;
+
+	bool localLoaded_ = false;
+
 	while (text != LOAD::END )
 	{
 		if (text == LOAD::L_Tile)
@@ -770,7 +801,15 @@ void Display::loadWorld(string filename)
 		}
 		if (text == LOAD::L_Player)
 		{
-			game::pHandler.getLocalPlayer().deserialize(file);
+			if (localLoaded_ == false)
+			{
+				game::pHandler.getLocalPlayer().deserialize(file);
+				localLoaded_ = true;
+			}else
+			{
+				game::pHandler.addPlayerDeserialize(file);
+			}
+			playerAmount_++;
 		}
 		if (text == LOAD::L_Bullet)
 		{
@@ -872,6 +911,19 @@ void Display::loadWorld()
 	int text;
 	file >> text;
 
+	if (text == L_Solo)
+	{
+		isMultiplayer_ = false;
+	}
+	else
+	{
+		isMultiplayer_ = true;
+	}
+
+	file >> text;
+
+	bool localLoaded_ = false;
+
 	game::system.clear();
 
 	while (text!=LOAD::END)
@@ -886,7 +938,15 @@ void Display::loadWorld()
 		}
 		if (text == LOAD::L_Player)
 		{
-			game::pHandler.getLocalPlayer().deserialize(file);
+			if (localLoaded_ == false)
+			{
+				game::pHandler.getLocalPlayer().deserialize(file);
+				localLoaded_ = true;
+			}
+			else
+			{
+				game::pHandler.addPlayerDeserialize(file);
+			}
 		}
 		if (text == LOAD::L_Bullet)
 		{
@@ -993,6 +1053,7 @@ void Display::newWorld()
 	game::pHandler.getLocalPlayer().forceHandPosition(startPos, *this);
 	game::pHandler.getLocalPlayer().setSpawnPos(startPos);
 	reloadAll_ = true;
+	isMultiplayer_ = false;
 }
 
 void Display::newWorldMulti()
@@ -1103,6 +1164,7 @@ void Display::newWorldMulti()
 	game::pHandler.addPlayer(other);
 	isLoaded_ = true;
 	reloadAll_ = true;
+	isMultiplayer_ = true;
 }
 
 void Display::newWorldMulti(int pAmount, std::string names[])
@@ -1198,7 +1260,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	m_map[Position(0, 1)] = stoneFloor;
 	game::pHandler.addLocalPlayer(host);
 	msg << SendDefault << EndLine 
-		<< AddPlayer << EndLine ;
+		<< AddPlayer << EndLine;
 	host.serialize(msg);
 	SendServerLiteral(msg.str());
 	msg.str(string());
@@ -1284,6 +1346,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 
 	isLoaded_ = true;
 	reloadAll_ = true;
+	isMultiplayer_ = true;
 }
 
 void Display::getSaveSuffix()

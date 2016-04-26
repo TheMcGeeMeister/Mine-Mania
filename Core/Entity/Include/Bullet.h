@@ -35,6 +35,7 @@ public:
 	virtual void damage(int damage, std::string name);
 	virtual void setPos(Position pos);
 	virtual void updateOverlay();
+	virtual void updateID();
 	virtual Position getPos();
 private:
 	double damage_;

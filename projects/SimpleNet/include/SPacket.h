@@ -4,9 +4,15 @@
 
 enum SPacketNames
 {
-	None, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
+	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
 
 	UpdatePlayerPosition, UpdateTile, UpdateTileChar, UpdateTileColor, UpdateTileHealth, UpdateTileOverlay, UpdateTileClaim,
+
+	UpdatePlayer, Health,
+
+	EntityDamage, EntityKill, EntityUpdatePosition,
+
+	EntityAdd, EBullet, ETurret,
 
 	DamagePlayer, HealPlayer, KillPlayer,
 
@@ -16,7 +22,7 @@ enum SPacketNames
 
 	PlayerConnect,
 
-	PacketEnd = -255
+	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,
 };
 
 class SPacket

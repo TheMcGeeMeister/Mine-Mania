@@ -25,7 +25,7 @@
 #include <conio.h>
 #include <cctype>
 
-#include "..\include\SPacket.h"
+#include "SPacket.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -35,19 +35,12 @@ void LoopRecieve(int id);
 namespace SimpleNet
 {
 	SOCKET ListenSocket;
-	SOCKET HostSocket = INVALID_SOCKET;
-	SOCKET PlayerSocket = INVALID_SOCKET;
-	SOCKET PlayerSocket02 = INVALID_SOCKET;
-	SOCKET PlayerSocket03 = INVALID_SOCKET;
 
 	std::map<int, SOCKET> s_players;
 	std::map<int, std::thread> s_threads;
 
 	bool ListenLoopContinue = true;
 	bool PlayerLoopExit = false;
-	bool PlayerConnected = false;
-	bool Player02Connected = false;
-	bool Player03Connected = false;
 	bool HostConnected = false;
 	void Log(std::string text)
 	{
@@ -55,7 +48,7 @@ namespace SimpleNet
 		file << text << std::endl;
 		if (!file)
 		{
-			std::cout << "FUCK MY LIFE" << std::endl;
+			std::cout << "Error: Can't open Log.txt" << std::endl;
 		}
 		file.close();
 	}
@@ -133,80 +126,11 @@ bool StartServer()
 
 void ListenLoop()
 {
-
-	/*SimpleNet::HostSocket = accept(SimpleNet::ListenSocket, NULL, NULL);
-
-	std::stringstream msg;
-
-	if (SimpleNet::HostSocket != INVALID_SOCKET)
-	{
-		msg << SetHost;
-		send(SimpleNet::HostSocket, msg.str().c_str(), msg.str().length(), NULL);
-		SimpleNet::HostConnected = true;
-		std::cout << "Host Connected" << std::endl;
-	}else
-	{
-		shutdown(SimpleNet::ListenSocket, 1);
-		closesocket(SimpleNet::ListenSocket);
-		return;
-	}
-
-	msg.str(std::string());
-
-	SimpleNet::PlayerSocket = accept(SimpleNet::ListenSocket, NULL, NULL);
-
-	if(SimpleNet::PlayerSocket != INVALID_SOCKET)
-	{
-		SimpleNet::PlayerConnected = true;
-		msg << SetPlayer;
-		send(SimpleNet::PlayerSocket, msg.str().c_str(), msg.str().length(), NULL);
-		std::cout << "Player Connected" << std::endl;
-	}
-	else
-	{
-		shutdown(SimpleNet::ListenSocket, 1);
-		closesocket(SimpleNet::ListenSocket);
-		return;
-	}
-
-
-	SimpleNet::PlayerSocket02 = accept(SimpleNet::ListenSocket, NULL, NULL);
-
-	if (SimpleNet::PlayerSocket != INVALID_SOCKET)
-	{
-		SimpleNet::Player02Connected = true;
-		msg << SetPlayer;
-		send(SimpleNet::PlayerSocket, msg.str().c_str(), msg.str().length(), NULL);
-		std::cout << "Player Connected" << std::endl;
-	}
-	else
-	{
-		shutdown(SimpleNet::ListenSocket, 1);
-		closesocket(SimpleNet::ListenSocket);
-		return;
-	}
-
-	SimpleNet::PlayerSocket03 = accept(SimpleNet::ListenSocket, NULL, NULL);
-
-	if (SimpleNet::PlayerSocket != INVALID_SOCKET)
-	{
-		SimpleNet::Player03Connected = true;
-		msg << SetPlayer;
-		send(SimpleNet::PlayerSocket, msg.str().c_str(), msg.str().length(), NULL);
-		std::cout << "Player Connected" << std::endl;
-	}
-	else
-	{
-		shutdown(SimpleNet::ListenSocket, 1);
-		closesocket(SimpleNet::ListenSocket);
-		return;
-	}*/
-
 	std::stringstream msg;
 
 	for (int i = 0; i < 4; i++)
 	{
-		SimpleNet::s_players[i];
+		SimpleNet::s_players[i] = INVALID_SOCKET;
 		SimpleNet::s_players[i] = accept(SimpleNet::ListenSocket, NULL, NULL);
 		if (SimpleNet::s_players[i] == INVALID_SOCKET)
 		{
@@ -217,19 +141,19 @@ void ListenLoop()
 		if (i == 0)
 		{
 			msg << SetHost << End << i;
+			SimpleNet::s_threads[i] = std::thread(LoopRecieve, i);
 			send(SimpleNet::s_players[i], msg.str().c_str(), msg.str().length(), NULL);
 			msg.str(std::string());
+			std::cout << "Host Connected" << std::endl;
 		}
 		else
 		{
 			msg << SetPlayer << End << i;
+			SimpleNet::s_threads[i] = std::thread(LoopRecieve, i);
 			send(SimpleNet::s_players[i], msg.str().c_str(), msg.str().length(), NULL);
 			msg.str(std::string());
+			std::cout << "Player Connected" << std::endl;
 		}
-
-		SimpleNet::s_threads[i] = std::thread(LoopRecieve, i);
-
-		std::cout << "Player Connected" << std::endl;
 	}
 }
 

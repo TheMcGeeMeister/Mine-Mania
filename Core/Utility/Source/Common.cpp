@@ -4,6 +4,7 @@
 #include "Turret.h"
 #include "Entity.h"
 #include "Packet.h"
+#include "Player.h"
 #include "SimpleNetClient.h"
 
 #define EndLine "\n"
@@ -51,6 +52,24 @@ namespace Common
 		std::stringstream msg;
 		msg << SendDefault << EndLine << EntityAdd << EndLine << ETurret << EndLine; turret->serialize(msg);
 		game::server.SendLiteral(msg.str());
+	}
+
+	void SendPlayer(Player* player, int playerAmount, int player_)
+	{
+		std::stringstream msg;
+		for (int x = 0; x < playerAmount; x++)
+		{
+			if (x == player_)
+			{
+				msg << x << EndLine << AddPlayerLocal << EndLine;
+				player->serialize(msg);
+			}
+			else
+			{
+				msg << x << EndLine << AddPlayer << EndLine;
+				player->serialize(msg);
+			}
+		}
 	}
 
 	bool ShootFrom(Position pos, int direction)

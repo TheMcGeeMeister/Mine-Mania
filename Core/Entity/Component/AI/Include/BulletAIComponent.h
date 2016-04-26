@@ -17,6 +17,7 @@ public:
 	void isDestroyed(bool);
 	void setGraphic(char g);
 	void updateOverlay();
+	void setID(int id);
 
 	int getDamage();
 
@@ -42,6 +43,7 @@ private:
 	int range;
 	int rangeIndex;
 	int damage;
+	int id;
 	bool isDestroyed_;
 	bool isCleaned_;
 	char graphic_;

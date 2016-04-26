@@ -127,6 +127,11 @@ void Bullet::updateOverlay()
 	ai.updateOverlay();
 }
 
+void Bullet::updateID()
+{
+	ai.setID(getID());
+}
+
 Position Bullet::getPos()
 {
 	return ai.getPosition();

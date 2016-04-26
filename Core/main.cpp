@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <time.h>
 #include "game.h"
+#include "LoadEnums.h"
 #include "Timer.h" // Timer utility class
 #include "Player.h" // Player Class
 #include "Tile.h" // Tile Class
@@ -395,74 +396,6 @@ void connectMenu(thread& sThread, bool& threadStarted)
 		game::lobby.Initialize(game::server.isHost());
 		game::lobby.Go();
 		Sleep(250);
-		/*if (game::server.isHost() == false)
-		{
-			std::stringstream msg;
-			msg << SendDefault << EndLine  << PlayerConnect << EndLine ;
-			game::server.SendLiteral(msg.str());
-			game::Log("Sent: PlayerConnect\n");
-		}
-		else
-		{
-			while (game::server.isPlayerConnected() == false)
-			{
-				loadScreen(100, "Waiting For Player...");
-				Sleep(10);
-			}
-		}
-		if (game::server.isHost() == true)
-		{
-			game::game.newWorldMulti();
-			std::stringstream msg;
-			msg << SendDefault << EndLine 
-				<< World << EndLine 
-				<< game::game.getWorld();
-			game::server.SendLiteral(msg.str());
-			msg.str(string());
-
-			Sleep(30);
-
-			Player* other;
-			if (game::pHandler.getPlayer("Other", &other) == true)
-			{
-				msg << SendDefault << EndLine  << AddPlayerLocal << EndLine ;
-				other->serialize(msg);
-				game::Log("///////////////////////\n" + msg.str() + "///////////////////////");
-				game::server.SendLiteral(msg.str());
-			}
-			else
-			{
-				exit(0);
-			}
-
-			Sleep(10);
-
-			msg.str(string());
-
-			Player& player = game::pHandler.getLocalPlayer();
-			msg << SendDefault << EndLine  << AddPlayer << EndLine ;
-			player.serialize(msg);
-			game::server.SendLiteral(msg.str());
-
-			game::Log("Sent: AddPlayer");
-
-			Sleep(10);
-
-			msg.str(string());
-
-			msg << SendDefault << EndLine  << Start << EndLine ;
-			game::server.SendLiteral(msg.str());
-			
-			game::Log("Sent: Start");
-			return;
-		}
-		setCursorPos(0, 0);
-		cout << "Loading...";
-		while (game::server.isWaiting() == true)
-		{
-			Sleep(50);
-		}
-		return;*/
 	}
 	ui.isHidden(true);
 	Sleep(50);
@@ -499,10 +432,30 @@ bool loadMenu(Display& game)
 			if (i < 10)
 			{
 				filename << "World" << "0" << i << ".dat";
+				std::stringstream rFilename;
+				rFilename << "Saves\\World" << "0" << i << ".dat";
+				fstream file(rFilename.str());
+				int isMulti = 0;
+				file >> isMulti;
+				file.close();
+				if (isMulti == L_Multi)
+				{
+					filename << " (Multiplayer)";
+				}
 			}
 			else
 			{
 				filename << "World" << i << ".dat";
+				std::stringstream rFilename;
+				rFilename << "Saves\\World" << i << ".dat";
+				fstream file(rFilename.str());
+				int isMulti = 0;
+				file >> isMulti;
+				file.close();
+				if (isMulti == L_Multi)
+				{
+					filename << " (Multiplayer)";
+				}
 			}
 			menu.addSection(filename.str(), true, true);
 		}
@@ -707,7 +660,6 @@ void settingsMenu()
 	game::game.setFont(font);
 	game::game.setFontSize(fontSize);
 	game::game.setVolume(volume);
-	game::m_sounds.SetVolume(volume / 100);
 	Sleep(250);
 }
 
@@ -966,6 +918,9 @@ void preGameLoop()
     game.update();
     bool exitFlag=false;
 	bool threadStarted = false;
+
+	game::m_sounds.PlaySoundR("Menu");
+
 	while (exitFlag == false)
 	{
 		exitFlag = pauseMenu(game, sThread, threadStarted);
@@ -1063,7 +1018,6 @@ void loadSounds()
 	if (game::m_sounds.AddSound("Menu", "Sounds//Loop.wav"))
 	{
 		game::m_sounds.SetInfinite("Menu");
-		game::m_sounds.PlaySound("Menu");
 	}
 
 	game::m_sounds.AddSound("Mining", "Sounds//Mining.wav");
@@ -1079,6 +1033,7 @@ void loadSounds()
 	game::m_sounds.AddSound("NoAmmo", "Sounds//NoAmmo.wav");
 	game::m_sounds.AddSound("TurretPlayerHit", "Sounds//TurretPlayerHit.wav");
 	game::m_sounds.AddSound("LevelUp", "Sounds//LevelUp.wav");
+	game::m_sounds.AddSound("MenuSelection", "Sounds//MenuSelection.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");

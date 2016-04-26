@@ -18,6 +18,20 @@ void PlayerHandler::addPlayer(Player& player)
 	m_players[player.getName()] = player;
 }
 
+void PlayerHandler::addPlayerDeserialize(std::fstream & file)
+{
+	Player player;
+	player.deserialize(file);
+	m_players[player.getName()] = player;
+}
+
+void PlayerHandler::addPlayerDeserialize(std::stringstream & file)
+{
+	Player player;
+	player.deserialize(file);
+	m_players[player.getName()] = player;
+}
+
 void PlayerHandler::addLocalPlayer(Player player)
 {
 	m_players["Local"] = player;
@@ -73,4 +87,22 @@ void PlayerHandler::clear()
 	m_players.clear();
 	Player player;
 	m_players["Local"] = player;
+}
+
+void PlayerHandler::serializeAll(std::stringstream & file)
+{
+	for (auto& iter : m_players)
+	{
+		iter.second.serialize(file);
+	}
+}
+
+void PlayerHandler::serializeAll(std::fstream & file)
+{
+	m_players["Local"].serialize(file);
+	for (auto& iter : m_players)
+	{
+		if(iter.first != "Local")
+			iter.second.serialize(file);
+	}
 }

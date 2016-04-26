@@ -5,6 +5,7 @@
 #include <fstream>
 #include "BorderEnums.h"
 #include "UserInterface.h"
+#include "SoundManager.h"
 
 using namespace std;
 
@@ -13,6 +14,7 @@ extern void clearInput();
 namespace game
 {
 	extern void Log(std::string txt);
+	extern SoundManager m_sounds;
 }
 
 
@@ -461,12 +463,14 @@ void UserInterface::update()
 							if (i == 'w')
 							{
 								moveSelectionUp();
+								game::m_sounds.PlaySoundR("MenuSelection");
 								inputCoolDown.StartNewTimer(0.100);
 								return;
 							}
 							else if (i == 's')
 							{
 								moveSelectionDown();
+								game::m_sounds.PlaySoundR("MenuSelection");
 								inputCoolDown.StartNewTimer(0.100);
 								return;
 							}
@@ -485,6 +489,7 @@ void UserInterface::update()
 							else
 							{
 								isSelectionActivated_ = true;
+								game::m_sounds.PlaySoundR("MenuSelection");
 							}
 							inputCoolDown.StartNewTimer(0.175);
 							return;

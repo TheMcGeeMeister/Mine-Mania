@@ -35,6 +35,7 @@ void Lobby::Initialize(bool isHost)
 	if (isHost)
 	{
 		ui.push_back("Start", true, true);
+		ui.push_back("Load", true, true);
 	}
 
 	ui.getSectionRef(1).setIVar(game::pHandler.getLocalPlayer().getName());
@@ -112,7 +113,7 @@ bool Lobby::Go()
 				}
 				DrawList();
 			}
-			else
+			else if(selected == 3)
 			{
 				bool isStartReady = true;
 				for (auto& iter : m_players_t)
@@ -131,15 +132,42 @@ bool Lobby::Go()
 						names[x] = iter.second.first;
 						x++;
 					}
-					CreateMultiplayerWorld(player_amount, names);
-					std::stringstream world;
-					world << SendDefault << EndLine  << World << EndLine  << game::game.getWorld();
-					SendServerLiteral(world.str());
-					std::stringstream startMsg;
-					startMsg << SendDefault << EndLine  << PacketNames::Lobby << EndLine  << LobbyStart << EndLine ;
-					SendServerLiteral(startMsg.str());
-					started_ = true;
+					if (game::game.isLoaded() == false || game::game.isLoadedMultiplayer() == false)
+					{
+						CreateMultiplayerWorld(player_amount, names);
+						std::stringstream world;
+						world << SendDefault << EndLine << World << EndLine << game::game.getWorld();
+						SendServerLiteral(world.str());
+						std::stringstream startMsg;
+						startMsg << SendDefault << EndLine << PacketNames::Lobby << EndLine << LobbyStart << EndLine;
+						SendServerLiteral(startMsg.str());
+						started_ = true;
+					}
+					else
+					{
+						/* Load Players */
+						//////////////////////////
+						Player* player;
+						for (auto& iter : m_players_t)
+						{
+							if (game::pHandler.getPlayer(iter.second.first, &player))
+							{
+								Common::SendPlayer(player, player_amount, iter.first);
+							}
+						}
+						//////////////////////////
+						std::stringstream msg;
+						msg << SendDefault << EndLine << World << EndLine << game::game.getWorld();
+						SendServerLiteral(msg.str());
+						msg.str(string());
+						msg << SendDefault << EndLine << PacketNames::Lobby << EndLine << LobbyStart << EndLine;
+						SendServerLiteral(msg.str());
+					}
 				}
+			}
+			else if (selected == 4)
+			{
+
 			}
 		}
 		if (started_ == true)

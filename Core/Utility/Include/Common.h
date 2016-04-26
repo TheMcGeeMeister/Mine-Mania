@@ -6,6 +6,7 @@
 class Entity;
 class Turret;
 class Bullet;
+class Player;
 
 enum COLOR
 {
@@ -23,6 +24,7 @@ namespace Common
 	extern void CleanGameOverlay();
 	extern void SendBullet(Bullet* bullet);
 	extern void SendTurret(Turret* turret);
+	extern void SendPlayer(Player* player, int playerAmount, int player_);
 	extern bool ShootFrom(Position pos, int direction);
 	extern bool ShootFrom(Position pos, int direction, int bullet_range);
 	extern int GetBulletDamage(Entity* entity);

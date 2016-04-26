@@ -9,6 +9,8 @@ public:
 	~PlayerHandler();
 
 	void addPlayer(Player& player);
+	void addPlayerDeserialize(std::fstream& file);
+	void addPlayerDeserialize(std::stringstream& file);
 	void addLocalPlayer(Player player);
 
 	void update();
@@ -22,6 +24,8 @@ public:
 	Player& getLocalPlayer();
 
 	void clear();
+	void serializeAll(std::stringstream& file);
+	void serializeAll(std::fstream& file);
 private:
 	map <std::string, Player> m_players;
 };

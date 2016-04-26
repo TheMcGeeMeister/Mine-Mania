@@ -49,6 +49,7 @@ public:
 	virtual void damage(int damage, std::string name) = 0;
 	virtual void setPos(Position) = 0;
 	virtual void updateOverlay() = 0;
+	virtual void updateID() = 0;
 	virtual Position getPos() = 0;
 private:
 	int id_;
@@ -78,6 +79,8 @@ public:
 	int addEntity(std::shared_ptr<Entity>, std::string txt);
 
 	bool getEntityAt(Position pos, Entity** entity);
+
+	bool getEntity(int id, Entity** entity);
 
 	void serialize(std::fstream&);
 

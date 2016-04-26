@@ -112,6 +112,11 @@ void Core::updateOverlay()
 	game::game.getTileRefAt(pos_).updateOverlay(true, graphic_);
 }
 
+void Core::updateID()
+{
+	return;
+}
+
 Position Core::getPos()
 {
 	return Position();

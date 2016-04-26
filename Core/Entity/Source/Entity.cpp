@@ -213,6 +213,16 @@ bool System::getEntityAt(Position pos, Entity ** entity)
 	return false;
 }
 
+bool System::getEntity(int id, Entity ** entity)
+{
+	if (m_system.count(id))
+	{
+		*entity = m_system[id].get();
+		return true;
+	}
+	return false;
+}
+
 void System::serialize(std::fstream & file)
 {
 	for (auto& iter : m_system)

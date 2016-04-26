@@ -94,6 +94,10 @@ class Player : public Entity
 		void purchaseBullet();
 		//////////////////////////////////
 
+		/* Server */
+		//////////////////////////////////
+		void updatePosition();
+		//////////////////////////////////
 		void reset();
 		void updateMiningUI();
 
@@ -117,6 +121,7 @@ class Player : public Entity
 		virtual void damage(int damage, string name = "");
 		virtual void setPos(Position pos); // Calls forceHandPosition(Position)
 		virtual void updateOverlay();
+		virtual void updateID(); // Not used for player
 		virtual Position getPos();
 
 		void killS();

@@ -43,6 +43,7 @@ public:
 	virtual void damage(int amount, std::string name);
 	virtual void setPos(Position pos);
 	virtual void updateOverlay();
+	virtual void updateID();
 	virtual Position getPos();
 private:
 	std::string owner;
