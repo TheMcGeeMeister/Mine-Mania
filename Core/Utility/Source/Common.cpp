@@ -190,5 +190,6 @@ namespace Network
 	{
 		std::stringstream msg;
 		msg << SendDefault << EndLine << EntityAdd << EndLine << ECore << EndLine; core->serialize(msg);
+		SendServerLiteral(msg.str());
 	}
 }

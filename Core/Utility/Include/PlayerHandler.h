@@ -8,6 +8,8 @@ public:
 	PlayerHandler();
 	~PlayerHandler();
 
+	void updateAllPositions();
+
 	void addPlayer(Player& player);
 	void addPlayerDeserialize(std::fstream& file);
 	void addPlayerDeserialize(std::stringstream& file);

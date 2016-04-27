@@ -845,6 +845,8 @@ void gameLoop()
 	game::m_sounds.StopSound("Menu");
 	game::m_sounds.PlaySoundR("Ambient");
 
+	game::pHandler.updateAllPositions();
+
 	while (isExitGame(game::game) == false)
 	{
 		LOGIC(InputCoolDown, game::game);

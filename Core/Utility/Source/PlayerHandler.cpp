@@ -11,6 +11,15 @@ PlayerHandler::PlayerHandler()
 
 PlayerHandler::~PlayerHandler()
 {
+
+}
+
+void PlayerHandler::updateAllPositions()
+{
+	for (auto& iter : m_players)
+	{
+		iter.second.updateHandPos();
+	}
 }
 
 void PlayerHandler::addPlayer(Player& player)

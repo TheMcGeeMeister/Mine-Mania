@@ -532,6 +532,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				bullet->deserialize(msg);
 				bullet->setToNoUpdate();
 				game::system.addEntity(bullet);
+				Log("EntityAdd\EBullet\n");
 			}
 			else if (name == ETurret)
 			{
@@ -541,6 +542,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				turret->deserialize(msg);
 				turret->setToNoUpdate();
 				game::system.addEntity(turret);
+				Log("EntityAdd\ETurret\n");
 			}
 			else if (name == ECore)
 			{
@@ -550,6 +552,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				core->deserialize(msg);
 				core->setToNoUpdate();
 				game::system.addEntity(core);
+				Log("EntityAdd\ECore\n");
 			}
 		}
 		else if (name == EntityUpdatePosition)
@@ -674,9 +677,15 @@ void SimpleNetClient::Do(std::string rMsg)
 				Log("Lobby Start\n");
 			}
 		}
+		else if (name == SendDefault)
+		{
+			Log("Multiple Msg's Sent At Once\n");
+		}
 		else
 		{
-			Log("SimpleNet: Unknown Packet Name: " + name);
+			std::stringstream log;
+			log << "Server: Unknown Packet Name: " << name;
+			Log(log.str());
 		}
 		name = None;
 		msg >> name;
