@@ -279,221 +279,46 @@ void Player::moveHand(DIRECTION direction)
 
 void Player::moveHandUp(Display& game)
 {
-	if (movementTimer_.Update() == false) return;
-	Position newPos = handPos;
-	newPos.getRefY()--;
-	/* Collision Checking */
-	///////////////////////////////////
-	if (game.isValidPosition(newPos, true) == false)
-		return;
-	Entity* entity;
-	if (game::system.getEntityAt(newPos, &entity))
-	{
-		if (entity->hasKeyWord(KEYWORD_BULLET))
-		{
-			damage(Common::GetBulletDamage(entity));
-			forceHandPosition(newPos);
-			knockbackTo((DIRECTION)Common::GetBulletDirection(entity), 1);
-			entity->kill();
-			game::m_sounds.PlaySoundR("Bullet");
-			std::stringstream msg;
-			msg << SendDefault << EndLine  << Sound << EndLine  << "Bullet" << EndLine ;
-		}
-		return;
-	}
-	///////////////////////////////////
-	game.removeSelectedAtTile(handPos);
-	game.setTileAsSelected(newPos);
-	handPos = newPos;
-	moved_ = true;
-	mined_ = false;
-	std::stringstream msg;
-	msg << UpdatePlayerPosition << endl
-		<< name_ << endl
-		<< newPos.getX() << endl
-		<< newPos.getY() << endl;
-	game::game.addPacket(msg.str());
+	moveHand(DIRECTION_UP);
 	return;
 }
 
 void Player::moveHandDown(Display& game)
 {
-	if (movementTimer_.Update() == false) return;
-	Position newPos = handPos;
-	newPos.getRefY()++;
-	/* Collision Checking */
-	///////////////////////////////////
-	if (game.isValidPosition(newPos, true) == false)
-		return;
-	Entity* entity;
-	if (game::system.getEntityAt(newPos, &entity))
-	{
-		if (entity->hasKeyWord(KEYWORD_BULLET))
-		{
-			damage(Common::GetBulletDamage(entity));
-			forceHandPosition(newPos);
-			knockbackTo((DIRECTION)Common::GetBulletDirection(entity), 1);
-			entity->kill();
-			game::m_sounds.PlaySoundR("Bullet");
-			std::stringstream msg;
-			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
-		}
-		return;
-	}
-	///////////////////////////////////
-	game.removeSelectedAtTile(handPos);
-	game.setTileAsSelected(newPos);
-	handPos = newPos;
-	moved_ = true;
-	mined_ = false;
-	std::stringstream msg;
-	msg << UpdatePlayerPosition << endl
-		<< name_ << endl
-		<< newPos.getX() << endl
-		<< newPos.getY() << endl;
-	game::game.addPacket(msg.str());
+	moveHand(DIRECTION_DOWN);
 	return;
 }
 
 void Player::moveHandLeft(Display& game)
 {
-	if (movementTimer_.Update() == false) return;
-	Position newPos = handPos;
-	newPos.getRefX()--;
-	/* Collision Checking */
-	///////////////////////////////////
-	if (game.isValidPosition(newPos, true) == false)
-		return;
-	Entity* entity;
-	if (game::system.getEntityAt(newPos, &entity))
-	{
-		if (entity->hasKeyWord(KEYWORD_BULLET))
-		{
-			damage(Common::GetBulletDamage(entity));
-			forceHandPosition(newPos);
-			knockbackTo((DIRECTION)Common::GetBulletDirection(entity), 1);
-			entity->kill();
-			game::m_sounds.PlaySoundR("Bullet");
-			std::stringstream msg;
-			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
-		}
-		return;
-	}
-	///////////////////////////////////
-	game.removeSelectedAtTile(handPos);
-	game.setTileAsSelected(newPos);
-	handPos = newPos;
-	moved_ = true;
-	mined_ = false;
-	std::stringstream msg;
-	msg << UpdatePlayerPosition << endl
-		<< name_ << endl
-		<< newPos.getX() << endl
-		<< newPos.getY() << endl;
-	game::game.addPacket(msg.str());
+	moveHand(DIRECTION_LEFT);
 	return;
 }
 
 void Player::moveHandRight(Display& game)
 {
-	if (movementTimer_.Update() == false) return;
-	Position newPos = handPos;
-	newPos.getRefX()++;
-	/* Collision Checking */
-	///////////////////////////////////
-	if (game.isValidPosition(newPos, true) == false)
-		return;
-	Entity* entity;
-	if (game::system.getEntityAt(newPos, &entity))
-	{
-		if (entity->hasKeyWord(KEYWORD_BULLET))
-		{
-			damage(Common::GetBulletDamage(entity));
-			forceHandPosition(newPos);
-			knockbackTo((DIRECTION)Common::GetBulletDirection(entity), 1);
-			entity->kill();
-			game::m_sounds.PlaySoundR("Bullet");
-			std::stringstream msg;
-			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
-		}
-		return;
-	}
-	///////////////////////////////////
-	game.removeSelectedAtTile(handPos);
-	game.setTileAsSelected(newPos);
-	handPos = newPos;
-	moved_ = true;
-	mined_ = false;
-	std::stringstream msg;
-	msg << UpdatePlayerPosition << endl
-		<< name_ << endl
-		<< newPos.getX() << endl
-		<< newPos.getY() << endl;
-	game::game.addPacket(msg.str());
+	moveHand(DIRECTION_RIGHT);
 	return;
 }
 
 void Player::mineUp(Display& game)
 {
-	Position newPos = handPos;
-	newPos.getRefY()--;
-	if(game::system.entityAt(newPos))
-	{ 
-		Entity* entity;
-		if(game::system.getEntityAt(newPos, &entity))
-		{
-			entity->damage(25, name_);
-		}
-	}
-	else 
-	{
-		if (game.isValidPosition(newPos) == false)
-			return;
-		if (game.getTileRefAt(newPos).isWall() == true)
-			game.getTileRefAt(newPos).mine(25, *this);
-		mineUIPos = newPos;
-		mined_ = true;
-		moved_ = false;
-	}
+	mine(DIRECTION_UP);
 }
 
 void Player::mineDown(Display& game)
 {
-	Position newPos = handPos;
-	newPos.getRefY()++;
-	if (game.isValidPosition(newPos) == false)
-		return;
-	if (game.getTileRefAt(newPos).isWall() == true)
-		game.getTileRefAt(newPos).mine(25, *this);
-	mineUIPos = newPos;
-	mined_ = true;
-	moved_ = false;
+	mine(DIRECTION_DOWN);
 }
 
 void Player::mineLeft(Display& game)
 {
-	Position newPos = handPos;
-	newPos.getRefX()--;
-	if (game.isValidPosition(newPos) == false)
-		return;
-	if (game.getTileRefAt(newPos).isWall() == true)
-		game.getTileRefAt(newPos).mine(25, *this);
-	mineUIPos = newPos;
-	mined_ = true;
-	moved_ = false;
+	mine(DIRECTION_LEFT);
 }
 
 void Player::mineRight(Display& game)
 {
-	Position newPos = handPos;
-	newPos.getRefX()++;
-	if (game.isValidPosition(newPos) == false)
-		return;
-	if (game.getTileRefAt(newPos).isWall() == true)
-		game.getTileRefAt(newPos).mine(25, *this);
-	mineUIPos = newPos;
-	mined_ = true;
-	moved_ = false;
+	mine(DIRECTION_RIGHT);
 }
 
 void Player::mine(DIRECTION direction)

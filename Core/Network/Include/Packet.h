@@ -15,7 +15,7 @@ enum PacketNames
 
 	EntityDamage, EntityKill, EntityUpdatePosition,
 	
-	EntityAdd, EBullet, ETurret,
+	EntityAdd, EBullet, ETurret, ECore, 
 
 	DamagePlayer, HealPlayer, KillPlayer,
 

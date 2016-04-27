@@ -7,6 +7,7 @@ class Entity;
 class Turret;
 class Bullet;
 class Player;
+class Core;
 
 enum COLOR
 {
@@ -35,4 +36,9 @@ namespace Common
 	extern int GetBulletDirection(Entity* entity);
 	extern int GetDisplayMaxWidth();
 	extern int GetDisplayMaxHeight();
+}
+
+namespace Network
+{
+	extern void SendCore(Core* core);
 }

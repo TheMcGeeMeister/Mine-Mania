@@ -71,7 +71,7 @@ namespace Common
 				}
 				else
 				{
-					msg << x << EndLine << AddPlayer << EndLine;
+					msg << x << EndLine << PacketNames::AddPlayer << EndLine;
 					player->serialize(msg);
 				}
 				SendServerLiteral(msg.str());
@@ -96,6 +96,7 @@ namespace Common
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
 		game::system.addEntity(NewCore);
+		Network::SendCore(NewCore.get());
 	}
 
 	void SetStoneFloorAt(Position pos, std::string owner)
@@ -179,5 +180,15 @@ namespace Common
 	int GetDisplayMaxHeight()
 	{
 		return game::game.getMaxHeight();
+	}
+}
+
+
+namespace Network
+{
+	extern void SendCore(Core* core)
+	{
+		std::stringstream msg;
+		msg << SendDefault << EndLine << EntityAdd << EndLine << ECore << EndLine; core->serialize(msg);
 	}
 }

@@ -1,6 +1,7 @@
 #include "Core.h"
 #include "Display.h"
 #include "Common.h"
+#include "LoadEnums.h"
 
 namespace game
 {
@@ -40,6 +41,22 @@ void Core::updatePos()
 	game::game.getTileRefAt(pos_).updateOverlay(true, graphic_);
 }
 
+void Core::serialize(std::stringstream & file)
+{
+	file << L_Core << EndLine
+		 << (int)graphic_ << EndLine
+		 << isDead_ << EndLine;
+	health_.serialize(file);
+}
+
+void Core::deserialize(std::stringstream & file)
+{
+	int g;
+	file >> g >> isDead_;
+	graphic_ = g;
+	health_.deserialize(file);
+}
+
 void Core::update()
 {
 	health_.update();
@@ -68,7 +85,8 @@ void Core::clean()
 
 void Core::serialize(std::fstream & file)
 {
-	file << (int)graphic_ << EndLine 
+	file << L_Core << EndLine
+		<<(int)graphic_ << EndLine 
 		<< isDead_ << EndLine;
 	health_.serialize(file);
 }

@@ -3,7 +3,7 @@
 
 enum LOAD
 {
-	L_Tile, L_Player, L_Bullet, L_Turret,
+	L_Tile, L_Player, L_Bullet, L_Turret, L_Core,
 
 	L_Solo, L_Multi,
 

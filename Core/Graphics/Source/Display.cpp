@@ -1135,12 +1135,6 @@ void Display::newWorldMulti()
 		}
 	}
 
-	/* Local Player */
-	//////////////////////////
-	Player localPlayer_;
-	localPlayer_.setName(game::pHandler.getLocalPlayer().getName());
-	localPlayer_.setPos(Position(0, 1));
-	//////////////////////////
 
 	isLoaded_ = true;
 	reloadAll_ = true;

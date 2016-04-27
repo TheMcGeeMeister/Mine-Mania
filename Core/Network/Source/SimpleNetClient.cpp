@@ -18,6 +18,7 @@
 #include <UserInterface.h>
 #include <PlayerHandler.h>
 #include <SoundManager.h>
+#include <Core.h>
 
 namespace game
 {
@@ -544,6 +545,15 @@ void SimpleNetClient::Do(std::string rMsg)
 				turret->deserialize(msg);
 				turret->setToNoUpdate();
 				game::system.addEntity(turret);
+			}
+			else if (name == ECore)
+			{
+				shared_ptr<Core> core = make_shared<Core>();
+				int none;
+				msg >> none;
+				core->deserialize(msg);
+				core->setToNoUpdate();
+				game::system.addEntity(core);
 			}
 		}
 		else if (name == EntityUpdatePosition)

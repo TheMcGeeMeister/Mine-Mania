@@ -13,6 +13,9 @@ public:
 	void setOwner(std::string name);
 	void updatePos();
 
+	void serialize(std::stringstream& file);
+	void deserialize(std::stringstream& file);
+
 
 	virtual void update();
 	virtual bool hasComponent(int component);
