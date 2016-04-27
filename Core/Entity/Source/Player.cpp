@@ -1111,38 +1111,11 @@ Player CreatePlayerAndSendAt(Position pos, std::string name, list<int> toSend) /
 	return NewPlayer;
 }
 
-void Common::CreatePlayerAndSendAt(Position pos, std::string name, Position corePos, bool isLocal)
-{
-	if (isLocal == false)
-	{
-		Player NewPlayer;
-		NewPlayer.setHandPos(pos);
-		NewPlayer.setSpawnPos(pos);
-		NewPlayer.setName(name);
-
-		shared_ptr<Core> NewCore = make_shared<Core>();
-		NewCore->setPos(corePos);
-		NewCore->setOwner(name);
-		game::system.addEntity(NewCore);
-	}
-	else
-	{
-		Player NewPlayer;
-		NewPlayer.setHandPos(pos);
-		NewPlayer.setSpawnPos(pos);
-		NewPlayer.setName(name);
-		Common::AddLocalPlayer(&NewPlayer);
-		shared_ptr<Core> NewCore = make_shared<Core>();
-		NewCore->setPos(corePos);
-		NewCore->setOwner(name);
-		game::system.addEntity(NewCore);
-	}
-}
-
 Player Common::CreatePlayer(Position pos, std::string name, bool isLocal)
 {
 	Player NewPlayer;
 	NewPlayer.setHandPosNoUpdate(pos);
+	NewPlayer.setSpawnPos(pos);
 	NewPlayer.setName(name);
 	if (isLocal)
 	{

@@ -168,6 +168,5 @@ class Player : public Entity
 
 namespace Common
 {
-	extern void CreatePlayerAndSendAt(Position pos, std::string name, Position corePos, bool isLocal=false);
 	extern Player CreatePlayer(Position pos, std::string name, bool isLocal = false);
 }

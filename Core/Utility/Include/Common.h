@@ -28,7 +28,7 @@ namespace Common
 	extern void AddPlayer(Player* player);
 	extern void AddLocalPlayer(Player* player);
 	extern void CreatePlayerCore(std::string name, Position pos);
-	extern void SetStoneFloorAt(Position pos, std::string owner="NO_OWNER");
+	extern void SetStoneFloorAt(Position pos, std::string owner = "NO_OWNER");
 	extern bool ShootFrom(Position pos, int direction);
 	extern bool ShootFrom(Position pos, int direction, int bullet_range);
 	extern int GetBulletDamage(Entity* entity);
