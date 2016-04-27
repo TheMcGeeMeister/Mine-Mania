@@ -35,7 +35,7 @@ void Lobby::Initialize(bool isHost)
 	if (isHost)
 	{
 		ui.push_back("Start", true, true);
-		ui.push_back("Load", true, true);
+		//ui.push_back("Load", true, true);
 	}
 
 	ui.getSectionRef(1).setIVar(game::pHandler.getLocalPlayer().getName());
@@ -53,7 +53,7 @@ bool Lobby::Go()
 		msg << SendDefault << EndLine 
 			<< PacketNames::Lobby << EndLine 
 			<< LobbyGetInfo << EndLine 
-			<< game::server.getId() << EndLine ;
+			<< game::server.getId() << EndLine;
 		game::server.SendLiteral(msg.str());
 		msg.str(string());
 		msg << SendDefault << EndLine 
@@ -61,7 +61,7 @@ bool Lobby::Go()
 			<< LobbyAdd << EndLine 
 			<< game::pHandler.getLocalPlayer().getName() << EndLine 
 			<< false << EndLine 
-			<< game::server.getId() << EndLine ;
+			<< game::server.getId() << EndLine;
 		game::server.SendLiteral(msg.str());
 	}
 	Sleep(250);
@@ -81,7 +81,7 @@ bool Lobby::Go()
 					<< PacketNames::Lobby << EndLine 
 					<< LobbyName << EndLine 
 					<< ui.getSectionRef(1).getIVar() << EndLine 
-					<< game::server.getId() << EndLine ;
+					<< game::server.getId() << EndLine;
 				game::server.SendLiteral(msg.str());
 				game::pHandler.getLocalPlayer().setName(ui.getSectionRef(1).getIVar());
 				DrawList();
@@ -94,7 +94,7 @@ bool Lobby::Go()
 					msg << SendDefault << EndLine 
 						<< PacketNames::Lobby << EndLine 
 						<< LobbyUnReady << EndLine 
-						<< game::server.getId() << EndLine ;
+						<< game::server.getId() << EndLine;
 					game::server.SendLiteral(msg.str());
 					ui.getSectionRef(2).setText("Ready Up");
 					isReady_ = false;
@@ -105,7 +105,7 @@ bool Lobby::Go()
 					msg << SendDefault << EndLine 
 						<< PacketNames::Lobby << EndLine 
 						<< LobbyReady << EndLine 
-						<< game::server.getId() << EndLine ;
+						<< game::server.getId() << EndLine;
 					game::server.SendLiteral(msg.str());
 					ui.getSectionRef(2).setText("UnReady");
 					isReady_ = true;
@@ -147,9 +147,12 @@ bool Lobby::Go()
 					{
 						/* Load Players */
 						//////////////////////////
-						Player* player;
+						Player* player = &game::pHandler.getLocalPlayer();
+						std::string local = game::pHandler.getLocalPlayer().getName();
+						Common::SendPlayer(player, player_amount, 0);
 						for (auto& iter : m_players_t)
 						{
+							if (iter.second.first == local) continue;
 							if (game::pHandler.getPlayer(iter.second.first, &player))
 							{
 								Common::SendPlayer(player, player_amount, iter.first);
@@ -162,13 +165,14 @@ bool Lobby::Go()
 						msg.str(string());
 						msg << SendDefault << EndLine << PacketNames::Lobby << EndLine << LobbyStart << EndLine;
 						SendServerLiteral(msg.str());
+						started_ = true;
 					}
 				}
 			}
-			else if (selected == 4)
+			/*else if (selected == 4) Load 
 			{
 
-			}
+			}*/
 		}
 		if (started_ == true)
 		{

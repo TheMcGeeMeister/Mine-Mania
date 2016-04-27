@@ -1,10 +1,12 @@
+#include "game.h"
+#include "Core.h"
 #include "Common.h"
-#include "Display.h"
 #include "Bullet.h"
 #include "Turret.h"
 #include "Entity.h"
 #include "Packet.h"
-#include "Player.h"
+#include "Display.h"
+#include "PlayerHandler.h"
 #include "SimpleNetClient.h"
 
 #define EndLine "\n"
@@ -14,6 +16,7 @@ namespace game
 	extern SimpleNetClient server;
 	extern Display game;
 	extern System system;
+	extern PlayerHandler pHandler;
 }
 
 void SendServerLiteral(std::string msg)
@@ -59,17 +62,47 @@ namespace Common
 		std::stringstream msg;
 		for (int x = 0; x < playerAmount; x++)
 		{
-			if (x == player_)
+			if (x != game::server.getId())
 			{
-				msg << x << EndLine << AddPlayerLocal << EndLine;
-				player->serialize(msg);
-			}
-			else
-			{
-				msg << x << EndLine << AddPlayer << EndLine;
-				player->serialize(msg);
+				if (x == player_)
+				{
+					msg << x << EndLine << AddPlayerLocal << EndLine;
+					player->serialize(msg);
+				}
+				else
+				{
+					msg << x << EndLine << AddPlayer << EndLine;
+					player->serialize(msg);
+				}
+				SendServerLiteral(msg.str());
+				msg.str(string());
 			}
 		}
+	}
+
+	void AddPlayer(Player * player)
+	{
+		game::pHandler.addPlayer(*player);
+	}
+
+	void AddLocalPlayer(Player * player)
+	{
+		game::pHandler.addLocalPlayer(*player);
+	}
+
+	void CreatePlayerCore(std::string name, Position pos)
+	{
+		shared_ptr<Core> NewCore = make_shared<Core>();
+		NewCore->setPos(pos);
+		NewCore->setOwner(name);
+		game::system.addEntity(NewCore);
+	}
+
+	void SetStoneFloorAt(Position pos, std::string owner)
+	{
+		gametiles::stone_floor.setPos(pos);
+		gametiles::stone_floor.forceClaim(owner);
+		game::game.getTileRefAt(pos) = gametiles::stone_floor;
 	}
 
 	bool ShootFrom(Position pos, int direction)

@@ -789,7 +789,22 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
             case 3: // Load
 				menu.isHidden(true);
 				if (loadMenu(game) == true)
-					return false;
+				{
+					if (game::game.isLoadedMultiplayer() == true)
+					{
+						menu.isHidden(true);
+						connectMenu(sThread, threadStarted);
+						if (game::server.isConnected() == true)
+						{
+							return false;
+						}
+						menu.isHidden(false);
+					}
+					else
+					{
+						return false;
+					}
+				}
 				else{
 					menu.isHidden(false);
 					menu.reDrawAll();

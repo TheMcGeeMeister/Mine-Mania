@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include "Core.h"
 #include "LoadEnums.h"
 #include "Player.h"
 #include "Position.h"
@@ -162,6 +163,11 @@ void Player::setSpawnPos(Position pos)
 }
 
 void Player::setHandPos(Position pos)
+{
+	handPos = pos;
+}
+
+void Player::setHandPosNoUpdate(Position pos)
 {
 	handPos = pos;
 }
@@ -1101,6 +1107,51 @@ Player CreatePlayerAndSendAt(Position pos, std::string name, list<int> toSend) /
 		NewPlayer.serialize(msg);
 		SendServerLiteral(msg.str());
 		msg.str(string());
+	}
+	return NewPlayer;
+}
+
+void Common::CreatePlayerAndSendAt(Position pos, std::string name, Position corePos, bool isLocal)
+{
+	if (isLocal == false)
+	{
+		Player NewPlayer;
+		NewPlayer.setHandPos(pos);
+		NewPlayer.setSpawnPos(pos);
+		NewPlayer.setName(name);
+
+		shared_ptr<Core> NewCore = make_shared<Core>();
+		NewCore->setPos(corePos);
+		NewCore->setOwner(name);
+		game::system.addEntity(NewCore);
+	}
+	else
+	{
+		Player NewPlayer;
+		NewPlayer.setHandPos(pos);
+		NewPlayer.setSpawnPos(pos);
+		NewPlayer.setName(name);
+		Common::AddLocalPlayer(&NewPlayer);
+		shared_ptr<Core> NewCore = make_shared<Core>();
+		NewCore->setPos(corePos);
+		NewCore->setOwner(name);
+		game::system.addEntity(NewCore);
+	}
+}
+
+Player Common::CreatePlayer(Position pos, std::string name, bool isLocal)
+{
+	Player NewPlayer;
+	NewPlayer.setHandPosNoUpdate(pos);
+	NewPlayer.setName(name);
+	if (isLocal)
+	{
+		Common::AddLocalPlayer(&NewPlayer);
+	}
+	else
+	{
+		Common::AddPlayer(&NewPlayer);
+
 	}
 	return NewPlayer;
 }

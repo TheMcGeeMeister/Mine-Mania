@@ -51,6 +51,7 @@ class Player : public Entity
         void setName(string name);
 		void setSpawnPos(Position pos);
 		void setHandPos(Position pos); /* Changes variable without changing map */
+		void setHandPosNoUpdate(Position pos);
 		//////////////////////////////////
 
 		/* Stats*/
@@ -165,7 +166,8 @@ class Player : public Entity
 
 };
 
-
-
-Player CreatePlayerAt(Position pos, std::string name);
-Player CreatePlayerAndSendAt(Position pos, std::string name, list<int> toSend);
+namespace Common
+{
+	extern void CreatePlayerAndSendAt(Position pos, std::string name, Position corePos, bool isLocal=false);
+	extern Player CreatePlayer(Position pos, std::string name, bool isLocal = false);
+}

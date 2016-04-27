@@ -1134,34 +1134,14 @@ void Display::newWorldMulti()
 			}
 		}
 	}
-	Player other;
-	other.setName("Other");
-	other.setSpawnPos(Position(74, 28));
 
-	game::pHandler.getLocalPlayer().setName("Host");
-	game::pHandler.getLocalPlayer().setSpawnPos(Position(0,1));
+	/* Local Player */
+	//////////////////////////
+	Player localPlayer_;
+	localPlayer_.setName(game::pHandler.getLocalPlayer().getName());
+	localPlayer_.setPos(Position(0, 1));
+	//////////////////////////
 
-	/* Host */
-	startPos(0, 1);
-	core.setPos(Position(0,0));
-	stoneFloor.setPos(Position(0,1));
-	core.forceClaim("Host");
-	stoneFloor.forceClaim("Host");
-	m_map[startPos] = stoneFloor;
-	m_map[corePos] = core;
-	game::pHandler.getLocalPlayer().forceHandPosition(Position(0, 1), *this);
-	game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
-
-	/* Other*/
-	core.setPos(Position(74, 29));
-	stoneFloor.setPos(Position(74, 28));
-	core.forceClaim("Other");
-	stoneFloor.forceClaim("Other");
-	m_map[Position(74, 28)] = stoneFloor;
-	m_map[Position(74, 29)] = core;
-
-	other.forceHandPosition(Position(74, 28), *this);
-	game::pHandler.addPlayer(other);
 	isLoaded_ = true;
 	reloadAll_ = true;
 	isMultiplayer_ = true;
@@ -1169,6 +1149,16 @@ void Display::newWorldMulti()
 
 void Display::newWorldMulti(int pAmount, std::string names[])
 {
+	map<int, Position> p_pos;
+	map<int, Position> p_cpos;
+	p_pos[1] = Position(74, 28);
+	p_cpos[1] = Position(74, 29);
+	p_pos[2] = Position(74, 1);
+	p_cpos[2] = Position(74, 0);
+	p_pos[3] = Position(1, 29);
+	p_cpos[3] = Position(0, 29);
+	
+
 	game::system.clear();
 
 	Position newPos(0, 0);
@@ -1221,8 +1211,6 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	stone.setHealth(100);
 	stone.isWall(true);
 
-	//Position startPos(rand() % 50, rand() % 20);
-	//Position corePos(rand() % 50, rand() % 20);
 	Position startPos(0, 1);
 	Position corePos(0, 0);
 	int key = rand() % 15;
@@ -1245,103 +1233,19 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 			}
 		}
 	}
-	std::stringstream msg;
 
-	Core pCore;
+	/* Local */
+	////////////////////
+	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], true), pAmount, 0);
+	Common::CreatePlayerCore(names[0], Position(0, 0));
+	Common::SetStoneFloorAt(Position(0,1), names[0]);
+	////////////////////
 
-	Player host;
-	host.setName(names[0]);
-	host.setSpawnPos(Position(0, 1));
-	core.setPos(Position(0, 0));
-	core.forceClaim(names[0]);
-	stoneFloor.setPos(Position(0, 1));
-	stoneFloor.forceClaim(names[0]);
-	m_map[Position(0, 0)] = core;
-	m_map[Position(0, 1)] = stoneFloor;
-	game::pHandler.addLocalPlayer(host);
-	msg << SendDefault << EndLine 
-		<< AddPlayer << EndLine;
-	host.serialize(msg);
-	SendServerLiteral(msg.str());
-	msg.str(string());
-	pCore.setPos(Position(0,1));
-	pCore.setOwner(names[0]);
-
-
-	Core pCore2;
-	Player p2;
-	p2.setName(names[1]);
-	p2.setSpawnPos(Position(74, 28));
-	p2.forceHandPosition(Position(74, 28), *this);
-	core.setPos(Position(74, 29));
-	core.forceClaim(names[1]);
-	stoneFloor.setPos(Position(74, 28));
-	stoneFloor.forceClaim(names[1]);
-	m_map[Position(74, 29)] = core;
-	m_map[Position(74, 28)] = stoneFloor;
-	game::pHandler.addPlayer(p2);
-	pCore2.setPos(Position(74, 28));
-	pCore2.setOwner(names[1]);
-
-	Player p3;
-	Core pCore3;
-	Player p4;
-	Core pCore4;
-
-	if (pAmount > 2)
+	for (int x = 1; x < pAmount; x++)
 	{
-		p3.setName(names[2]);
-		p3.setSpawnPos(Position(74, 1));
-		p3.forceHandPosition(Position(74, 1), *this);
-		core.setPos(Position(74, 0));
-		core.forceClaim(names[2]);
-		stoneFloor.setPos(Position(74, 1));
-		stoneFloor.forceClaim(names[2]);
-		game::pHandler.addPlayer(p3);
-		pCore3.setPos(Position(74, 1));
-		pCore3.setOwner(names[2]);
-		
-
-		if (pAmount == 4)
-		{
-			p4.setName(names[3]);
-			p4.setSpawnPos(Position(0, 28));
-			p4.forceHandPosition(Position(0, 28), *this);
-			core.setPos(Position(0, 29));
-			core.forceClaim(names[3]);
-			stoneFloor.setPos(Position(0, 28));
-			stoneFloor.forceClaim(names[3]);
-			game::pHandler.addPlayer(p4);
-			pCore4.setPos(Position(0, 28));
-			pCore4.setOwner(names[3]);
-		}
-	}
-
-	switch (pAmount)
-	{
-	case 2:{
-		std::stringstream msg;
-		msg << SendDefault << EndLine  << AddPlayerLocal << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str());
-		break;}
-	case 3:{
-		std::stringstream msg;
-		msg << 1 << EndLine  << AddPlayerLocal << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 1 << EndLine  << AddPlayer << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << EndLine  << AddPlayerLocal << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << EndLine  << AddPlayer << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str());
-		break;}
-	case 4:{
-		std::stringstream msg;
-		msg << 1 << EndLine  << AddPlayerLocal << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 1 << EndLine  << AddPlayer << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 1 << EndLine  << AddPlayer << EndLine ; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << EndLine  << AddPlayerLocal << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << EndLine  << AddPlayer << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 2 << EndLine  << AddPlayer << EndLine ; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 3 << EndLine  << AddPlayerLocal << EndLine ; p4.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 3 << EndLine  << AddPlayer << EndLine ; p2.serialize(msg); SendServerLiteral(msg.str()); msg.str(string());
-		msg << 3 << EndLine  << AddPlayer << EndLine ; p3.serialize(msg); SendServerLiteral(msg.str());
-		break;}
+		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x]), pAmount, x);
+		Common::SetStoneFloorAt(p_pos[x], names[x]);
+		Common::CreatePlayerCore(names[x], p_cpos[x]);
 	}
 
 	isLoaded_ = true;

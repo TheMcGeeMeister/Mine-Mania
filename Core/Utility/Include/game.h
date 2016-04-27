@@ -11,7 +11,7 @@ namespace game
     extern RegenManager RegenHandler;
 }
 
-namespace gameTiles
+namespace gametiles
 {
 	extern Tile stone_wall;
 	extern Tile stone_wall_gold;
