@@ -37,4 +37,3 @@ private:
 
 	UserInterface ui;
 };
-

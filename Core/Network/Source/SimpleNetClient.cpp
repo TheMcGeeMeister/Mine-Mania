@@ -51,7 +51,6 @@ SimpleNetClient::SimpleNetClient()
 	id_ = 0;
 }
 
-
 SimpleNetClient::~SimpleNetClient()
 {
 	if (isConnected_)
@@ -73,7 +72,6 @@ bool SimpleNetClient::Start()
 
 	// Validate the parameters
 
-
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -90,10 +88,9 @@ bool SimpleNetClient::Start()
 	// Attempt to connect to an address until one succeeds
 	for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
 	{
-
 		// Create a SOCKET for connecting to server
 		SimpleNet::ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
-		if (SimpleNet::ConnectSocket == INVALID_SOCKET) 
+		if (SimpleNet::ConnectSocket == INVALID_SOCKET)
 		{
 			WSACleanup();
 			return false;
@@ -112,7 +109,7 @@ bool SimpleNetClient::Start()
 
 	freeaddrinfo(result);
 
-	if (SimpleNet::ConnectSocket == INVALID_SOCKET) 
+	if (SimpleNet::ConnectSocket == INVALID_SOCKET)
 	{
 		WSACleanup();
 		return false;
@@ -120,7 +117,7 @@ bool SimpleNetClient::Start()
 
 	// Send an initial buffer
 	//iResult = send(SimpleNet::ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
-	/*if (iResult == SOCKET_ERROR) 
+	/*if (iResult == SOCKET_ERROR)
 	{
 		closesocket(SimpleNet::ConnectSocket);
 		WSACleanup();
@@ -129,7 +126,7 @@ bool SimpleNetClient::Start()
 
 	// shutdown the connection since no more data will be sent
 	/*iResult = shutdown(SimpleNet::ConnectSocket, SD_SEND);
-	if (iResult == SOCKET_ERROR) 
+	if (iResult == SOCKET_ERROR)
 	{
 		closesocket(SimpleNet::ConnectSocket);
 		WSACleanup();
@@ -153,7 +150,6 @@ bool SimpleNetClient::Connect(std::string ip)
 
 	// Validate the parameters
 
-
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -170,7 +166,6 @@ bool SimpleNetClient::Connect(std::string ip)
 	// Attempt to connect to an address until one succeeds
 	for (ptr = result; ptr != NULL; ptr = ptr->ai_next)
 	{
-
 		// Create a SOCKET for connecting to server
 		SimpleNet::ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 		if (SimpleNet::ConnectSocket == INVALID_SOCKET)
@@ -241,7 +236,8 @@ void SimpleNetClient::Loop()
 			game::ServerUI.getSectionRef(1).setVar(1, "False");
 			Log("Server Disconnected");
 			isExit_ = true;
-		}else if (iResult > 0)
+		}
+		else if (iResult > 0)
 		{
 			/*msg << msgBuffer;
 			Packet nMsg;
@@ -425,7 +421,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			int pos_y = 0;
 			bool overlayEnabled = false;
 			int overlayGraphic = ' ';
-			
+
 			msg >> pos_x;
 			msg >> pos_y;
 			msg >> overlayEnabled;
@@ -478,7 +474,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			}
 		}
 		////////////////////////////////////////////
-		
+
 		/* Adds */
 		////////////////////////////////////////////
 		else if (name == AddPlayer)
@@ -572,7 +568,6 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		////////////////////////////////////////////
 
-
 		else if (name == GetWorld)
 		{
 			std::string world = game::game.getWorld();
@@ -604,7 +599,6 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		else if (name == WaitingPlayer)
 		{
-
 		}
 		else if (name == PlayerConnect)
 		{
@@ -665,12 +659,12 @@ void SimpleNetClient::Do(std::string rMsg)
 				int id;
 				msg >> id;
 				std::stringstream nMsg;
-				nMsg << id << EndLine 
-					<< Lobby << EndLine 
-					<< LobbyAdd << EndLine 
-					<< game::pHandler.getLocalPlayer().getName() << EndLine 
-					<< game::lobby.isReady() << EndLine 
-					<< id_ << EndLine ;
+				nMsg << id << EndLine
+					<< Lobby << EndLine
+					<< LobbyAdd << EndLine
+					<< game::pHandler.getLocalPlayer().getName() << EndLine
+					<< game::lobby.isReady() << EndLine
+					<< id_ << EndLine;
 				SendLiteral(nMsg.str());
 				Log("Lobby GetInfo\n");
 			}
@@ -726,11 +720,9 @@ void SimpleNetClient::Do(Packet msg)
 	}
 	else if (msg.name == GetWorld)
 	{
-
 	}
 	else if (msg.name == World)
 	{
-
 	}
 	else if (msg.name == SetHost)
 	{

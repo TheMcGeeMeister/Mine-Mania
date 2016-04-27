@@ -21,10 +21,8 @@ Lobby::Lobby() : ui(30, 10, 0, 0, 1)
 	player_amount = 1;
 }
 
-
 Lobby::~Lobby()
 {
-
 }
 
 void Lobby::Initialize(bool isHost)
@@ -50,17 +48,17 @@ bool Lobby::Go()
 	if (isHost_ == false)
 	{
 		std::stringstream msg;
-		msg << SendDefault << EndLine 
-			<< PacketNames::Lobby << EndLine 
-			<< LobbyGetInfo << EndLine 
+		msg << SendDefault << EndLine
+			<< PacketNames::Lobby << EndLine
+			<< LobbyGetInfo << EndLine
 			<< game::server.getId() << EndLine;
 		game::server.SendLiteral(msg.str());
 		msg.str(string());
-		msg << SendDefault << EndLine 
-			<< PacketNames::Lobby << EndLine 
-			<< LobbyAdd << EndLine 
-			<< game::pHandler.getLocalPlayer().getName() << EndLine 
-			<< false << EndLine 
+		msg << SendDefault << EndLine
+			<< PacketNames::Lobby << EndLine
+			<< LobbyAdd << EndLine
+			<< game::pHandler.getLocalPlayer().getName() << EndLine
+			<< false << EndLine
 			<< game::server.getId() << EndLine;
 		game::server.SendLiteral(msg.str());
 	}
@@ -77,23 +75,23 @@ bool Lobby::Go()
 			{
 				PlayerChangeName(game::server.getId(), ui.getSectionRef(1).getIVar());
 				std::stringstream msg;
-				msg << SendDefault << EndLine 
-					<< PacketNames::Lobby << EndLine 
-					<< LobbyName << EndLine 
-					<< ui.getSectionRef(1).getIVar() << EndLine 
+				msg << SendDefault << EndLine
+					<< PacketNames::Lobby << EndLine
+					<< LobbyName << EndLine
+					<< ui.getSectionRef(1).getIVar() << EndLine
 					<< game::server.getId() << EndLine;
 				game::server.SendLiteral(msg.str());
 				game::pHandler.getLocalPlayer().setName(ui.getSectionRef(1).getIVar());
 				DrawList();
 			}
-			else if(selected == 2)
+			else if (selected == 2)
 			{
 				std::stringstream msg;
 				if (isReady_)
 				{
-					msg << SendDefault << EndLine 
-						<< PacketNames::Lobby << EndLine 
-						<< LobbyUnReady << EndLine 
+					msg << SendDefault << EndLine
+						<< PacketNames::Lobby << EndLine
+						<< LobbyUnReady << EndLine
 						<< game::server.getId() << EndLine;
 					game::server.SendLiteral(msg.str());
 					ui.getSectionRef(2).setText("Ready Up");
@@ -102,9 +100,9 @@ bool Lobby::Go()
 				}
 				else
 				{
-					msg << SendDefault << EndLine 
-						<< PacketNames::Lobby << EndLine 
-						<< LobbyReady << EndLine 
+					msg << SendDefault << EndLine
+						<< PacketNames::Lobby << EndLine
+						<< LobbyReady << EndLine
 						<< game::server.getId() << EndLine;
 					game::server.SendLiteral(msg.str());
 					ui.getSectionRef(2).setText("UnReady");
@@ -113,7 +111,7 @@ bool Lobby::Go()
 				}
 				DrawList();
 			}
-			else if(selected == 3)
+			else if (selected == 3)
 			{
 				bool isStartReady = true;
 				for (auto& iter : m_players_t)
@@ -169,9 +167,8 @@ bool Lobby::Go()
 					}
 				}
 			}
-			/*else if (selected == 4) Load 
+			/*else if (selected == 4) Load
 			{
-
 			}*/
 		}
 		if (started_ == true)

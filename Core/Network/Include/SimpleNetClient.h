@@ -47,4 +47,3 @@ private:
 
 	int id_;
 };
-

@@ -752,7 +752,7 @@ string Display::getWorld()
 	{
 		world << iter.second.serialize(true);
 	}
-	world << LOAD::END << EndLine ;
+	world << LOAD::END << EndLine;
 	return world.str();
 }
 

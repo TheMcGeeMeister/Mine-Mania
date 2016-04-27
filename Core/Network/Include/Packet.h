@@ -14,8 +14,8 @@ enum PacketNames
 	UpdatePlayer, Health,
 
 	EntityDamage, EntityKill, EntityUpdatePosition,
-	
-	EntityAdd, EBullet, ETurret, ECore, 
+
+	EntityAdd, EBullet, ETurret, ECore,
 
 	DamagePlayer, HealPlayer, KillPlayer,
 
@@ -38,4 +38,3 @@ public:
 	uint16_t send;
 	std::string data;
 };
-
