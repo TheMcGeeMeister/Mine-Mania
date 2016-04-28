@@ -1,4 +1,4 @@
-// SimpleNet.cpp : Defines the entry point for the console application.
+﻿// SimpleNet.cpp : Defines the entry point for the console application.
 //
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -157,7 +157,7 @@ void ListenLoop()
 	}
 }
 
-void Send(int sender, std::string msg)
+void Send(int sender, std::string& msg)
 {
 	for (auto& iter : SimpleNet::s_players)
 	{
@@ -166,7 +166,7 @@ void Send(int sender, std::string msg)
 	}
 }
 
-void SendTo(int to, std::string msg)
+void SendTo(int to, std::string& msg)
 {
 	if (SimpleNet::s_players.count(to))
 	{
@@ -176,6 +176,7 @@ void SendTo(int to, std::string msg)
 
 void LogTry(std::string rmsg)
 {
+	return;
 	std::stringstream msg;
 	msg >> rmsg;
 	int name;
@@ -573,45 +574,59 @@ void LogTry(std::string rmsg)
 
 void Go(std::string rMsg, int sender)
 {
-	std::stringstream sMsg; // Stream Msg
-	sMsg << rMsg;
+	int CurPos = 0;
+	int EndPos = rMsg.find('♥', 0);
+	std::stringstream curMsg;
+	std::stringstream sMsg;
 	uint16_t send;
-	sMsg >> send;
-	SimpleNet::Log(rMsg);
-	if (send == SendDefault)
+	while (EndPos != std::string::npos)
 	{
-		std::stringstream rMsg;
-		rMsg << sMsg.rdbuf();
-		Send(sender, rMsg.str());
-		LogTry(rMsg.str());
-	}
-	else
-	{
-		std::stringstream rMsg;
-		rMsg << sMsg.rdbuf();
-		SendTo(send, rMsg.str());
-		LogTry(rMsg.str());
+		curMsg << rMsg.substr(CurPos, (EndPos - CurPos));
+		curMsg >> send;
+		SimpleNet::Log(curMsg.str());
+		if (send == SendDefault)
+		{
+			sMsg << curMsg.rdbuf();
+			Send(sender, sMsg.str());
+		}
+		else
+		{
+			sMsg << curMsg.rdbuf();
+			SendTo(send, sMsg.str());
+		}
+		sMsg.str(std::string());
+		curMsg.str(std::string());
+		CurPos = EndPos + 1;
+		EndPos = rMsg.find('♥', CurPos);
 	}
 }
 
 void Go(std::string rMsg, int sender, int to)
 {
-	std::stringstream sMsg; // Stream Msg
-	sMsg << rMsg;
+	int CurPos = 0;
+	int EndPos = rMsg.find('♥', 0);
+	std::stringstream curMsg;
+	std::stringstream sMsg;
 	uint16_t send;
-	sMsg >> send;
-	SimpleNet::Log(rMsg);
-	if (send == SendDefault)
+	while (EndPos != std::string::npos)
 	{
-		std::stringstream rMsg;
-		rMsg << sMsg.rdbuf();
-		Send(sender, rMsg.str());
-	}
-	else
-	{
-		std::stringstream rMsg;
-		rMsg << sMsg.rdbuf();
-		SendTo(send, rMsg.str());
+		curMsg << rMsg.substr(CurPos, (EndPos - CurPos));
+		curMsg >> send;
+		SimpleNet::Log(curMsg.str());
+		if (send == SendDefault)
+		{
+			sMsg << curMsg.rdbuf();
+			Send(sender, sMsg.str());
+		}
+		else
+		{
+			sMsg << curMsg.rdbuf();
+			SendTo(send, sMsg.str());
+		}
+		sMsg.str(std::string());
+		curMsg.str(std::string());
+		CurPos = EndPos + 1;
+		EndPos = rMsg.find('♥', CurPos);
 	}
 }
 

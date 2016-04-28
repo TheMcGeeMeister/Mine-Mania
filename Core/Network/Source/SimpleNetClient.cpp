@@ -1,4 +1,4 @@
-#include "SimpleNetClient.h"
+﻿#include "SimpleNetClient.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -239,83 +239,35 @@ void SimpleNetClient::Loop()
 		}
 		else if (iResult > 0)
 		{
-			/*msg << msgBuffer;
-			Packet nMsg;
-			msg >> nMsg.name;
-			stringstream tStream;
-			tStream << msg.rdbuf();
-			nMsg.data = tStream.str();*/
 			std::string msg = msgBuffer;
 			Do(msg);
 		}
-		/*else
-		{
-			game::SlideUI.addSlide("MSG:Server Error");
-			game::ServerUI.getSectionRef(1).setVar(1, "False");
-			Log("Error:Server Closed");
-			isConnected_ = false;
-			return;
-		}*/
 		msg.str(string());
 	}
 	game::SlideUI.addSlide("MSG:Network Loop Ended");
 }
 
-void SimpleNetClient::Send(std::string msg)
+void SimpleNetClient::SendLiteral(std::string rmsg)
 {
-	stringstream cMsg;
-	if (isHost_)
-	{
-		cMsg << SendPlayer << endl;
-	}
-	else
-	{
-		cMsg << SendDefault << endl;
-	}
-	cMsg << msg;
-	send(SimpleNet::ConnectSocket, cMsg.str().c_str(), cMsg.str().length(), NULL);
-}
-
-void SimpleNetClient::Send(Packet msg)
-{
-	stringstream sMsg;
-	if (msg.name == SendPlayer)
-	{
-		sMsg << msg.name << endl;
-		sMsg << msg.data;
-	}
-	else if (msg.name == SendHost)
-	{
-		sMsg << msg.send << endl;
-		sMsg << msg.name << endl;
-		sMsg << msg.data;
-	}
-	else if (msg.name == SendDefault)
-	{
-		sMsg << msg.send << endl;
-		sMsg << msg.name << endl;
-		sMsg << msg.data;
-		send(SimpleNet::ConnectSocket, sMsg.str().c_str(), sMsg.str().length(), NULL);
-	}
-}
-
-void SimpleNetClient::SendLiteral(std::string msg)
-{
+	std::stringstream msg;
+	char t = '♥';
+	msg << rmsg << t;
 	if (isConnected_ == false) return;
-	int amount = msg.length();
+	int amount = msg.str().length();
 	int amountSent = 0;
 	int result;
 	std::string cur;
-	result = send(SimpleNet::ConnectSocket, msg.c_str(), msg.length(), NULL);
+	result = send(SimpleNet::ConnectSocket, msg.str().c_str(), msg.str().length(), NULL);
 	if (result != amount)
 	{
 		amountSent += result;
 		while (amountSent < amount)
 		{
-			cur = msg.substr(amountSent, msg.length());
+			cur = msg.str().substr(amountSent, msg.str().length());
 			result = send(SimpleNet::ConnectSocket, cur.c_str(), cur.length(), NULL);
 			amountSent += result;
 		}
+		Log("INFO: NOT ALL DATA SENT AT ONCE\n");
 	}
 }
 
@@ -679,74 +631,18 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		else if (name == SendDefault)
 		{
-			Log("Multiple Msg's Sent At Once\n");
+			Log("SERVER ERROR: RECIEVED TWO MESSAGES AT ONCE\n");
 		}
 		else
 		{
 			std::stringstream log;
-			log << "Server: Unknown Packet Name: " << name;
+			log << "SERVER ERROR: PACKET NAME UNKNOWN -> " << name << std::endl;
 			Log(log.str());
 		}
 		name = None;
 		msg >> name;
 	}
 	return;
-}
-
-void SimpleNetClient::Do(Packet msg)
-{
-	Log("Network Recieved:" + msg.data + "\nEnd\n");
-	if (msg.name == SetSelected)
-	{
-		stringstream data; data << msg.data;
-		int posX;
-		int posY;
-		data >> posX;
-		data >> posY;
-		Position pos;
-		pos.setX(posX);
-		pos.setY(posY);
-		game::game.setTileAsSelectedS(pos);
-	}
-	else if (msg.name == RemoveSelected)
-	{
-		stringstream data; data << msg.data;
-		int posX;
-		int posY;
-		data >> posX;
-		data >> posY;
-		Position pos;
-		pos.setX(posX);
-		pos.setY(posY);
-		game::game.removeSelectedAtTileS(pos);
-	}
-	else if (msg.name == SetTile)
-	{
-		stringstream data; data << msg.data;
-		Tile tile;
-		tile.deserialize(data);
-		game::game.setTileAtS(tile.getPos(), tile);
-	}
-	else if (msg.name == GetWorld)
-	{
-	}
-	else if (msg.name == World)
-	{
-	}
-	else if (msg.name == SetHost)
-	{
-		isHost_ = true;
-		isHostChosen_ = true;
-	}
-	else if (msg.name == SetPlayer)
-	{
-		isHost_ = false;
-		isHostChosen_ = true;
-	}
-	else
-	{
-		Log("Error: Unknown Packet Name : " + msg.name);
-	}
 }
 
 void SimpleNetClient::Close()

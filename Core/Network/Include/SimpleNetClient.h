@@ -11,12 +11,9 @@ public:
 	bool Start();
 	bool Connect(std::string ip);
 	void Loop();
-	void Send(std::string msg);
-	void Send(Packet msg);
 	void SendLiteral(std::string msg);
 	void SetId(int id);
 	void Do(std::string rMsg);
-	void Do(Packet msg);
 	void Close();
 	void Pause();
 	void Continue();
