@@ -1,6 +1,7 @@
 #include <fstream>
 #include "Bullet.h"
 #include "LoadEnums.h"
+#include "Common.h"
 
 Bullet::Bullet()
 {
@@ -130,6 +131,13 @@ void Bullet::updateOverlay()
 void Bullet::updateID()
 {
 	ai.setID(getID());
+}
+
+void Bullet::send()
+{
+	std::stringstream msg;
+	msg << SendDefault << EndLine << EntityAdd << EndLine << EBullet << EndLine; serialize(msg);
+	SendServerLiteral(msg.str());
 }
 
 Position Bullet::getPos()

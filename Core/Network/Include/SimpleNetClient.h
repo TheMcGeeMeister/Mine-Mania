@@ -11,7 +11,7 @@ public:
 	bool Start();
 	bool Connect(std::string ip);
 	void Loop();
-	void SendLiteral(std::string msg);
+	void SendLiteral(std::string& msg);
 	void SetId(int id);
 	void Do(std::string rMsg);
 	void Close();

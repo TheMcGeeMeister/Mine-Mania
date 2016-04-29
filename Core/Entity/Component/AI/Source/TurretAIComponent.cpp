@@ -163,8 +163,6 @@ void TurretAIComponent::shoot(DIRECTION direction)
 
 	game::system.addEntity(bullet, "Bullet");
 
-	Common::SendBullet(bullet.get());
-
 	game::m_sounds.PlaySoundR("TurretShoot");
 }
 

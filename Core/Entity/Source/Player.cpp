@@ -903,6 +903,11 @@ void Player::updateID()
 	return;
 }
 
+void Player::send()
+{
+	return;
+}
+
 Position Player::getPos()
 {
 	return handPos;

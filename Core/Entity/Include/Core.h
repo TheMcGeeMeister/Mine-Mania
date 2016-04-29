@@ -28,6 +28,7 @@ public:
 	virtual void setPos(Position);
 	virtual void updateOverlay();
 	virtual void updateID(); // Not used for core
+	virtual void send();
 	virtual Position getPos();
 private:
 	Position pos_;

@@ -50,6 +50,7 @@ public:
 	virtual void setPos(Position) = 0;
 	virtual void updateOverlay() = 0;
 	virtual void updateID() = 0;
+	virtual void send() = 0;
 	virtual Position getPos() = 0;
 private:
 	int id_;
@@ -74,20 +75,27 @@ public:
 
 	bool entityAt(Position pos);
 	
-	int addEntity(std::shared_ptr<Entity>);
+	int addEntity(std::shared_ptr<Entity>, bool send = true);
 
-	int addEntity(std::shared_ptr<Entity>, std::string txt);
+	int addEntityServer(std::shared_ptr<Entity>);
+
+	int addEntity(std::shared_ptr<Entity>, std::string txt, bool send = true);
 
 	bool getEntityAt(Position pos, Entity** entity);
+
+	bool getEntityServer(int id, Entity** entity);
 
 	bool getEntity(int id, Entity** entity);
 
 	void serialize(std::fstream&);
 
+	void sendAll();
+
 	void clear();
 private:
 	int id_index;
 	std::map<int, std::shared_ptr<Entity>> m_system;
+	std::map<int, int> m_server;
 	bool updateServer_;
 };
 

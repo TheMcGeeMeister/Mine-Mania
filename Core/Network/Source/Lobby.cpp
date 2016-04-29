@@ -5,12 +5,14 @@
 #include "PlayerHandler.h"
 #include "Common.h"
 #include "Display.h"
+#include "Entity.h"
 
 namespace game
 {
 	extern SimpleNetClient server;
 	extern PlayerHandler pHandler;
 	extern Display game;
+	extern System system;
 }
 
 Lobby::Lobby() : ui(30, 10, 0, 0, 1)
@@ -157,10 +159,20 @@ bool Lobby::Go()
 							}
 						}
 						//////////////////////////
+
+						/* World Sync */
+						//////////////////////
 						std::stringstream msg;
 						msg << SendDefault << EndLine << World << EndLine << game::game.getWorld();
 						SendServerLiteral(msg.str());
 						msg.str(string());
+						//////////////////////
+
+						/* Entity Sync */
+						//////////////////////
+						game::system.sendAll();
+						//////////////////////
+
 						msg << SendDefault << EndLine << PacketNames::Lobby << EndLine << LobbyStart << EndLine;
 						SendServerLiteral(msg.str());
 						started_ = true;

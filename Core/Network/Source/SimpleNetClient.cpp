@@ -247,12 +247,12 @@ void SimpleNetClient::Loop()
 	game::SlideUI.addSlide("MSG:Network Loop Ended");
 }
 
-void SimpleNetClient::SendLiteral(std::string rmsg)
+void SimpleNetClient::SendLiteral(std::string& rmsg)
 {
+	if (isConnected_ == false) return;
 	std::stringstream msg;
 	char t = '♥';
 	msg << rmsg << t;
-	if (isConnected_ == false) return;
 	int amount = msg.str().length();
 	int amountSent = 0;
 	int result;
@@ -483,7 +483,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				msg >> none;
 				bullet->deserialize(msg);
 				bullet->setToNoUpdate();
-				game::system.addEntity(bullet);
+				game::system.addEntityServer(bullet);
 				Log("EntityAdd\EBullet\n");
 			}
 			else if (name == ETurret)
@@ -493,7 +493,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				msg >> none;
 				turret->deserialize(msg);
 				turret->setToNoUpdate();
-				game::system.addEntity(turret);
+				game::system.addEntityServer(turret);
 				Log("EntityAdd\ETurret\n");
 			}
 			else if (name == ECore)
@@ -503,7 +503,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				msg >> none;
 				core->deserialize(msg);
 				core->setToNoUpdate();
-				game::system.addEntity(core);
+				game::system.addEntityServer(core);
 				Log("EntityAdd\ECore\n");
 			}
 		}

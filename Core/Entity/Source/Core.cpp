@@ -135,6 +135,13 @@ void Core::updateID()
 	return;
 }
 
+void Core::send()
+{
+	std::stringstream msg;
+	msg << SendDefault << EndLine << EntityAdd << EndLine << ECore << EndLine; serialize(msg);
+	SendServerLiteral(msg.str());
+}
+
 Position Core::getPos()
 {
 	return Position();

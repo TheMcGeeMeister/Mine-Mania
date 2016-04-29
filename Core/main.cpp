@@ -863,14 +863,12 @@ void gameLoop()
 		{
 			if (game::game.isPacketsAvailable())
 			{
-				//list<Packet> packets = game::game.getPackets();
 				for (auto& iter : game::game.getPackets())
 				{
 					stringstream data;
 					data << iter.send << endl
 						<< iter.name << endl
 						<< iter.data;
-					//game::log("Sending:" + data.str() + "\nEnd\n");
 					game::server.SendLiteral(data.str());
 				}
 				game::game.clearPackets();

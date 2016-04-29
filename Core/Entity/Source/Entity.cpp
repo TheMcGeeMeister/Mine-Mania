@@ -129,7 +129,7 @@ void System::update()
 						std::fstream file("Logs\\Log.txt", std::ios::app);
 						file << "System: Entity Deleted ID:" << iter.first << std::endl;
 						/////////////////////////////////
-						msg << SendDefault << EndLine  << EntityKill << EndLine  << iter.second->getPos().serializeR();
+						msg << SendDefault << EndLine  << EntityKill << EndLine << iter.second->getPos().serializeR();
 						SendServerLiteral(msg.str());
 						msg.str(std::string());
 						continue;
@@ -175,8 +175,9 @@ bool System::entityAt(Position pos)
 	return false;
 }
 
-int System::addEntity(std::shared_ptr<Entity> entity)
+int System::addEntity(std::shared_ptr<Entity> entity, bool send)
 {
+	entity->setID(id_index);
 	m_system[id_index] = entity;
 	/* Debug */
 	/////////////////////////////////
@@ -184,11 +185,29 @@ int System::addEntity(std::shared_ptr<Entity> entity)
 	file << "System: Entity Created ID:" << id_index << std::endl;
 	/////////////////////////////////
 	id_index++;
+	if (send)
+	{
+		if (Common::isConnected() == true)
+		{
+			entity->send();
+		}
+	}
 	return (id_index - 1);
 }
 
-int System::addEntity(std::shared_ptr<Entity> entity, std::string txt)
+int System::addEntityServer(std::shared_ptr<Entity> entity)
 {
+	entity->setID(id_index);
+	m_system[id_index] = entity;
+	std::fstream file("Logs\\Log.txt", std::ios::app | std::ios::out);
+	file << "System: Entity Created ID:" << id_index << std::endl;
+	id_index++;
+	return (id_index - 1);
+}
+
+int System::addEntity(std::shared_ptr<Entity> entity, std::string txt, bool send)
+{
+	entity->setID(id_index);
 	m_system[id_index] = entity;
 	/* Debug */
 	/////////////////////////////////
@@ -196,6 +215,13 @@ int System::addEntity(std::shared_ptr<Entity> entity, std::string txt)
 	file << "System: Entity Created ID:" << id_index << " <" << txt.c_str() << ">" << std::endl;
 	/////////////////////////////////
 	id_index++;
+	if (send)
+	{
+		if (Common::isConnected() == true)
+		{
+			entity->send();
+		}
+	}
 	return (id_index - 1);
 }
 
@@ -210,6 +236,17 @@ bool System::getEntityAt(Position pos, Entity ** entity)
 		}
 	}
 	entity = nullptr;
+	return false;
+}
+
+bool System::getEntityServer(int i_id, Entity ** entity)
+{
+	int id = m_server[i_id];
+	if (m_system.count(id))
+	{
+		*entity = m_system[id].get();
+		return true;
+	}
 	return false;
 }
 
@@ -228,6 +265,14 @@ void System::serialize(std::fstream & file)
 	for (auto& iter : m_system)
 	{
 		iter.second->serialize(file);
+	}
+}
+
+void System::sendAll()
+{
+	for (auto& iter : m_system)
+	{
+		iter.second->send();
 	}
 }
 

@@ -123,6 +123,7 @@ class Player : public Entity
 		virtual void setPos(Position pos); // Calls forceHandPosition(Position)
 		virtual void updateOverlay();
 		virtual void updateID(); // Not used for player
+		virtual void send();
 		virtual Position getPos();
 
 		void killS();

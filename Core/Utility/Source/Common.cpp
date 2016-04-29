@@ -19,7 +19,7 @@ namespace game
 	extern PlayerHandler pHandler;
 }
 
-void SendServerLiteral(std::string msg)
+void SendServerLiteral(std::string& msg)
 {
 	game::server.SendLiteral(msg);
 }
@@ -96,7 +96,6 @@ namespace Common
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
 		game::system.addEntity(NewCore);
-		Network::SendCore(NewCore.get());
 	}
 
 	void SetStoneFloorAt(Position pos, std::string owner)
@@ -153,6 +152,11 @@ namespace Common
 			}
 		}
 		return false;
+	}
+
+	bool isConnected()
+	{
+		return game::server.isConnected();
 	}
 
 	int GetBulletDamage(Entity * entity)
