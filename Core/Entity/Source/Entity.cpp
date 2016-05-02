@@ -66,6 +66,11 @@ int Entity::getID()
 	return id_;
 }
 
+int & Entity::getIDRef()
+{
+	return id_;
+}
+
 bool Entity::isKilled()
 {
 	return kill_;

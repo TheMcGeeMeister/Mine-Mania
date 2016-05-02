@@ -17,6 +17,8 @@ public:
 	void setDirection(DIRECTION direction);
 	void setPosition(Position pos);
 
+	virtual void setID(int id);
+
 	void setGraphic(char g);
 
 	DIRECTION getDirection();
@@ -32,7 +34,7 @@ public:
 	virtual bool isKilled();
 	virtual void kill();
 	virtual void clean();
-	virtual void damage(int damage, std::string name);
+	virtual void damage(int damage, std::string name, bool server=false);
 	virtual void setPos(Position pos);
 	virtual void updateOverlay();
 	virtual void updateID();

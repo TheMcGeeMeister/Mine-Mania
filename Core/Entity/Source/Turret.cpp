@@ -87,7 +87,8 @@ void Turret::serialize(std::stringstream& file)
 	file << LOAD::L_Turret << std::endl
 		<< owner << std::endl
 		<< (int)graphic << std::endl
-		<< isDestroyed_ << std::endl;
+		<< isDestroyed_ << std::endl
+		<< getID() << std::endl;
 	ai.serialize(file);
 	health.serialize(file);
 }
@@ -95,9 +96,12 @@ void Turret::serialize(std::stringstream& file)
 void Turret::deserialize(std::stringstream& file)
 {
 	int graphic_;
+	int id;
 	file >> owner
 		>> graphic_
-		>> isDestroyed_;
+		>> isDestroyed_
+		>> id;
+	setID(id);
 	ai.deserialize(file);
 	health.deserialize(file);
 	graphic = graphic_;
@@ -108,7 +112,8 @@ void Turret::serialize(fstream & file)
 	file << LOAD::L_Turret << std::endl
 		<< owner << std::endl
 		<< (int)graphic << std::endl
-		<< isDestroyed_ << std::endl;
+		<< isDestroyed_ << std::endl
+		<< getID() << std::endl;
 	ai.serialize(file);
 	health.serialize(file);
 }
@@ -116,9 +121,12 @@ void Turret::serialize(fstream & file)
 void Turret::deserialize(fstream & file)
 {
 	int graphic_;
+	int id;
 	file >> owner
 		>> graphic_
-		>> isDestroyed_;
+		>> isDestroyed_
+		>> id;
+	setID(id);
 	ai.deserialize(file);
 	health.deserialize(file);
 	graphic = graphic_;
@@ -157,23 +165,32 @@ void Turret::clean()
 	game::TileHandler.push_back(ai.getPosition());
 }
 
-void Turret::damage(int amount, string name)
+void Turret::damage(int amount, string name, bool server)
 {
-	if (isSetToUpdate() == true)
+	if (server == false)
 	{
-		if (owner == name) return;
-		health.damage(amount);
-		if (health.isDead())
+		std::stringstream msg;
+		if (isSetToUpdate() == true)
 		{
-			game::m_sounds.PlaySoundR("Destroy");
-			kill();
+			if (owner == name) return;
+			health.damage(amount);
+			msg << SendDefault << EndLine << EntityDamage << EndLine << ai.getPosition().serializeR() << amount << EndLine << name << EndLine;
+			SendServerLiteral(msg.str());
+			if (health.isDead())
+			{
+				game::m_sounds.PlaySoundR("Destroy");
+				kill();
+			}
+		}
+		else
+		{
+			msg << SendDefault << EndLine << EntityDamage << EndLine << ai.getPosition().serializeR() << amount << EndLine << name << EndLine;
+			SendServerLiteral(msg.str());
 		}
 	}
 	else
 	{
-		std::stringstream msg;
-		msg << SendDefault << EndLine  << EntityDamage << ai.getPosition().serializeR() << amount << EndLine  << name << EndLine ;
-		SendServerLiteral(msg.str());
+		health.damage(amount);
 	}
 }
 

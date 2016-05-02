@@ -32,13 +32,14 @@ public:
 
 	void setToUpdate();
 	void setToNoUpdate();
-	void setID(int id);
+	virtual void setID(int id);
 	void addKeyWord(KEYWORD key);
 	
 	bool isSetToUpdate();
 	bool hasKeyWord(KEYWORD key);
 
 	int getID();
+	int& getIDRef();
 
 	virtual bool hasComponent(int component) = 0;
 	virtual bool isKilled() = 0;
@@ -46,7 +47,7 @@ public:
 	virtual void clean() = 0;
 	virtual void serialize(std::fstream&) = 0;
 	virtual void deserialize(std::fstream&) = 0;
-	virtual void damage(int damage, std::string name) = 0;
+	virtual void damage(int damage, std::string name, bool server=false) = 0;
 	virtual void setPos(Position) = 0;
 	virtual void updateOverlay() = 0;
 	virtual void updateID() = 0;

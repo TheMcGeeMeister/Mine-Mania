@@ -46,6 +46,12 @@ void Bullet::setPosition(Position pos)
 	ai.setPosition(pos);
 }
 
+void Bullet::setID(int id)
+{
+	ai.setID(id);
+	getIDRef() = id;
+}
+
 void Bullet::setGraphic(char g)
 {
 	ai.setGraphic(g);
@@ -59,26 +65,34 @@ DIRECTION Bullet::getDirection()
 void Bullet::serialize(std::stringstream & file)
 {
 	file << L_Bullet << std::endl
-		<< damage_ << std::endl;
+		<< damage_ << std::endl
+		<< getID() << std::endl;
 	ai.serialize(file);
 }
 
 void Bullet::deserialize(std::stringstream & file)
 {
-	file >> damage_;
+	int id;
+	file >> damage_
+		>> id;
+	setID(id);
 	ai.deserialize(file);
 }
 
 void Bullet::serialize(fstream & file)
 {
 	file << L_Bullet << std::endl
-		<< damage_ << std::endl;
+		<< damage_ << std::endl
+		<< getID() << std::endl;
 	ai.serialize(file);
 }
 
 void Bullet::deserialize(fstream & file)
 {
-	file >> damage_;
+	int id;
+	file >> damage_
+		>> id;
+	setID(id);
 	ai.deserialize(file);
 }
 
@@ -113,7 +127,7 @@ void Bullet::clean()
 	ai.clean();
 }
 
-void Bullet::damage(int damage, std::string name)
+void Bullet::damage(int damage, std::string name, bool server)
 {
 	return;
 }

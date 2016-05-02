@@ -10,11 +10,10 @@ namespace game
 
 
 
-Core::Core()
+Core::Core() :
+health_(2500, 2500, 2, true)
 {
-	pos_(255, 255);
-	health_.setHealth(2500);
-	health_.getHealthRegenRef() = 2;
+	pos_(0, 0);
 	graphic_ = 'C';
 	name_ = "NO_OWNER";
 }
@@ -44,15 +43,18 @@ void Core::updatePos()
 void Core::serialize(std::stringstream & file)
 {
 	file << L_Core << EndLine
-		 << (int)graphic_ << EndLine
-		 << isDead_ << EndLine;
+		<< (int)graphic_ << EndLine
+		<< isDead_ << EndLine
+		<< getID() << EndLine;
 	health_.serialize(file);
 }
 
 void Core::deserialize(std::stringstream & file)
 {
 	int g;
-	file >> g >> isDead_;
+	int id;
+	file >> g >> isDead_ >> id;
+	setID(id);
 	graphic_ = g;
 	health_.deserialize(file);
 }
@@ -86,35 +88,45 @@ void Core::clean()
 void Core::serialize(std::fstream & file)
 {
 	file << L_Core << EndLine
-		<<(int)graphic_ << EndLine 
-		<< isDead_ << EndLine;
+		<< (int)graphic_ << EndLine
+		<< isDead_ << EndLine
+		<< getID() << EndLine;
 	health_.serialize(file);
 }
 
 void Core::deserialize(std::fstream & file)
 {
 	int g;
-	file >> g >> isDead_;
+	int id;
+	file >> g >> isDead_ >> id;
+	setID(id);
 	graphic_ = g;
 	health_.deserialize(file);
 }
 
-void Core::damage(int damage, std::string name)
+void Core::damage(int damage, std::string name, bool isServer)
 {
-	if (isSetToUpdate())
+	if (isServer == false)
 	{
-		if (name_ == name) return;
-		health_.damage(damage);
-		if (health_.isDead())
+		if (isSetToUpdate())
 		{
-			kill();
+			if (name_ == name) return;
+			health_.damage(damage);
+			if (health_.isDead())
+			{
+				kill();
+			}
+		}
+		else
+		{
+			std::stringstream msg;
+			msg << SendDefault << EndLine << EntityDamage << EndLine << pos_.serializeR() << damage << EndLine << name << EndLine;
+			SendServerLiteral(msg.str());
 		}
 	}
 	else
 	{
-		std::stringstream msg;
-		msg << SendDefault << EndLine << EntityDamage << EndLine << pos_.serializeR() << damage << EndLine  << name << EndLine;
-		SendServerLiteral(msg.str());
+		health_.damage(damage);
 	}
 }
 

@@ -7,11 +7,13 @@ class HealthComponent : public Component
 {
 public:
 	HealthComponent();
+	HealthComponent(double health, double maxHealth, double healthRegen, bool isRegenEnabled);
 	~HealthComponent();
 
 	void setHealth(double health);
 	void setMaxHealth(double maxHealth);
 	void setHealthRegen(double healthRegen);
+	void setIDPtr(int* id_ptr);
 	void isRegenEnabled(bool isRegenEnabled);
 	void isDead(bool isDead);
 
@@ -36,6 +38,8 @@ public:
 	void deserialize(std::fstream&);
 	void deserialize(std::stringstream&);
 
+	void operator()(double health, double maxHealth, double healthRegen, bool isRegenEnabled);
+
 	virtual void update();
 private:
 	double health_;
@@ -44,5 +48,6 @@ private:
 	Timer regenCoolDown;
 	bool isRegenEnabled_;
 	bool isDead_;
+	int* id_;
 };
 

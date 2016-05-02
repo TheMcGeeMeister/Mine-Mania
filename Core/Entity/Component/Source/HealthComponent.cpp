@@ -9,6 +9,17 @@ HealthComponent::HealthComponent()
 	healthRegen_ = 1;
 	isRegenEnabled_ = true;
 	isDead_ = false;
+	id_ = nullptr;
+}
+
+HealthComponent::HealthComponent(double health, double maxHealth, double healthRegen, bool isRegenEnabled)
+{
+	health_ = health;
+	maxHealth_ = maxHealth;
+	healthRegen_ = healthRegen;
+	isRegenEnabled_ = isRegenEnabled;
+	id_ = nullptr;
+	isDead_ = false;
 }
 
 
@@ -31,6 +42,11 @@ void HealthComponent::setMaxHealth(double maxHealth)
 void HealthComponent::setHealthRegen(double healthRegen)
 {
 	healthRegen_ = healthRegen;
+}
+
+void HealthComponent::setIDPtr(int * id_ptr)
+{
+	id_ = id_ptr;
 }
 
 void HealthComponent::isRegenEnabled(bool isRegenEnabled)
@@ -148,6 +164,14 @@ void HealthComponent::deserialize(std::stringstream & stream)
 		>> healthRegen_
 		>> isRegenEnabled_
 		>> isDead_;
+}
+
+void HealthComponent::operator()(double health, double maxHealth, double healthRegen, bool isRegenEnabled)
+{
+	health_ = health;
+	maxHealth_ = maxHealth;
+	healthRegen_ = healthRegen;
+	isRegenEnabled_ = isRegenEnabled;
 }
 
 void HealthComponent::update()

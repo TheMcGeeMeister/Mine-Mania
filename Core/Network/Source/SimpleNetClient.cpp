@@ -470,7 +470,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			Entity *entity;
 			if (game::system.getEntityAt(Position(x, y), &entity))
 			{
-				entity->damage(damage, name);
+				entity->damage(damage, name, true);
 			}
 		}
 		else if (name == EntityAdd)
@@ -512,9 +512,9 @@ void SimpleNetClient::Do(std::string rMsg)
 			int id;
 			int x;
 			int y;
-			msg >> id;
-			msg >> x;
-			msg >> y;
+			msg >> id
+				>> x
+				>> y;
 			Entity* entity;
 			if (game::system.getEntity(id, &entity))
 			{

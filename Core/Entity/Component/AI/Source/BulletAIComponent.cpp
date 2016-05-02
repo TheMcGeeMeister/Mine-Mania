@@ -250,7 +250,7 @@ void BulletAIComponent::update()
 
 		std::stringstream msg;
 
-		msg << SendDefault << EndLine << EntityUpdatePosition << EndLine << id << EndLine << position.serializeR() << nPos.serializeR();
+		msg << SendDefault << EndLine << EntityUpdatePosition << EndLine << id << EndLine << nPos.serializeR();
 
 		SendServerLiteral(msg.str());
 

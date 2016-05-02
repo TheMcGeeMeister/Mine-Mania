@@ -20,7 +20,7 @@ namespace game
 
 enum PLAYER_MODE
 {
-	MODE_PLACING, MODE_MINING_, MODE_SHOOTING,
+	MODE_MINING, MODE_PLACING, MODE_SHOOTING,
 };
 
 Player::Player() : UI(23, 5, 50, 30, 1)
@@ -172,7 +172,7 @@ void Player::setHandPosNoUpdate(Position pos)
 	handPos = pos;
 }
 
-void Player::damage(int amount, string name)
+void Player::damage(int amount, string name, bool server)
 {
 	health.damage(amount);
 	std::stringstream slide;
@@ -323,7 +323,7 @@ void Player::mineRight(Display& game)
 
 void Player::mine(DIRECTION direction)
 {
-	if (handMode_ == 0)
+	if (handMode_ == MODE_MINING)
 	{
 		Position newPos = handPos;
 		newPos.go(direction);
@@ -375,7 +375,7 @@ void Player::mine(DIRECTION direction)
 			}
 		}
 	}
-	else if(handMode_ == 1)
+	else if(handMode_ == MODE_PLACING)
 	{
 		if (moved_ == true)
 		{
@@ -409,7 +409,7 @@ void Player::mine(DIRECTION direction)
 			}
 		}
 	}
-	else if (handMode_ = 2)
+	else if (handMode_ = MODE_SHOOTING)
 	{
 		if (ammo_ > 0)
 		{

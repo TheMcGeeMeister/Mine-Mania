@@ -24,7 +24,7 @@ public:
 	virtual void clean();
 	virtual void serialize(std::fstream&);
 	virtual void deserialize(std::fstream&);
-	virtual void damage(int damage, std::string name);
+	virtual void damage(int damage, std::string name, bool server=false);
 	virtual void setPos(Position);
 	virtual void updateOverlay();
 	virtual void updateID(); // Not used for core
