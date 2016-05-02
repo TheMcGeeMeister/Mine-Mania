@@ -88,6 +88,8 @@ public:
 
 	bool getEntity(int id, Entity** entity);
 
+	bool deleteEntity(int id);
+
 	void serialize(std::fstream&);
 
 	void sendAll();

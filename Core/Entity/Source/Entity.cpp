@@ -134,7 +134,7 @@ void System::update()
 						std::fstream file("Logs\\Log.txt", std::ios::app);
 						file << "System: Entity Deleted ID:" << iter.first << std::endl;
 						/////////////////////////////////
-						msg << SendDefault << EndLine  << EntityKill << EndLine << iter.second->getPos().serializeR();
+						msg << SendDefault << EndLine << EntityKill << EndLine << iter.first;
 						SendServerLiteral(msg.str());
 						msg.str(std::string());
 						continue;
@@ -263,6 +263,19 @@ bool System::getEntity(int id, Entity ** entity)
 		return true;
 	}
 	return false;
+}
+
+bool System::deleteEntity(int id)
+{
+	if (m_system.count(id))
+	{
+		m_system.erase(id);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void System::serialize(std::fstream & file)

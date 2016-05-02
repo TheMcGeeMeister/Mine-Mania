@@ -507,6 +507,12 @@ void SimpleNetClient::Do(std::string rMsg)
 				Log("EntityAdd\ECore\n");
 			}
 		}
+		else if (name == EntityKill)
+		{
+			int id;
+			msg >> id;
+			game::system.deleteEntity(id);
+		}
 		else if (name == EntityUpdatePosition)
 		{
 			int id;
@@ -520,6 +526,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			{
 				entity->setPos(Position(x, y));
 			}
+			Log("EntityUpdatePosition\n");
 		}
 		////////////////////////////////////////////
 
