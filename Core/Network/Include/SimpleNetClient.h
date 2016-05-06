@@ -28,11 +28,6 @@ public:
 	void Log(std::string text);
 
 	int getId();
-
-	/* Packets */
-	/////////////////////////
-	void addPacket(std::string packet);
-	/////////////////////////
 private:
 	bool isExit_;
 	bool isConnected_;

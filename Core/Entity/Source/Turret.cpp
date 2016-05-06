@@ -165,14 +165,14 @@ void Turret::clean()
 	game::TileHandler.push_back(ai.getPosition());
 }
 
-void Turret::damage(int amount, string name, bool server)
+bool Turret::damage(int amount, string name, bool server)
 {
+	if (owner == name) return false;
 	if (server == false)
 	{
 		std::stringstream msg;
 		if (isSetToUpdate() == true)
 		{
-			if (owner == name) return;
 			health.damage(amount);
 			msg << SendDefault << EndLine << EntityDamage << EndLine << ai.getPosition().serializeR() << amount << EndLine << name << EndLine;
 			SendServerLiteral(msg.str());
@@ -192,6 +192,7 @@ void Turret::damage(int amount, string name, bool server)
 	{
 		health.damage(amount);
 	}
+	return true;
 }
 
 void Turret::setPos(Position pos)

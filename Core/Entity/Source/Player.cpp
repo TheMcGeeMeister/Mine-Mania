@@ -172,7 +172,7 @@ void Player::setHandPosNoUpdate(Position pos)
 	handPos = pos;
 }
 
-void Player::damage(int amount, string name, bool server)
+bool Player::damage(int amount, string name, bool server)
 {
 	health.damage(amount);
 	std::stringstream slide;
@@ -184,19 +184,21 @@ void Player::damage(int amount, string name, bool server)
 		health.reset();
 		forceHandPosition(spawnPos, game::game);
 		std::stringstream msg;
-		msg << UpdatePlayerPosition << std::endl
+		msg << SendDefault << EndLine
+			<< UpdatePlayerPosition << std::endl
 			<< name_ << std::endl
 			<< handPos.getX() << std::endl
 			<< handPos.getY() << std::endl;
-
-		game::game.addPacket(msg.str());
+		SendServerLiteral(msg.str());
 	}
 
 	stringstream msg;
-	msg << DamagePlayer << EndLine
+	msg << SendDefault << EndLine
+		<< DamagePlayer << EndLine
 		<< name_ << EndLine
 		<< amount << EndLine;
-	game::game.addPacket(msg.str());
+	SendServerLiteral(msg.str());
+	return true;
 }
 
 void Player::damageS(int amount)
@@ -221,10 +223,11 @@ void Player::heal(int amount)
 	game::SlideUI.addSlide(healthSlide.str());
 
 	stringstream msg;
-	msg << HealPlayer << EndLine
+	msg << SendDefault << EndLine
+		<< HealPlayer << EndLine
 		<< name_ << EndLine
 		<< amount << EndLine;
-	game::game.addPacket(msg.str());
+	SendServerLiteral(msg.str());
 }
 void Player::healS(int amount)
 {
@@ -269,11 +272,12 @@ void Player::moveHand(DIRECTION direction)
 	moved_ = true;
 	mined_ = false;
 	std::stringstream msg;
-	msg << UpdatePlayerPosition << endl
-		<< name_ << endl
-		<< newPos.getX() << endl
-		<< newPos.getY() << endl;
-	game::game.addPacket(msg.str());
+	msg << SendDefault << EndLine
+		<< UpdatePlayerPosition << EndLine
+		<< name_ << EndLine
+		<< newPos.getX() << EndLine
+		<< newPos.getY() << EndLine;
+	SendServerLiteral(msg.str());
 	return;
 }
 
@@ -332,8 +336,10 @@ void Player::mine(DIRECTION direction)
 			Entity* entity;
 			if (game::system.getEntityAt(newPos, &entity))
 			{
-				entity->damage(25, name_);
-				turret_sound.SetTimer(0.200);
+				if (entity->damage(25, name_))
+				{
+					turret_sound.SetTimer(0.200);
+				}
 			}
 		}
 		else
@@ -827,11 +833,12 @@ void Player::update()
 	if (health.getHealth() != pHealth)
 	{
 		std::stringstream msg;
-		msg << UpdatePlayer << std::endl
-			<< Health << std::endl
-			<< name_ << std::endl
-			<< health.getHealth() << std::endl;
-		game::game.addPacket(msg.str());
+		msg << SendDefault << EndLine
+			<< UpdatePlayer << EndLine
+			<< Health << EndLine
+			<< name_ << EndLine
+			<< health.getHealth() << EndLine;
+		SendServerLiteral(msg.str());
 	}
 	if (miningStopSound.Update() == true && isSoundPlayingM_ == true)
 	{
@@ -863,9 +870,8 @@ void Player::kill()
 	forceHandPosition(spawnPos, game::game);
 
 	stringstream msg;
-	msg << KillPlayer << EndLine
-		<< name_ << EndLine;
-	game::game.addPacket(msg.str());
+	msg << SendDefault << KillPlayer << EndLine << name_ << EndLine;
+	SendServerLiteral(msg.str());
 }
 
 void Player::killS()

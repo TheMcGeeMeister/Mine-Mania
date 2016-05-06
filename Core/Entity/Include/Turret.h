@@ -40,7 +40,7 @@ public:
 	virtual bool isKilled();
 	virtual void kill();
 	virtual void clean();
-	virtual void damage(int amount, std::string name, bool server=false);
+	virtual bool damage(int amount, std::string name, bool server=false);
 	virtual void setPos(Position pos);
 	virtual void updateOverlay();
 	virtual void updateID();

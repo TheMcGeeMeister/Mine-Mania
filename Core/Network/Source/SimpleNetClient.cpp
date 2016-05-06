@@ -355,7 +355,6 @@ void SimpleNetClient::Do(std::string rMsg)
 			}
 			else
 				Log("UpdatePlayerPosition Failed - \n" + name);
-			Log("UpdatePlayerPosition\n");
 		}
 		else if (name == PacketNames::UpdateTile)
 		{
@@ -364,28 +363,6 @@ void SimpleNetClient::Do(std::string rMsg)
 			msg >> null;
 			tile.deserialize(msg);
 			game::game.setTileAt(tile.getPos(), tile);
-			Log("UpdateTile\n");
-		}
-		else if (name == PacketNames::UpdateTileOverlay)
-		{
-			Position pos;
-			int pos_x = 0;
-			int pos_y = 0;
-			bool overlayEnabled = false;
-			int overlayGraphic = ' ';
-
-			msg >> pos_x;
-			msg >> pos_y;
-			msg >> overlayEnabled;
-			msg >> overlayGraphic;
-
-			pos.setX(pos_x);
-			pos.setY(pos_y);
-
-			Tile& tile = game::game.getTileRefAt(pos);
-
-			tile.updateOverlayS(overlayEnabled, overlayGraphic);
-			Log("UpdateTileOverlay\n");
 		}
 		////////////////////////////////////////////
 
@@ -472,6 +449,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			{
 				entity->damage(damage, name, true);
 			}
+			Log("EntityDamage\n");
 		}
 		else if (name == EntityAdd)
 		{
@@ -512,6 +490,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			int id;
 			msg >> id;
 			game::system.deleteEntity(id);
+			Log("EntityKill\n");
 		}
 		else if (name == EntityUpdatePosition)
 		{
@@ -737,9 +716,4 @@ void SimpleNetClient::Log(std::string text)
 int SimpleNetClient::getId()
 {
 	return id_;
-}
-
-void SimpleNetClient::addPacket(std::string packet)
-{
-	game::game.addPacket(packet);
 }

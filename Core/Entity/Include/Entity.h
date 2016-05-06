@@ -47,7 +47,7 @@ public:
 	virtual void clean() = 0;
 	virtual void serialize(std::fstream&) = 0;
 	virtual void deserialize(std::fstream&) = 0;
-	virtual void damage(int damage, std::string name, bool server=false) = 0;
+	virtual bool damage(int damage, std::string name, bool server=false) = 0;
 	virtual void setPos(Position) = 0;
 	virtual void updateOverlay() = 0;
 	virtual void updateID() = 0;
@@ -69,8 +69,6 @@ public:
 	~System();
 
 	void update();
-
-	void setUpdateServer(bool serverUpdate);
 
 	void cleanAndUpdateOverlays();
 
@@ -99,6 +97,5 @@ private:
 	int id_index;
 	std::map<int, std::shared_ptr<Entity>> m_system;
 	std::map<int, int> m_server;
-	bool updateServer_;
 };
 

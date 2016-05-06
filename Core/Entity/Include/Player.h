@@ -119,7 +119,7 @@ class Player : public Entity
 		virtual bool isKilled();
 		virtual void kill();
 		virtual void clean();
-		virtual void damage(int damage, string name = "", bool server=false);
+		virtual bool damage(int damage, string name = "", bool server=false);
 		virtual void setPos(Position pos); // Calls forceHandPosition(Position)
 		virtual void updateOverlay();
 		virtual void updateID(); // Not used for player

@@ -95,7 +95,7 @@ namespace Common
 		shared_ptr<Core> NewCore = make_shared<Core>();
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
-		game::system.addEntity(NewCore);
+		game::system.addEntity(NewCore, "Core");
 	}
 
 	void SetStoneFloorAt(Position pos, std::string owner)
@@ -122,8 +122,6 @@ namespace Common
 				bullet->addKeyWord(KEYWORD_BULLET);
 
 				game::system.addEntity(bullet, "Bullet");
-
-				SendBullet(bullet.get());
 				return true;
 			}
 		}
@@ -145,7 +143,6 @@ namespace Common
 				bullet->setPosition(nPos);
 				bullet->setGraphic(250);
 				bullet->setBulletRange(bullet_range);
-				bullet->addKeyWord(KEYWORD_BULLET);
 
 				game::system.addEntity(bullet, "Bullet");
 				return true;

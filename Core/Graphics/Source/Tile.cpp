@@ -9,6 +9,7 @@
 #include "Position.h"
 #include "SimpleNetClient.h"
 #include "SoundManager.h"
+#include "Common.h"
 
 namespace game
 {
@@ -228,26 +229,12 @@ void Tile::setOverlayEnabled(bool is) // Deprecated Use updateOverlay(bool, char
 {
 	overlayEnabled_ = is;
 	game::TileHandler.push_back(pos_);
-	stringstream msg;
-	msg << UpdateTileOverlay << EndLine 
-		<< pos_.getX() << EndLine 
-		<< pos_.getY() << EndLine 
-		<< is << EndLine 
-		<< (int)overlayGraphic_ << EndLine ;
-	game::server.addPacket(msg.str());
 }
 
 void Tile::setOverlayGraphic(char g) // Deprecated Use updateOverlay(bool, char)
 {
 	overlayGraphic_ = g;
 	game::TileHandler.push_back(pos_);
-	stringstream msg;
-	msg << UpdateTileOverlay << EndLine 
-		<< pos_.getX() << EndLine 
-		<< pos_.getY() << EndLine 
-		<< overlayEnabled_ << EndLine 
-		<< (int)g << EndLine ;
-	game::server.addPacket(msg.str());
 }
 
 void Tile::isWall(bool isWall)
@@ -501,13 +488,6 @@ void Tile::removeOverlay()
 	overlayGraphic_ = ' ';
 	overlayEnabled_ = false;
 	game::TileHandler.push_back(pos_);
-	stringstream msg;
-	msg << UpdateTileOverlay << EndLine 
-		<< pos_.getX() << EndLine 
-		<< pos_.getY() << EndLine 
-		<< false << EndLine 
-		<< (int)overlayGraphic_ << EndLine ;
-	game::server.addPacket(msg.str());
 }
 
 void Tile::updateOverlay(bool enabled, char graphic)
@@ -515,13 +495,6 @@ void Tile::updateOverlay(bool enabled, char graphic)
 	overlayGraphic_ = graphic;
 	overlayEnabled_ = enabled;
 	game::TileHandler.push_back(pos_);
-	stringstream msg;
-	msg << UpdateTileOverlay << EndLine 
-		<< pos_.getX() << EndLine 
-		<< pos_.getY() << EndLine 
-		<< enabled << EndLine 
-		<< (int)graphic << EndLine ;
-	game::server.addPacket(msg.str());
 }
 
 void Tile::updateOverlayS(bool enabled, char graphic)
@@ -534,9 +507,9 @@ void Tile::updateOverlayS(bool enabled, char graphic)
 void Tile::updateServer()
 {
 	stringstream msg;
-	msg << UpdateTile << EndLine ;
+	msg << SendDefault << EndLine << UpdateTile << EndLine;
 	serialize(msg);
-	game::server.addPacket(msg.str());
+	SendServerLiteral(msg.str());
 }
 
 /*

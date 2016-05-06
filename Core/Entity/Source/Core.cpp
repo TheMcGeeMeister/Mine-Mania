@@ -45,7 +45,8 @@ void Core::serialize(std::stringstream & file)
 	file << L_Core << EndLine
 		<< (int)graphic_ << EndLine
 		<< isDead_ << EndLine
-		<< getID() << EndLine;
+		<< getID() << EndLine
+		<< pos_.serializeR();
 	health_.serialize(file);
 }
 
@@ -53,7 +54,7 @@ void Core::deserialize(std::stringstream & file)
 {
 	int g;
 	int id;
-	file >> g >> isDead_ >> id;
+	file >> g >> isDead_ >> id; pos_.deserialize(file);
 	setID(id);
 	graphic_ = g;
 	health_.deserialize(file);
@@ -90,7 +91,8 @@ void Core::serialize(std::fstream & file)
 	file << L_Core << EndLine
 		<< (int)graphic_ << EndLine
 		<< isDead_ << EndLine
-		<< getID() << EndLine;
+		<< getID() << EndLine
+		<< pos_.serializeR() << EndLine;
 	health_.serialize(file);
 }
 
@@ -98,20 +100,23 @@ void Core::deserialize(std::fstream & file)
 {
 	int g;
 	int id;
-	file >> g >> isDead_ >> id;
+	file >> g >> isDead_ >> id; pos_.deserialize(file);
 	setID(id);
 	graphic_ = g;
 	health_.deserialize(file);
 }
 
-void Core::damage(int damage, std::string name, bool isServer)
+bool Core::damage(int damage, std::string name, bool isServer)
 {
+	if (name_ == name) return false;
 	if (isServer == false)
 	{
 		if (isSetToUpdate())
 		{
-			if (name_ == name) return;
 			health_.damage(damage);
+			std::stringstream msg;
+			msg << SendDefault << EndLine << EntityDamage << EndLine << pos_.serializeR() << damage << EndLine << name << EndLine;
+			SendServerLiteral(msg.str());
 			if (health_.isDead())
 			{
 				kill();
@@ -156,5 +161,5 @@ void Core::send()
 
 Position Core::getPos()
 {
-	return Position();
+	return pos_;
 }

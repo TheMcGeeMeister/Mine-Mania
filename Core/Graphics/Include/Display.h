@@ -65,11 +65,6 @@ public:
     Tile& getTileRefAt(Position);
 	Tile& getTileRefAt(int x, int y);
 
-	bool isPacketsAvailable();
-	list<Packet>& getPackets();
-	void addPacket(std::string);
-	void clearPackets();
-
 	int getFont();
 	int getFontSize();
 	int getMaxWidth();
@@ -104,7 +99,6 @@ private:
     map<Position, bool> isSeen_;
 	map<Position, bool> isSelected_;
     list<pair<Position, Tile> > tileChanges_;
-	list<Packet> packetsBuffer_;
     int size_x_, size_y_, offset_x_, offset_y_, borderWidth_;
 
 	void Log(std::string);

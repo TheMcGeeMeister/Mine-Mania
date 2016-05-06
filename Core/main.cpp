@@ -859,25 +859,6 @@ void gameLoop()
 		game::ServerUI.update();
 		game::system.update();
 		game::pHandler.update();
-		if (game::server.isConnected() == true)
-		{
-			if (game::game.isPacketsAvailable())
-			{
-				for (auto& iter : game::game.getPackets())
-				{
-					stringstream data;
-					data << iter.send << endl
-						<< iter.name << endl
-						<< iter.data;
-					game::server.SendLiteral(data.str());
-				}
-				game::game.clearPackets();
-			}
-		}
-		else
-		{
-			game::game.clearPackets();
-		}
 		Sleep(10);
 	}
 	game::m_sounds.StopSound("Ambient");
@@ -1030,11 +1011,7 @@ void initializeStdTiles()
 
 void loadSounds()
 {
-	if (game::m_sounds.AddSound("Menu", "Sounds//Loop.wav"))
-	{
-		game::m_sounds.SetInfinite("Menu");
-	}
-
+	game::m_sounds.AddSound("Menu", "Sounds//Loop.wav");
 	game::m_sounds.AddSound("Mining", "Sounds//Mining.wav");
 	game::m_sounds.AddSound("Bullet", "Sounds//Hit.wav");
 	game::m_sounds.AddSound("Place", "Sounds//Tap.wav");
@@ -1052,6 +1029,8 @@ void loadSounds()
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");
+	game::m_sounds.SetInfinite("TurretPlayerHit");
+	game::m_sounds.SetInfinite("Menu");
 }
 
 int main()

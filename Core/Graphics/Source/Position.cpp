@@ -1,4 +1,5 @@
 #include <sstream>
+#include <fstream>
 #include "Position.h"
 #include "Common.h"
 
@@ -208,6 +209,18 @@ std::string Position::serializeR()
 	std::stringstream msg;
 	msg << x_ << EndLine << y_ << EndLine;
 	return msg.str();
+}
+
+void Position::deserialize(std::stringstream & file)
+{
+	file >> x_
+		>> y_;
+}
+
+void Position::deserialize(std::fstream & file)
+{
+	file >> x_
+		>> y_;
 }
 
 std::pair<int, int> Position::getPair()

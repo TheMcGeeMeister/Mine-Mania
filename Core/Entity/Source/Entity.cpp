@@ -11,6 +11,7 @@ Entity::Entity()
 {
 	kill_ = false;
 	isObjectHosted_ = true;
+	keywords_.push_back(KEYWORD_BULLET);
 }
 
 
@@ -79,7 +80,6 @@ bool Entity::isKilled()
 System::System()
 {
 	id_index = 0;
-	updateServer_ = false;
 }
 
 System::~System()
@@ -91,33 +91,34 @@ System::~System()
 void System::update()
 {
 	std::list<int> d_queue;
-	if (updateServer_ == false)
+	if (m_system.empty() == false)
 	{
-		if (m_system.empty() == false)
+		for (auto& iter : m_system)
 		{
-			for (auto& iter : m_system)
+			if (iter.second->isSetToUpdate())
 			{
-				if (iter.second->isSetToUpdate())
+				if (iter.second->isKilled() == true)
 				{
-					if (iter.second->isKilled() == true)
-					{
-						d_queue.push_back(iter.first);
-						/* Debug */
-						/////////////////////////////////
-						std::fstream file("Logs\\Log.txt", std::ios::app);
-						file << "System: Entity Deleted ID:" << iter.first << std::endl;
-						/////////////////////////////////
-						continue;
-					}
-					else
-					{
-						iter.second->update();
-					}
+					d_queue.push_back(iter.first);
+					/* Debug */
+					/////////////////////////////////
+					std::fstream file("Logs\\Log.txt", std::ios::app);
+					file << "System: Entity Deleted ID:" << iter.first << std::endl;
+					/////////////////////////////////
+					std::stringstream msg;
+					msg << SendDefault << EndLine << EntityKill << EndLine << iter.first;
+					SendServerLiteral(msg.str());
+					msg.str(std::string());
+					continue;
+				}
+				else
+				{
+					iter.second->update();
 				}
 			}
 		}
 	}
-	else
+	/*else
 	{
 		if (m_system.empty() == false)
 		{
@@ -129,7 +130,7 @@ void System::update()
 					if (iter.second->isKilled() == true)
 					{
 						d_queue.push_back(iter.first);
-						/* Debug */
+						/* Debug
 						/////////////////////////////////
 						std::fstream file("Logs\\Log.txt", std::ios::app);
 						file << "System: Entity Deleted ID:" << iter.first << std::endl;
@@ -146,17 +147,11 @@ void System::update()
 				}
 			}
 		}
-	}
-
+	}*/
 	for (auto& iter : d_queue)
 	{
 		m_system.erase(iter);
 	}
-}
-
-void System::setUpdateServer(bool serverUpdate)
-{
-	updateServer_ = serverUpdate;
 }
 
 void System::cleanAndUpdateOverlays() // Disables All Overlays, then calls on the entity's to update them
@@ -244,9 +239,15 @@ bool System::getEntityAt(Position pos, Entity ** entity)
 	return false;
 }
 
-bool System::getEntityServer(int i_id, Entity ** entity)
+bool System::getEntityServer(int id, Entity ** entity)
 {
-	int id = m_server[i_id];
+	/*int id = m_server[i_id];
+	if (m_system.count(id))
+	{
+		*entity = m_system[id].get();
+		return true;
+	}
+	return false;*/
 	if (m_system.count(id))
 	{
 		*entity = m_system[id].get();
@@ -269,6 +270,7 @@ bool System::deleteEntity(int id)
 {
 	if (m_system.count(id))
 	{
+		m_system[id]->kill();
 		m_system.erase(id);
 		return true;
 	}

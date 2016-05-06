@@ -34,15 +34,13 @@ public:
 	virtual bool isKilled();
 	virtual void kill();
 	virtual void clean();
-	virtual void damage(int damage, std::string name, bool server=false);
+	virtual bool damage(int damage, std::string name, bool server=false);
 	virtual void setPos(Position pos);
 	virtual void updateOverlay();
 	virtual void updateID();
 	virtual void send();
 	virtual Position getPos();
 private:
-	double damage_;
-
 	BulletAIComponent ai;
 };
 

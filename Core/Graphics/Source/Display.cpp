@@ -398,11 +398,9 @@ bool Display::isLoadedMultiplayer()
 
 void Display::updateTileServer(Position pos)
 {
-	Packet msg;
-	msg.send = SendDefault;
-	msg.name = UpdateTile;
-	msg.data = m_map[pos].serialize(true);
-	packetsBuffer_.push_back(msg);
+	std::stringstream msg;
+	msg << SendDefault << EndLine << UpdateTile << EndLine << m_map[pos].serialize(true);
+	SendServerLiteral(msg.str());
 }
 
 Position Display::searchLine(Position sPos, DIRECTION direction, int amount, char target)
@@ -558,41 +556,6 @@ Tile& Display::getTileRefAt(Position pos)
 Tile& Display::getTileRefAt(int x, int y)
 {
 	return m_map[Position(x, y)];
-}
-
-bool Display::isPacketsAvailable()
-{
-	if (packetsBuffer_.empty() == true)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
-list<Packet>& Display::getPackets()
-{
-	return packetsBuffer_;
-}
-
-void Display::addPacket(std::string rMsg)
-{
-	std::stringstream msg;
-	msg << rMsg;
-	Packet packet;
-	packet.send = SendDefault;
-	msg >> packet.name;
-	std::stringstream buff;
-	buff << msg.rdbuf();
-	packet.data = buff.str();
-	packetsBuffer_.push_back(packet);
-}
-
-void Display::clearPackets()
-{
-	packetsBuffer_.clear();
 }
 
 int Display::getFont()
@@ -1172,18 +1135,6 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	gold.setHealth(150);
 	gold.setMaxHealth(150);
 
-	Tile stoneFloor;
-	stoneFloor.setColor(TGC_StoneFloor);
-	stoneFloor.setGraphic(TG_StoneFloor);
-	stoneFloor.setBackground(TGB_StoneFloor);
-	stoneFloor.isDestructable(false);
-	stoneFloor.isWall(false);
-	stoneFloor.isWalkable(true);
-	stoneFloor.forceClaim(game::pHandler.getLocalPlayer().getName());
-	stoneFloor.isClaimable(true);
-	stoneFloor.setHealth(100);
-	stoneFloor.setMaxHealth(100);
-
 	Tile core;
 	core.setGraphic('C');
 	core.setColor(TC_Gray);
@@ -1205,8 +1156,6 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	stone.setHealth(100);
 	stone.isWall(true);
 
-	Position startPos(0, 1);
-	Position corePos(0, 0);
 	int key = rand() % 15;
 	for (int x = 0; x < size_x_; x++)
 	{

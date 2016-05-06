@@ -9,7 +9,7 @@ enum PacketNames
 {
 	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
 
-	UpdatePlayerPosition, UpdateTile, UpdateTileChar, UpdateTileColor, UpdateTileHealth, UpdateTileOverlay, UpdateTileClaim,
+	UpdatePlayerPosition, UpdateTile,
 
 	UpdatePlayer, Health,
 
