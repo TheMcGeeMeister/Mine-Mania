@@ -22,6 +22,7 @@ BulletAIComponent::BulletAIComponent()
 	damage = 10;
 	direction = DIRECTION_UP;
 	isDestroyed_ = false;
+	position(0, 0);
 	movementCoolDown.StartNewTimer(movementCoolDownTime);
 }
 
@@ -49,6 +50,11 @@ void BulletAIComponent::setPosition(Position position)
 	game::game.getTileRefAt(this->position).removeOverlay();
 	this->position = position;
 	game::game.getTileRefAt(position).updateOverlay(true, graphic_);
+}
+
+void BulletAIComponent::setPositionNoUpdate(Position position)
+{
+	this->position = position;
 }
 
 void BulletAIComponent::setRange(int range)

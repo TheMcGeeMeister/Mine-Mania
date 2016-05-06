@@ -16,6 +16,7 @@ public:
 
 	void setDirection(DIRECTION direction);
 	void setPosition(Position pos);
+	void setPositionNoUpdate(Position pos);
 
 	virtual void setID(int id);
 

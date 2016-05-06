@@ -12,6 +12,7 @@ public:
 
 	void setDirection(DIRECTION direction);
 	void setPosition(Position position);
+	void setPositionNoUpdate(Position position);
 	void setRange(int range);
 	void setDamage(int damage);
 	void isDestroyed(bool);

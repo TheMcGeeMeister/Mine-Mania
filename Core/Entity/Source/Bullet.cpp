@@ -7,13 +7,14 @@ Bullet::Bullet()
 {
 	ai.setDamage(5);
 	ai.setGraphic('@');
+	ai.setPositionNoUpdate(Position(0, 0));
 }
 
 Bullet::Bullet(Position sPos, double damage, DIRECTION direction)
 {
 	ai.setDamage(damage);
 	ai.setDirection(direction);
-	ai.setPosition(sPos);
+	ai.setPositionNoUpdate(sPos);
 }
 
 Bullet::~Bullet()
@@ -44,6 +45,11 @@ void Bullet::setDirection(DIRECTION direction)
 void Bullet::setPosition(Position pos)
 {
 	ai.setPosition(pos);
+}
+
+void Bullet::setPositionNoUpdate(Position pos)
+{
+	ai.setPositionNoUpdate(pos);
 }
 
 void Bullet::setID(int id)
