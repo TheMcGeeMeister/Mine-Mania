@@ -21,6 +21,7 @@ public:
 	virtual void setID(int id);
 
 	void setGraphic(char g);
+	void setGraphicNoUpdate(char g);
 
 	DIRECTION getDirection();
 

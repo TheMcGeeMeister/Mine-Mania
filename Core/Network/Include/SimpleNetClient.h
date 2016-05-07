@@ -10,6 +10,7 @@ public:
 
 	bool Start();
 	bool Connect(std::string ip);
+	void Disconnect();
 	void Loop();
 	void SendLiteral(std::string& msg);
 	void SetId(int id);
@@ -36,6 +37,7 @@ private:
 	bool isPaused_;
 	bool isWaiting_;
 	bool isPlayerConnected_;
+	static bool isInitialized_;
 
 	int id_;
 };

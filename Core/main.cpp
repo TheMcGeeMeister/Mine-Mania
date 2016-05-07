@@ -5,6 +5,7 @@
 #include <sstream>
 #include <conio.h>
 #include <time.h>
+#include <atomic>
 #include "game.h"
 #include "LoadEnums.h"
 #include "Timer.h" // Timer utility class
@@ -45,6 +46,7 @@ namespace game
 	class Lobby lobby;
 	bool threadExit;
 	bool lobbyStart = false;
+	std::atomic<bool> exitFromDisconnect = false;
 	int curFont;
 	void Log(string txt)
 	{
@@ -84,6 +86,11 @@ bool isExit()
 
 bool isExitGame(Display& game)
 {
+	if (game::exitFromDisconnect == true)
+	{
+		game::exitFromDisconnect = false;
+		return true;
+	}
 	if (GetAsyncKeyState(VK_ESCAPE))
 	{
 		bool exit = false;
@@ -103,7 +110,9 @@ bool isExitGame(Display& game)
 		return exit;
 	}
 	else
+	{
 		return false;
+	}
 }
 
 void fillLine(int x, int y)

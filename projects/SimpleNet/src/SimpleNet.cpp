@@ -268,28 +268,6 @@ void LogTry(std::string rmsg)
 		//Log("UpdateTile\n");
 		SimpleNet::Log("UpdateTile\n");
 	}
-	else if (name == UpdateTileOverlay)
-	{
-		//Position pos;
-		//int pos_x = 0;
-		//int pos_y = 0;
-		//bool overlayEnabled = false;
-		//int overlayGraphic = ' ';
-		//
-		//msg >> pos_x;
-		//msg >> pos_y;
-		//msg >> overlayEnabled;
-		//msg >> overlayGraphic;
-		//
-		//pos.setX(pos_x);
-		//pos.setY(pos_y);
-		//
-		//Tile& tile = game::game.getTileRefAt(pos);
-		//
-		//tile.updateOverlayS(overlayEnabled, overlayGraphic);
-		//Log("UpdateTileOverlay\n");
-		SimpleNet::Log("UpdateTileOverlay\n");
-	}
 	////////////////////////////////////////////
 
 	/* Player */
@@ -645,7 +623,6 @@ void LoopRecieve(int id)
 			SimpleNet::Log("Player Disconnected");
 			std::cout << "Server:Player Disconnected..." << std::endl;
 			closesocket(SimpleNet::s_players[id]);
-			SimpleNet::s_players.erase(id);
 			break;
 		}
 		else if (result > 0)
@@ -653,18 +630,27 @@ void LoopRecieve(int id)
 			Go(msg, id);
 		}
 		/////////////////////////////////////
-		Sleep(10);
 		if (SimpleNet::PlayerLoopExit == true)
 		{
-			return;
+			std::stringstream msg;
+			msg << ServerDisconnect;
+			send(SimpleNet::s_players[id], msg.str().c_str(), msg.str().length(), NULL);
+			SimpleNet::Log("Forced Disconnection... (PlayerLoopExit == true)");
+			Sleep(250);
+			shutdown(SimpleNet::s_players[id], 1);
+			std::cout << "Server:Forced Disconnection..." << End;
+			break;
 		}
+		Sleep(10);
 	}
+	return;
 }
 
 bool ProcessCommand(std::string cmd)
 {
 	if (cmd == "exit")
 	{
+		std::cout << End << "Exiting..." << End;
 		return true;
 	}
 	return false;
@@ -707,12 +693,12 @@ int main()
 				}
 			}
 		}
-		Sleep(100);
+		Sleep(10);
 	}
 	SimpleNet::ListenLoopContinue = false;
 	SimpleNet::PlayerLoopExit = true;
 	WSACancelBlockingCall();
-	Sleep(250);
+	Sleep(1000);
 	shutdown(SimpleNet::ListenSocket, 1);
 	closesocket(SimpleNet::ListenSocket);
 

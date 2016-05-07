@@ -1,5 +1,3 @@
-#include <sstream>
-#include <fstream>
 #include "LoadEnums.h"
 #include "Tile.h"
 #include "game.h"
@@ -21,18 +19,17 @@ extern void updateTile(Position pos);
 
 Tile::Tile()
 {
-	graphic_ = ' ';
+	graphic_ = TG_StoneFloor;
 	overlayGraphic_ = ' ';
-	color_ = C_Black;
+	color_ = TGC_StoneFloor;
 	gold_ = 0;
 	claimedPercentage_ = 0;
 	objectid_ = 0;
-	isClaimable_ = false;
-	canFlyOver_ = false;
+	isClaimable_ = true;
 	overlayEnabled_ = false;
 	claimedBy_ = "Neutral";
 	curBeingClaimedBy_ = "None";
-	isWalkable_ = false;
+	isWalkable_ = true;
 	isFortified_ = false;
 	isDestructable_ = false;
 	isWall_ = false;
@@ -208,11 +205,6 @@ void Tile::setIsWalkable(bool isWalkable)
 void Tile::setIsClaimable(bool canClaim)
 {
 	isClaimable_ = canClaim;
-}
-
-void Tile::setCanFlyOver(bool canFlyOver)
-{
-	canFlyOver_ = canFlyOver;
 }
 
 void Tile::setClaimedBy(string claimedBy)
@@ -452,7 +444,6 @@ bool Tile::mine(int damage, Player& underlord)
 		isWalkable_ = true;
 		isDestructable_ = false;
 		isClaimable_ = true;;
-		canFlyOver_ = true;
 		health.getMaxHealthRef() = 100;
 
 		if (hasGold_)
@@ -512,239 +503,182 @@ void Tile::updateServer()
 	SendServerLiteral(msg.str());
 }
 
-/*
-		int health_;
-		int maxHealth_;
-		int claimedPercentage_;
-		int gold_;
-		char graphic_;
-		string claimedBy_;
-		string curBeingClaimedBy_;
-		WORD color_;
-		WORD background_;
-		bool isClaimable_;
-		bool isWalkable_;
-		bool canFlyOver_;
-		bool isDestructable_;
-		bool isWall_;
-		bool isFortified_
-		bool isClaimed_;
-		bool hasGold_;
-		Position pos_;
-*/
-
-void Tile::serialize(fstream& file)
-{
-	int pos_x = pos_.getX();
-	int pos_y = pos_.getY();
-	file << LOAD::L_Tile << endl;
-	file << health.getHealth() << endl;
-	file << health.getMaxHealth() << endl;
-	file << claimedPercentage_ << endl;
-	file << gold_ << endl;
-	file << (int)graphic_ << endl;
-	file << (int)overlayGraphic_ << endl;
-	file << claimedBy_ << endl;
-	file << curBeingClaimedBy_ << endl;
-	file << color_ << endl;
-	file << background_ << endl;
-	file << isClaimable_ << endl;
-	file << isWalkable_ << endl;
-	file << canFlyOver_ << endl;
-	file << isDestructable_ << endl;
-	file << isWall_ << endl;
-	file << isFortified_ << endl;
-	file << isClaimable_ << endl;
-	file << hasGold_ << endl;
-	file << overlayEnabled_ << endl;
-	file << pos_x << endl;
-	file << pos_y << endl;
-}
-
-void Tile::serialize(ofstream& file)
-{
-	int pos_x = pos_.getX();
-	int pos_y = pos_.getY();
-	file << LOAD::L_Tile << endl;
-	file << health.getHealth() << endl;
-	file << health.getMaxHealth() << endl;
-	file << claimedPercentage_ << endl;
-	file << gold_ << endl;
-	file << (int)graphic_ << endl;
-	file << (int)overlayGraphic_ << endl;
-	file << claimedBy_ << endl;
-	file << curBeingClaimedBy_ << endl;
-	file << color_ << endl;
-	file << background_ << endl;
-	file << isClaimable_ << endl;
-	file << isWalkable_ << endl;
-	file << canFlyOver_ << endl;
-	file << isDestructable_ << endl;
-	file << isWall_ << endl;
-	file << isFortified_ << endl;
-	file << isClaimable_ << endl;
-	file << hasGold_ << endl;
-	file << overlayEnabled_ << endl;
-	file << pos_x << endl;
-	file << pos_y << endl;
-}
-
-void Tile::serialize(stringstream& file)
-{
-	int pos_x = pos_.getX();
-	int pos_y = pos_.getY();
-	file << LOAD::L_Tile << endl;
-	file << health.getHealth() << endl;
-	file << health.getMaxHealth() << endl;
-	file << claimedPercentage_ << endl;
-	file << gold_ << endl;
-	file << (int)graphic_ << endl;
-	file << (int)overlayGraphic_ << endl;
-	file << claimedBy_ << endl;
-	file << curBeingClaimedBy_ << endl;
-	file << color_ << endl;
-	file << background_ << endl;
-	file << isClaimable_ << endl;
-	file << isWalkable_ << endl;
-	file << canFlyOver_ << endl;
-	file << isDestructable_ << endl;
-	file << isWall_ << endl;
-	file << isFortified_ << endl;
-	file << isClaimable_ << endl;
-	file << hasGold_ << endl;
-	file << overlayEnabled_ << endl;
-	file << pos_x << endl;
-	file << pos_y << endl;
-}
-
-string Tile::serialize(bool)
-{
-	stringstream file;
-	int pos_x = pos_.getX();
-	int pos_y = pos_.getY();
-	file << LOAD::L_Tile << endl;
-	file << health.getHealth() << endl;
-	file << health.getMaxHealth() << endl;
-	file << claimedPercentage_ << endl;
-	file << gold_ << endl;
-	file << (int)graphic_ << endl;
-	file << (int)overlayGraphic_ << endl;
-	file << claimedBy_ << endl;
-	file << curBeingClaimedBy_ << endl;
-	file << color_ << endl;
-	file << background_ << endl;
-	file << isClaimable_ << endl;
-	file << isWalkable_ << endl;
-	file << canFlyOver_ << endl;
-	file << isDestructable_ << endl;
-	file << isWall_ << endl;
-	file << isFortified_ << endl;
-	file << isClaimable_ << endl;
-	file << hasGold_ << endl;
-	file << overlayEnabled_ << endl;
-	file << pos_x << endl;
-	file << pos_y << endl;
-	return file.str();
-}
-
-void Tile::deserialize(stringstream& file)
-{
-	int pos_x = 0;
-	int pos_y = 0;
-	int graphic = 0;
-	int overlayGraphic = 0;
-	file >> health.getHealthRef();
-	file >> health.getMaxHealthRef();
-	file >> claimedPercentage_;
-	file >> gold_;
-	file >> graphic;
-	file >> overlayGraphic;
-	file >> claimedBy_;
-	file >> curBeingClaimedBy_;
-	file >> color_;
-	file >> background_;
-	file >> isClaimable_;
-	file >> isWalkable_;
-	file >> canFlyOver_;
-	file >> isDestructable_;
-	file >> isWall_;
-	file >> isFortified_;
-	file >> isClaimable_;
-	file >> hasGold_;
-	file >> overlayEnabled_;
-	file >> pos_x;
-	file >> pos_y;
-	pos_.setX(pos_x);
-	pos_.setY(pos_y);
-	graphic_ = graphic;
-	overlayGraphic_ = overlayGraphic;
-}
-
 void Tile::update()
 {
 	health.update();
 }
 
-void Tile::deserialize(fstream& file)
+void Tile::serialize(fstream& stream)
+{
+	int pos_x = pos_.getX();
+	int pos_y = pos_.getY();
+	stream << LOAD::L_Tile << endl
+	 << health.getHealth() << endl
+	 << health.getMaxHealth() << endl
+	 << claimedPercentage_ << endl
+	 << gold_ << endl
+	 << (int)graphic_ << endl
+	 << (int)overlayGraphic_ << endl
+	 << claimedBy_ << endl
+	 << curBeingClaimedBy_ << endl
+	 << color_ << endl
+	 << background_ << endl
+	 << isClaimable_ << endl
+	 << isWalkable_ << endl
+	 << isDestructable_ << endl
+	 << isWall_ << endl
+	 << isFortified_ << endl
+	 << isClaimable_ << endl
+	 << hasGold_ << endl
+	 << overlayEnabled_ << endl
+	 << pos_x << endl
+	 << pos_y << endl;
+}
+
+void Tile::serialize(ofstream& stream)
+{
+	int pos_x = pos_.getX();
+	int pos_y = pos_.getY();
+	stream << LOAD::L_Tile << endl
+		<< health.getHealth() << endl
+		<< health.getMaxHealth() << endl
+		<< claimedPercentage_ << endl
+		<< gold_ << endl
+		<< (int)graphic_ << endl
+		<< (int)overlayGraphic_ << endl
+		<< claimedBy_ << endl
+		<< curBeingClaimedBy_ << endl
+		<< color_ << endl
+		<< background_ << endl
+		<< isClaimable_ << endl
+		<< isWalkable_ << endl
+		<< isDestructable_ << endl
+		<< isWall_ << endl
+		<< isFortified_ << endl
+		<< isClaimable_ << endl
+		<< hasGold_ << endl
+		<< overlayEnabled_ << endl
+		<< pos_x << endl
+		<< pos_y << endl;
+}
+
+void Tile::serialize(stringstream& stream)
+{
+	int pos_x = pos_.getX();
+	int pos_y = pos_.getY();
+	stream << LOAD::L_Tile << endl
+		<< health.getHealth() << endl
+		<< health.getMaxHealth() << endl
+		<< claimedPercentage_ << endl
+		<< gold_ << endl
+		<< (int)graphic_ << endl
+		<< (int)overlayGraphic_ << endl
+		<< claimedBy_ << endl
+		<< curBeingClaimedBy_ << endl
+		<< color_ << endl
+		<< background_ << endl
+		<< isClaimable_ << endl
+		<< isWalkable_ << endl
+		<< isDestructable_ << endl
+		<< isWall_ << endl
+		<< isFortified_ << endl
+		<< isClaimable_ << endl
+		<< hasGold_ << endl
+		<< overlayEnabled_ << endl
+		<< pos_x << endl
+		<< pos_y << endl;
+}
+
+void Tile::deserialize(stringstream& stream)
 {
 	int pos_x = 0;
 	int pos_y = 0;
 	int graphic = 0;
 	int overlayGraphic = 0;
-	file >> health.getHealthRef();
-	file >> health.getMaxHealthRef();
-	file >> claimedPercentage_;
-	file >> gold_;
-	file >> graphic;
-	file >> overlayGraphic;
-	file >> claimedBy_;
-	file >> curBeingClaimedBy_;
-	file >> color_;
-	file >> background_;
-	file >> isClaimable_;
-	file >> isWalkable_;
-	file >> canFlyOver_;
-	file >> isDestructable_;
-	file >> isWall_;
-	file >> isFortified_;
-	file >> isClaimable_;
-	file >> hasGold_;
-	file >> overlayEnabled_;
-	file >> pos_x;
-	file >> pos_y;
+	stream >> health.getHealthRef()
+	 >> health.getMaxHealthRef()
+	 >> claimedPercentage_
+	 >> gold_
+	 >> graphic
+	 >> overlayGraphic
+	 >> claimedBy_
+	 >> curBeingClaimedBy_
+	 >> color_
+	 >> background_
+	 >> isClaimable_
+	 >> isWalkable_
+	 >> isDestructable_
+	 >> isWall_
+	 >> isFortified_
+	 >> isClaimable_
+	 >> hasGold_
+	 >> overlayEnabled_
+	 >> pos_x
+	 >> pos_y;
 	pos_.setX(pos_x);
 	pos_.setY(pos_y);
 	graphic_ = graphic;
 	overlayGraphic_ = overlayGraphic;
 }
 
-void Tile::deserialize(ifstream& file)
+void Tile::deserialize(fstream& stream)
 {
 	int pos_x = 0;
 	int pos_y = 0;
 	int graphic = 0;
 	int overlayGraphic = 0;
-	file >> health.getHealthRef();
-	file >> health.getMaxHealthRef();
-	file >> claimedPercentage_;
-	file >> gold_;
-	file >> graphic;
-	file >> overlayGraphic;
-	file >> claimedBy_;
-	file >> curBeingClaimedBy_;
-	file >> color_;
-	file >> background_;
-	file >> isClaimable_;
-	file >> isWalkable_;
-	file >> canFlyOver_;
-	file >> isDestructable_;
-	file >> isWall_;
-	file >> isFortified_;
-	file >> isClaimable_;
-	file >> hasGold_;
-	file >> overlayEnabled_;
-	file >> pos_x;
-	file >> pos_y;
+	stream >> health.getHealthRef()
+		>> health.getMaxHealthRef()
+		>> claimedPercentage_
+		>> gold_
+		>> graphic
+		>> overlayGraphic
+		>> claimedBy_
+		>> curBeingClaimedBy_
+		>> color_
+		>> background_
+		>> isClaimable_
+		>> isWalkable_
+		>> isDestructable_
+		>> isWall_
+		>> isFortified_
+		>> isClaimable_
+		>> hasGold_
+		>> overlayEnabled_
+		>> pos_x
+		>> pos_y;
+	pos_.setX(pos_x);
+	pos_.setY(pos_y);
+	graphic_ = graphic;
+	overlayGraphic_ = overlayGraphic;
+}
+
+void Tile::deserialize(ifstream& stream)
+{
+	int pos_x = 0;
+	int pos_y = 0;
+	int graphic = 0;
+	int overlayGraphic = 0;
+	stream >> health.getHealthRef()
+		>> health.getMaxHealthRef()
+		>> claimedPercentage_
+		>> gold_
+		>> graphic
+		>> overlayGraphic
+		>> claimedBy_
+		>> curBeingClaimedBy_
+		>> color_
+		>> background_
+		>> isClaimable_
+		>> isWalkable_
+		>> isDestructable_
+		>> isWall_
+		>> isFortified_
+		>> isClaimable_
+		>> hasGold_
+		>> overlayEnabled_
+		>> pos_x
+		>> pos_y;
 	pos_.setX(pos_x);
 	pos_.setY(pos_y);
 	graphic_ = graphic;

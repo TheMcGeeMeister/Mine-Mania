@@ -6,7 +6,7 @@ enum SPacketNames
 {
 	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
 
-	UpdatePlayerPosition, UpdateTile, UpdateTileChar, UpdateTileColor, UpdateTileHealth, UpdateTileOverlay, UpdateTileClaim,
+	UpdatePlayerPosition, UpdateTile,
 
 	UpdatePlayer, Health,
 
@@ -20,7 +20,7 @@ enum SPacketNames
 
 	WaitingPlayer, Start,
 
-	PlayerConnect,
+	PlayerConnect, ServerDisconnect,
 
 	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,
 };

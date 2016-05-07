@@ -56,6 +56,7 @@ public:
 	void newWorldMulti();
 	void newWorldMulti(int pAmount, std::string names[]);
 	void getSaveSuffix();
+	void unloadWorld();
 	int getSaveAmount();
 
 	void saveSettings();
@@ -77,6 +78,7 @@ public:
 
 	void removeSelectedAtTile(Position);
 	void removeSelectedAtTileS(Position);
+	void removeTileAt(Position);
 
     void update();
     void updatePos(Position);

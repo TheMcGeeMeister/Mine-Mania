@@ -96,6 +96,7 @@ namespace Common
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
 		game::system.addEntity(NewCore, "Core");
+		game::game.removeTileAt(pos);
 	}
 
 	void SetStoneFloorAt(Position pos, std::string owner)

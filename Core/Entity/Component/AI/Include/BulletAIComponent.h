@@ -17,6 +17,7 @@ public:
 	void setDamage(int damage);
 	void isDestroyed(bool);
 	void setGraphic(char g);
+	void setGraphicNoUpdate(char g);
 	void updateOverlay();
 	void setID(int id);
 

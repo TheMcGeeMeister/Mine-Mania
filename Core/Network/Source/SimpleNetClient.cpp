@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <atomic>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -31,6 +32,7 @@ namespace game
 	extern System system;
 	extern SoundManager m_sounds;
 	extern bool lobbyStart;
+	extern atomic<bool> exitFromDisconnect;
 	extern class Lobby lobby;
 }
 
@@ -47,6 +49,7 @@ SimpleNetClient::SimpleNetClient()
 	isHostChosen_ = false;
 	isWaiting_ = true;
 	isPlayerConnected_ = false;
+	isInitialized_ = false;
 	SimpleNet::ConnectSocket = INVALID_SOCKET;
 	id_ = 0;
 }
@@ -115,24 +118,6 @@ bool SimpleNetClient::Start()
 		return false;
 	}
 
-	// Send an initial buffer
-	//iResult = send(SimpleNet::ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
-	/*if (iResult == SOCKET_ERROR)
-	{
-		closesocket(SimpleNet::ConnectSocket);
-		WSACleanup();
-		return false;
-	}*/
-
-	// shutdown the connection since no more data will be sent
-	/*iResult = shutdown(SimpleNet::ConnectSocket, SD_SEND);
-	if (iResult == SOCKET_ERROR)
-	{
-		closesocket(SimpleNet::ConnectSocket);
-		WSACleanup();
-		return false;
-	}*/
-
 	isConnected_ = true;
 	return true;
 }
@@ -140,7 +125,10 @@ bool SimpleNetClient::Start()
 bool SimpleNetClient::Connect(std::string ip)
 {
 	if (isConnected_ == true)
-		return true;
+	{
+		Disconnect();
+	}
+
 	WSADATA wsaData;
 	struct addrinfo *result = NULL,
 		*ptr = NULL,
@@ -159,7 +147,6 @@ bool SimpleNetClient::Connect(std::string ip)
 	iResult = getaddrinfo(ip.c_str(), "15015", &hints, &result);
 	if (iResult != 0)
 	{
-		WSACleanup();
 		return false;
 	}
 
@@ -170,7 +157,6 @@ bool SimpleNetClient::Connect(std::string ip)
 		SimpleNet::ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 		if (SimpleNet::ConnectSocket == INVALID_SOCKET)
 		{
-			WSACleanup();
 			return false;
 		}
 
@@ -189,31 +175,21 @@ bool SimpleNetClient::Connect(std::string ip)
 
 	if (SimpleNet::ConnectSocket == INVALID_SOCKET)
 	{
-		WSACleanup();
 		return false;
 	}
-
-	// Send an initial buffer
-	//iResult = send(SimpleNet::ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
-	/*if (iResult == SOCKET_ERROR)
-	{
-	closesocket(SimpleNet::ConnectSocket);
-	WSACleanup();
-	return false;
-	}*/
-
-	// shutdown the connection since no more data will be sent
-	/*iResult = shutdown(SimpleNet::ConnectSocket, SD_SEND);
-	if (iResult == SOCKET_ERROR)
-	{
-	closesocket(SimpleNet::ConnectSocket);
-	WSACleanup();
-	return false;
-	}*/
 
 	game::ServerUI.getSectionRef(1).setVar(1, "True");
 	isConnected_ = true;
 	return true;
+}
+
+void SimpleNetClient::Disconnect()
+{
+	if (isConnected_ == false) return;
+	isConnected_ = false;
+	isExit_ = true;
+	closesocket(SimpleNet::ConnectSocket);
+	game::ServerUI.getSectionRef(1).setVar(1, "False");
 }
 
 void SimpleNetClient::Loop()
@@ -227,24 +203,34 @@ void SimpleNetClient::Loop()
 		{
 			Sleep(5);
 		}
+
+		if (isExit_ == true)
+		{
+			continue;
+		}
+		
 		memset(msgBuffer, 0x00, sizeof(msgBuffer));
+
 		int iResult = recv(SimpleNet::ConnectSocket, msgBuffer, BufferLength, NULL);
+
 		if (iResult == 0)
 		{
-			game::SlideUI.addSlide("MSG:Disconnected");
 			isConnected_ = false;
 			game::ServerUI.getSectionRef(1).setVar(1, "False");
-			Log("Server Disconnected");
+			Log("Server Disconnected\n");
 			isExit_ = true;
+			continue;
 		}
 		else if (iResult > 0)
 		{
 			std::string msg = msgBuffer;
 			Do(msg);
 		}
+
 		msg.str(string());
 	}
-	game::SlideUI.addSlide("MSG:Network Loop Ended");
+
+	isExit_ = false;
 }
 
 void SimpleNetClient::SendLiteral(std::string& rmsg)
@@ -619,6 +605,11 @@ void SimpleNetClient::Do(std::string rMsg)
 		{
 			Log("SERVER ERROR: RECIEVED TWO MESSAGES AT ONCE\n");
 		}
+		else if (name == ServerDisconnected)
+		{
+			game::exitFromDisconnect = true;
+			Log("ServerDisconnect\n");
+		}
 		else
 		{
 			std::stringstream log;
@@ -659,6 +650,7 @@ void SimpleNetClient::isExit(bool isExit)
 
 bool SimpleNetClient::Initialize()
 {
+	if (isInitialized_ == true) return;
 	WSADATA wsaData;
 
 	int iResult;
@@ -668,7 +660,9 @@ bool SimpleNetClient::Initialize()
 	if (iResult != 0)
 	{
 		return false;
+		isInitialized_ = false;
 	}
+	isInitialized_ = true;
 	return true;
 }
 

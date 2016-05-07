@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <string>
 #include <windows.h>
 #include "Position.h"
@@ -8,7 +10,6 @@
 class Player;
 
 using namespace std;
-
 
 class Tile
 {
@@ -51,7 +52,6 @@ class Tile
         void setIsClaimed(bool);
         void setIsClaimed(bool isClaimed, string claimedBy);
         void setIsClaimable(bool);
-        void setCanFlyOver(bool);
         void setClaimedBy(string);
 		void setObjectId(int id);
 		void setOverlayEnabled(bool);
@@ -74,15 +74,14 @@ class Tile
 		void updateOverlayS(bool enabled, char graphic); // Updates Overlay without sending to server
 		void updateServer();
 
-        void serialize(fstream& file);
-		void serialize(ofstream& file);
-		void serialize(stringstream& file);
-		string serialize(bool);
-        void deserialize(fstream& file);
-		void deserialize(ifstream& file);
-		void deserialize(stringstream& data);
+      void serialize(fstream& stream);
+	  void serialize(ofstream& stream);
+	  void serialize(stringstream& stream);
+      void deserialize(fstream& stream);
+	  void deserialize(ifstream& stream);
+	  void deserialize(stringstream& stream);
 
-		void update();
+	  void update();
     protected:
 
     private:
@@ -98,7 +97,6 @@ class Tile
         WORD background_;
         bool isClaimable_;
         bool isWalkable_;
-        bool canFlyOver_;
         bool isDestructable_;
         bool isWall_;
 		bool isFortified_;

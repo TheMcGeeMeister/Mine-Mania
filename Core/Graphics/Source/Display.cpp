@@ -399,7 +399,7 @@ bool Display::isLoadedMultiplayer()
 void Display::updateTileServer(Position pos)
 {
 	std::stringstream msg;
-	msg << SendDefault << EndLine << UpdateTile << EndLine << m_map[pos].serialize(true);
+	msg << SendDefault << EndLine << UpdateTile << EndLine; m_map[pos].serialize(msg);
 	SendServerLiteral(msg.str());
 }
 
@@ -619,6 +619,11 @@ void Display::removeSelectedAtTileS(Position pos)
 	updatePos(pos);
 }
 
+void Display::removeTileAt(Position pos)
+{
+	m_map[pos] = Tile();
+}
+
 
 /* Loading/Saving */
 ///////////////////////////////////
@@ -713,7 +718,7 @@ string Display::getWorld()
 	stringstream world;
 	for (auto& iter : m_map)
 	{
-		world << iter.second.serialize(true);
+		iter.second.serialize(world);
 	}
 	world << LOAD::END << EndLine;
 	return world.str();
@@ -1232,6 +1237,13 @@ void Display::getSaveSuffix()
 		}
 		worldAmount++;
 	}
+}
+
+void Display::unloadWorld()
+{
+	isLoaded_ = false;
+	isMultiplayer_ = false;
+	m_map.clear();
 }
 
 int Display::getSaveAmount()

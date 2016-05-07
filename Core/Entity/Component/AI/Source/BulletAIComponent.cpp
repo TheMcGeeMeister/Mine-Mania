@@ -79,6 +79,11 @@ void BulletAIComponent::setGraphic(char g)
 	tile.updateOverlay(true, g);
 }
 
+void BulletAIComponent::setGraphicNoUpdate(char g)
+{
+	graphic_ = g;
+}
+
 void BulletAIComponent::updateOverlay()
 {
 	Tile& tile = game::game.getTileRefAt(position);

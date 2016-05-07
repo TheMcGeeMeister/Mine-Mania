@@ -6,7 +6,7 @@
 Bullet::Bullet()
 {
 	ai.setDamage(5);
-	ai.setGraphic('@');
+	ai.setGraphicNoUpdate('@');
 	ai.setPositionNoUpdate(Position(0, 0));
 }
 
@@ -61,6 +61,11 @@ void Bullet::setID(int id)
 void Bullet::setGraphic(char g)
 {
 	ai.setGraphic(g);
+}
+
+void Bullet::setGraphicNoUpdate(char g)
+{
+	ai.setGraphicNoUpdate(g);
 }
 
 DIRECTION Bullet::getDirection()
