@@ -217,6 +217,11 @@ void Turret::send()
 	SendServerLiteral(msg.str());
 }
 
+void Turret::render()
+{
+	game::game.getTileRefAt(ai.getPosition()).updateOverlay(true, graphic);
+}
+
 Position Turret::getPos()
 {
 	return ai.getPosition();

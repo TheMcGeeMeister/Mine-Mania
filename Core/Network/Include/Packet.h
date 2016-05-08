@@ -11,13 +11,17 @@ enum PacketNames
 
 	UpdatePlayerPosition, UpdateTile,
 
-	UpdatePlayer, Health,
+	UpdatePlayer,
 
+	PlayerUpdate,
+	///////////////////	
+	Knockback,
+	Health,
+	Kill,
+	///////////////////
 	EntityDamage, EntityKill, EntityUpdatePosition,
 
 	EntityAdd, EBullet, ETurret, ECore,
-
-	DamagePlayer, HealPlayer, KillPlayer,
 
 	AddPlayer, AddPlayerLocal,
 
@@ -27,7 +31,16 @@ enum PacketNames
 
 	PlayerConnect, ServerDisconnected,
 
-	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,
+	Lobby,
+	///////////////////
+	LobbyAdd,
+	LobbyName, 
+	LobbyReady, 
+	LobbyUnReady, 
+	LobbyStart, 
+	LobbyLeave, 
+	LobbyGetInfo,
+	///////////////////
 };
 
 class Packet

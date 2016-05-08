@@ -45,6 +45,7 @@ public:
 	virtual void updateOverlay();
 	virtual void updateID();
 	virtual void send();
+	virtual void render();
 	virtual Position getPos();
 private:
 	std::string owner;

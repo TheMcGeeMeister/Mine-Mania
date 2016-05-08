@@ -52,6 +52,7 @@ public:
 	virtual void updateOverlay() = 0;
 	virtual void updateID() = 0;
 	virtual void send() = 0;
+	virtual void render() = 0;
 	virtual Position getPos() = 0;
 private:
 	int id_;

@@ -92,11 +92,11 @@ namespace Common
 
 	void CreatePlayerCore(std::string name, Position pos)
 	{
+		game::game.removeTileAt(pos);
 		shared_ptr<Core> NewCore = make_shared<Core>();
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
 		game::system.addEntity(NewCore, "Core");
-		//game::game.removeTileAt(pos);
 	}
 
 	void SetStoneFloorAt(Position pos, std::string owner)

@@ -623,7 +623,7 @@ void Display::removeSelectedAtTileS(Position pos)
 
 void Display::removeTileAt(Position pos)
 {
-	m_map[pos] = Tile();
+	m_map[pos] = Tile(pos);
 }
 
 
@@ -794,6 +794,7 @@ void Display::loadWorld(string filename)
 			game::system.addEntity(turret);
 		}
 		file.clear();
+		text = 7;
 		file >> text;
 	}
 

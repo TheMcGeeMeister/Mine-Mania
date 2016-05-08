@@ -728,6 +728,7 @@ bool newWorldMenu(Display& game)
 	NewWorld.push_isection("Name:");
 	NewWorld.push_back("Continue", true, true);
 	NewWorld.addSection("Exit", true, true);
+	NewWorld.getSectionRef(1).setIVar(game::pHandler.getLocalPlayer().getName());
 	bool exitFlag = false;
 	while (exitFlag == false)
 	{
@@ -958,6 +959,8 @@ void preGameLoop()
 	bool threadStarted = false;
 
 	game::m_sounds.PlaySoundR("Menu");
+
+	game::system.cleanAndUpdateOverlays();
 
 	while (exitFlag == false)
 	{

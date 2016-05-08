@@ -355,44 +355,6 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		////////////////////////////////////////////
 
-		/* Player */
-		////////////////////////////////////////////
-		else if (name == DamagePlayer)
-		{
-			int amount;
-			std::string name;
-			msg >> name;
-			msg >> amount;
-			Player* player;
-			if (game::pHandler.getPlayer(name, &player) == true)
-			{
-				player->damageS(amount);
-			}
-		}
-		else if (name == HealPlayer)
-		{
-			int amount;
-			std::string name;
-			msg >> name;
-			msg >> amount;
-			Player* player;
-			if (game::pHandler.getPlayer(name, &player) == true)
-			{
-				player->healS(amount);
-			}
-		}
-		else if (name == KillPlayer)
-		{
-			std::string name;
-			msg >> name;
-			Player* player;
-			if (game::pHandler.getPlayer(name, &player) == true)
-			{
-				player->killS();
-			}
-		}
-		////////////////////////////////////////////
-
 		/* Adds */
 		////////////////////////////////////////////
 		else if (name == AddPlayer)
@@ -450,6 +412,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				msg >> none;
 				bullet->deserialize(msg);
 				bullet->setToNoUpdate();
+				bullet->render();
 				game::system.addEntityServer(bullet);
 				Log("EntityAdd\EBullet\n");
 			}
@@ -460,6 +423,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				msg >> none;
 				turret->deserialize(msg);
 				turret->setToNoUpdate();
+				turret->render();
 				game::system.addEntityServer(turret);
 				Log("EntityAdd\ETurret\n");
 			}
@@ -470,6 +434,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				msg >> none;
 				core->deserialize(msg);
 				core->setToNoUpdate();
+				core->render();
 				game::system.addEntityServer(core);
 				Log("EntityAdd\ECore\n");
 			}
@@ -495,6 +460,51 @@ void SimpleNetClient::Do(std::string rMsg)
 				entity->setPos(Position(x, y));
 			}
 			Log("EntityUpdatePosition\n");
+		}
+		////////////////////////////////////////////
+
+		/* Player Updates */
+		////////////////////////////////////////////
+		else if (name == PlayerUpdate)
+		{
+			msg >> name;
+			if (name == Knockback)
+			{
+				double stunTime;
+				std::string name;
+				Position pos;
+				msg >> name;
+				msg >> stunTime;
+				pos.deserialize(msg);
+				Player* player;
+				if (game::pHandler.getPlayer(name, &player))
+				{
+					player->forceHandPosition(pos);
+					player->disableMovementFor(stunTime);
+				}
+			}
+			else if (name == Health)
+			{
+				std::string name;
+				msg >> name;
+				int health;
+				msg >> health;
+				Player* player;
+				if (game::pHandler.getPlayer(name, &player))
+				{
+					player->setHealth(health);
+				}
+			}
+			else if (name == Kill)
+			{
+				std::string name;
+				msg >> name;
+				Player* player;
+				if (game::pHandler.getPlayer(name, &player))
+				{
+					player->killS();
+				}
+			}
 		}
 		////////////////////////////////////////////
 

@@ -56,6 +56,8 @@ class Player : public Entity
 		void setSpawnPos(Position pos);
 		void setHandPos(Position pos); /* Changes variable without changing map */
 		void setHandPosNoUpdate(Position pos);
+		void setHealth(int amount);
+		void setMaxHealth(int amount);
 		//////////////////////////////////
 
 		/* Stats*/
@@ -128,6 +130,7 @@ class Player : public Entity
 		virtual void updateOverlay();
 		virtual void updateID(); // Not used for player
 		virtual void send();
+		virtual void render();
 		virtual Position getPos();
 
 		void killS();

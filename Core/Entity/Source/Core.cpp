@@ -172,6 +172,11 @@ void Core::send()
 	SendServerLiteral(msg.str());
 }
 
+void Core::render()
+{
+	game::game.getTileRefAt(pos_).updateOverlay(true, graphic_);
+}
+
 Position Core::getPos()
 {
 	return pos_;

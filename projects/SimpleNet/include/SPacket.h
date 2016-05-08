@@ -8,13 +8,17 @@ enum SPacketNames
 
 	UpdatePlayerPosition, UpdateTile,
 
-	UpdatePlayer, Health,
+	UpdatePlayer,
 
+	PlayerUpdate,
+	///////////////////	
+	Knockback,
+	Health,
+	Kill,
+	///////////////////
 	EntityDamage, EntityKill, EntityUpdatePosition,
 
 	EntityAdd, EBullet, ETurret, ECore,
-
-	DamagePlayer, HealPlayer, KillPlayer,
 
 	AddPlayer, AddPlayerLocal,
 
@@ -22,9 +26,18 @@ enum SPacketNames
 
 	Win,
 
-	PlayerConnect, ServerDisconnect,
+	PlayerConnect, ServerDisconnected,
 
-	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,
+	Lobby,
+	///////////////////
+	LobbyAdd,
+	LobbyName,
+	LobbyReady,
+	LobbyUnReady,
+	LobbyStart,
+	LobbyLeave,
+	LobbyGetInfo,
+	///////////////////
 };
 
 class SPacket

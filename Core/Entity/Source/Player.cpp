@@ -192,69 +192,56 @@ void Player::setHandPosNoUpdate(Position pos)
 	handPos = pos;
 }
 
+void Player::setHealth(int amount)
+{
+	health.setHealth(amount);
+}
+
+void Player::setMaxHealth(int amount)
+{
+	health.setMaxHealth(amount);
+}
+
 bool Player::damage(int amount, string name, bool server)
 {
 	health.damage(amount);
+
+
 	std::stringstream slide;
 	slide << name_ << " -" << amount << " Health";
 	game::SlideUI.addSlide(slide.str());
+
 	if (health.isDead() == true)
 	{
 		game::SlideUI.addSlide(name_ + " Died");
-		health.reset();
-		forceHandPosition(spawnPos, game::game);
-		std::stringstream msg;
+		kill();
+	}
+	else
+	{
+		stringstream msg;
 		msg << SendDefault << EndLine
-			<< UpdatePlayerPosition << std::endl
-			<< name_ << std::endl
-			<< handPos.getX() << std::endl
-			<< handPos.getY() << std::endl;
+			<< PlayerUpdate << EndLine
+			<< Health << EndLine
+			<< name_ << EndLine
+			<< health.getHealth() << EndLine;
 		SendServerLiteral(msg.str());
 	}
-
-	stringstream msg;
-	msg << SendDefault << EndLine
-		<< DamagePlayer << EndLine
-		<< name_ << EndLine
-		<< amount << EndLine;
-	SendServerLiteral(msg.str());
 	return true;
 }
 
 void Player::damageS(int amount)
 {
-	health.damage(amount);
-	std::stringstream slide;
-	slide << " -" << amount << " Health";
-	game::SlideUI.addSlide(slide.str());
-	if (health.isDead() == true)
-	{
-		game::SlideUI.addSlide(name_ + " Died");
-		health.reset();
-		//forceHandPosition(spawnPos, game::game);
-	}
+	/* Not Needed */
 }
 
 void Player::heal(int amount)
 {
-	health.heal(amount);
-	std::stringstream healthSlide;
-	healthSlide << name_ << " +" << amount << " Health";
-	game::SlideUI.addSlide(healthSlide.str());
-
-	stringstream msg;
-	msg << SendDefault << EndLine
-		<< HealPlayer << EndLine
-		<< name_ << EndLine
-		<< amount << EndLine;
-	SendServerLiteral(msg.str());
+	/* Not Needed */
 }
+
 void Player::healS(int amount)
 {
-	health.heal(amount);
-	std::stringstream healthSlide;
-	healthSlide << name_ << " +" << amount << " Health";
-	game::SlideUI.addSlide(healthSlide.str());
+	/* Not Needed */
 }
 ////////////////////////////////////////////////
 
@@ -526,6 +513,11 @@ void Player::knockbackTo(DIRECTION direction, int amount)
 	{
 		pPos = cPos;
 		cPos.go(direction);
+		if (cPos.isValid() == false)
+		{
+			forceHandPosition(pPos);
+			return;
+		}
 		if (game::game.getTileRefAt(cPos).isWalkable() == false)
 		{
 			if (x > 0)
@@ -838,21 +830,19 @@ bool Player::isKilled()
 
 void Player::kill()
 {
-	isDead_ = true;
-	clean();
-
 	forceHandPosition(spawnPos, game::game);
+	health.reset();
+	stats = PlayerStatComponent();
 
 	stringstream msg;
-	msg << SendDefault << EndLine << KillPlayer << EndLine << name_ << EndLine;
+	msg << SendDefault << EndLine << PlayerUpdate << EndLine << Kill << EndLine << name_ << EndLine;
 	SendServerLiteral(msg.str());
 }
 
 void Player::killS()
 {
-	isDead_ = true;
-	clean();
-
+	health.reset();
+	stats = PlayerStatComponent();
 	forceHandPosition(spawnPos, game::game);
 }
 
@@ -884,6 +874,11 @@ void Player::updateID()
 }
 
 void Player::send()
+{
+	return;
+}
+
+void Player::render()
 {
 	return;
 }

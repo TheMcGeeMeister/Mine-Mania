@@ -162,6 +162,11 @@ void Bullet::send()
 	SendServerLiteral(msg.str());
 }
 
+void Bullet::render()
+{
+	ai.updateOverlay();
+}
+
 Position Bullet::getPos()
 {
 	return ai.getPosition();

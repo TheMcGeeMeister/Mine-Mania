@@ -270,47 +270,6 @@ void LogTry(std::string rmsg)
 	}
 	////////////////////////////////////////////
 
-	/* Player */
-	////////////////////////////////////////////
-	else if (name == DamagePlayer)
-	{
-		//int amount;
-		//std::string name;
-		//msg >> name;
-		//msg >> amount;
-		//Player* player;
-		//if (game::pHandler.getPlayer(name, &player) == true)
-		//{
-		//	player->damageS(amount);
-		//}
-		SimpleNet::Log("DamagePlayer\n");
-	}
-	else if (name == HealPlayer)
-	{
-		//int amount;
-		//std::string name;
-		//msg >> name;
-		//msg >> amount;
-		//Player* player;
-		//if (game::pHandler.getPlayer(name, &player) == true)
-		//{
-		//	player->healS(amount);
-		//}
-		SimpleNet::Log("HealPlayer\n");
-	}
-	else if (name == KillPlayer)
-	{
-		//std::string name;
-		//msg >> name;
-		//Player* player;
-		//if (game::pHandler.getPlayer(name, &player) == true)
-		//{
-		//	player->killS();
-		//}
-		SimpleNet::Log("KillPlayer\n");
-	}
-	////////////////////////////////////////////
-
 	/* Adds */
 	////////////////////////////////////////////
 	else if (name == AddPlayer)
@@ -633,7 +592,7 @@ void LoopRecieve(int id)
 		if (SimpleNet::PlayerLoopExit == true)
 		{
 			std::stringstream msg;
-			msg << ServerDisconnect;
+			msg << ServerDisconnected;
 			send(SimpleNet::s_players[id], msg.str().c_str(), msg.str().length(), NULL);
 			SimpleNet::Log("Forced Disconnection... (PlayerLoopExit == true)");
 			Sleep(250);
