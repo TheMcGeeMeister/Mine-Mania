@@ -8,6 +8,8 @@
 #include <atomic>
 #include "game.h"
 #include "LoadEnums.h"
+#include "Common.h"
+#include "GameManager.h"
 #include "Timer.h" // Timer utility class
 #include "Player.h" // Player Class
 #include "Tile.h" // Tile Class
@@ -36,6 +38,7 @@ namespace game
     TileChangeManager TileHandler;
     RegenManager RegenHandler;
 	PlayerHandler pHandler;
+	GameManager GameHandler;
 	Player enemy;
 	Display game;
 	UserInterface tileUI(30, 8, 0, 30, 1);
@@ -43,9 +46,11 @@ namespace game
 	UserInterface ServerUI(18, 3, 75, 27, 1);
 	SimpleNetClient server;
 	SoundManager m_sounds;
+	std::string winnerName;
 	class Lobby lobby;
 	bool threadExit;
 	bool lobbyStart = false;
+	bool gameWon = false;
 	std::atomic<bool> exitFromDisconnect = false;
 	int curFont;
 	void Log(string txt)
@@ -53,6 +58,8 @@ namespace game
 		fstream file("Logs\\Log.txt", ios::app);
 		file << txt << endl;
 	}
+
+	int CoreDestroyedAmount = 0;
 }
 
 namespace gametiles
@@ -86,11 +93,40 @@ bool isExit()
 
 bool isExitGame(Display& game)
 {
+	/* Any Extra Checks for Exiting*/
+	///////////////////////////////////////////
 	if (game::exitFromDisconnect == true)
 	{
 		game::exitFromDisconnect = false;
 		return true;
 	}
+	if (game::gameWon == true)
+	{
+		game::pHandler.getLocalPlayer().stopSounds();
+		game::ServerUI.isHidden(true);
+		game::tileUI.isHidden(true);
+		game::SlideUI.isHidden(true);
+		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
+		game::game.isHidden(true);
+		std::stringstream winnerTxt;
+		winnerTxt << "Player " << game::winnerName << " Won the game!";
+		//Common::DisplayTextCentered(game::game.getWidth(), game::game.getHeight() / 2, winnerTxt.str());
+		Common::SetCursorPosition(0, 0);
+		cout << winnerTxt.str();
+		if (game::pHandler.getLocalPlayer().getName() == game::winnerName)
+		{
+			game::m_sounds.PlaySoundR("Winner");
+		}
+		else
+		{
+			game::m_sounds.PlaySoundR("Loser");
+		}
+		game::game.unloadWorld();
+		Sleep(4000);
+		game::gameWon = false;
+		return true;
+	}
+	///////////////////////////////////////////
 	if (GetAsyncKeyState(VK_ESCAPE))
 	{
 		bool exit = false;
@@ -868,6 +904,7 @@ void gameLoop()
 		game::ServerUI.update();
 		game::system.update();
 		game::pHandler.update();
+		game::GameHandler.Update();
 		Sleep(10);
 	}
 	game::m_sounds.StopSound("Ambient");
@@ -1035,6 +1072,8 @@ void loadSounds()
 	game::m_sounds.AddSound("TurretPlayerHit", "Sounds//TurretPlayerHit.wav");
 	game::m_sounds.AddSound("LevelUp", "Sounds//LevelUp.wav");
 	game::m_sounds.AddSound("MenuSelection", "Sounds//MenuSelection.wav");
+	game::m_sounds.AddSound("Winner", "Sounds//Winner.wav");
+	game::m_sounds.AddSound("Loser", "Sounds//Loser.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");

@@ -2,10 +2,13 @@
 #include "Display.h"
 #include "Common.h"
 #include "LoadEnums.h"
+#include "GameManager.h"
 
 namespace game
 {
 	extern Display game;
+	extern int CoreDestroyedAmount;
+	extern GameManager GameHandler;
 }
 
 
@@ -15,7 +18,7 @@ health_(2500, 2500, 2, true)
 {
 	pos_(0, 0);
 	graphic_ = 'C';
-	name_ = "NO_OWNER";
+	owner_ = "NO_OWNER";
 }
 
 
@@ -32,12 +35,17 @@ void Core::setGraphic(char g)
 
 void Core::setOwner(std::string name)
 {
-	name_ = name;
+	owner_ = name;
 }
 
 void Core::updatePos()
 {
 	game::game.getTileRefAt(pos_).updateOverlay(true, graphic_);
+}
+
+bool Core::hasKeyWord(KEYWORD key)
+{
+	return false;
 }
 
 void Core::serialize(std::stringstream & file)
@@ -46,7 +54,8 @@ void Core::serialize(std::stringstream & file)
 		<< (int)graphic_ << EndLine
 		<< isDead_ << EndLine
 		<< getID() << EndLine
-		<< pos_.serializeR();
+		<< pos_.serializeR() << EndLine
+		<< owner_ << EndLine;
 	health_.serialize(file);
 }
 
@@ -55,6 +64,7 @@ void Core::deserialize(std::stringstream & file)
 	int g;
 	int id;
 	file >> g >> isDead_ >> id; pos_.deserialize(file);
+	file >> owner_;
 	setID(id);
 	graphic_ = g;
 	health_.deserialize(file);
@@ -92,7 +102,8 @@ void Core::serialize(std::fstream & file)
 		<< (int)graphic_ << EndLine
 		<< isDead_ << EndLine
 		<< getID() << EndLine
-		<< pos_.serializeR() << EndLine;
+		<< pos_.serializeR() << EndLine
+		<< owner_ << EndLine;
 	health_.serialize(file);
 }
 
@@ -101,6 +112,7 @@ void Core::deserialize(std::fstream & file)
 	int g;
 	int id;
 	file >> g >> isDead_ >> id; pos_.deserialize(file);
+	file >> owner_;
 	setID(id);
 	graphic_ = g;
 	health_.deserialize(file);
@@ -108,7 +120,7 @@ void Core::deserialize(std::fstream & file)
 
 bool Core::damage(int damage, std::string name, bool isServer)
 {
-	if (name_ == name) return false;
+	if (owner_ == name) return false;
 	if (isServer == false)
 	{
 		if (isSetToUpdate())
@@ -119,6 +131,7 @@ bool Core::damage(int damage, std::string name, bool isServer)
 			SendServerLiteral(msg.str());
 			if (health_.isDead())
 			{
+				game::GameHandler.CoreDestroyed(owner_);
 				kill();
 			}
 		}

@@ -44,7 +44,7 @@ double PlayerStatComponent::getMaxExp()
 	return expNeed_;
 }
 
-int PlayerStatComponent::getStength()
+int PlayerStatComponent::getStrength()
 {
 	return strength_;
 }
@@ -143,12 +143,12 @@ bool PlayerStatComponent::addExp(double exp)
 		if (maxLevel_ == 0)
 		{
 			level_++;
-			strength_ += 10;
+			strength_ += 1;
 			maxMagicka_ += 10;
 			maxStamina_ += 10;
 			speed_ -= 0.01;
 			exp_ = exp_ - expNeed_;
-			expNeed_ = expNeed_ * 2;
+			expNeed_ += expNeed_ * 0.3;
 			return true;
 		}
 		else
@@ -160,12 +160,12 @@ bool PlayerStatComponent::addExp(double exp)
 			else
 			{
 				level_++;
-				strength_ += 10;
+				strength_ += 1;
 				maxMagicka_ += 10;
 				maxStamina_ += 10;
 				speed_ -= 0.01;
 				exp_ = exp_ - expNeed_;
-				expNeed_ = expNeed_ * 2;
+				expNeed_ += expNeed_ * 0.3;
 				return true;
 			}
 		}
@@ -185,12 +185,12 @@ void PlayerStatComponent::setLevelWithScale(int level)
 {
 	for (; level_ <= level; level_++)
 	{
-		strength_ += 10;
+		strength_ += 1;
 		maxMagicka_ += 10;
 		maxStamina_ += 10;
 		speed_ -= 0.01;
 		exp_ = exp_ - expNeed_;
-		expNeed_ = expNeed_ * 2;
+		expNeed_ += expNeed_ * 0.3;
 	}
 }
 

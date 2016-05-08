@@ -32,7 +32,7 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	ammo_ = 0;
 	handPos.setX(0);
 	handPos.setY(0);
-    name_="None";
+    name_= "None";
 	moved_ = true;
 	mined_ = false;
 	isSoundPlayingM_ = false;
@@ -60,6 +60,12 @@ Player::Player(Player & p)
 Player::~Player()
 {
     //dtor
+}
+
+void Player::stopSounds()
+{
+	game::m_sounds.StopSound("Mining");
+	game::m_sounds.StopSound("TurretPlayerHit");
 }
 
 
@@ -336,7 +342,8 @@ void Player::mine(DIRECTION direction)
 			Entity* entity;
 			if (game::system.getEntityAt(newPos, &entity))
 			{
-				if (entity->damage(25, name_))
+				double tDamage = 25.0 + (25.0 / (5.0 / stats.getStrength()));
+				if (entity->damage((int)tDamage, name_))
 				{
 					turret_sound.SetTimer(0.200);
 				}
@@ -348,14 +355,15 @@ void Player::mine(DIRECTION direction)
 				return;
 			if (game::game.getTileRefAt(newPos).isWall() == true)
 			{
-				if (game::game.getTileRefAt(newPos).mine(25, *this))
+				double tDamage = 25.0 + (25.0 / (5.0 / stats.getStrength()));
+				if (game::game.getTileRefAt(newPos).mine((int)tDamage, *this))
 				{
 					if (stats.addExp(10))
 					{
 						game::m_sounds.PlaySoundR("LevelUp");
 						health.setMaxHealth(health.getMaxHealth() + 10);
 						std::stringstream lvlmsg;
-						lvlmsg << "Level Up! >> " << stats.getLevel();
+						lvlmsg << "Level Up! << " << stats.getLevel();
 						game::SlideUI.addSlide(lvlmsg.str());
 					}
 				}
@@ -570,7 +578,7 @@ void Player::purchaseTurret()
 			turret->setPosition(handPos);
 			turret->setGraphic('+');
 			turret->setRange(8);
-			turret->setOwner("Name");
+			turret->setOwner(name_);
 			game::system.addEntity(turret, "Turret");
 			Common::SendTurret(turret.get());
 			goldAmount_ -= 1000;
@@ -602,14 +610,7 @@ void Player::updatePosition()
 
 void Player::reset()
 {
-	goldAmount_ = 100;
-	maxGoldAmount_ = 10000;
-	manaAmount_ = 500;
-	maxManaAmount_ = 500;
-	handPos(0, 0);
-	mineUIPos(0, 0);
-
-	name_ = "None";
+	*this = Player();
 }
 
 void Player::updateMiningUI()

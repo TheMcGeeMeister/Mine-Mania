@@ -12,7 +12,7 @@ public:
 	int getMaxLevel();
 	double getExp();
 	double getMaxExp();
-	int getStength();
+	int getStrength();
 	int getStamina();
 	int getMaxStamina();
 	int getMagicka();

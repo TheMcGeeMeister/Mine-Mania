@@ -13,6 +13,8 @@ public:
 	void setOwner(std::string name);
 	void updatePos();
 
+	virtual bool hasKeyWord(KEYWORD key);
+
 	void serialize(std::stringstream& file);
 	void deserialize(std::stringstream& file);
 
@@ -34,7 +36,7 @@ private:
 	Position pos_;
 	bool isDead_;
 	char graphic_;
-	std::string name_;
+	std::string owner_;
 	HealthComponent health_;
 };
 

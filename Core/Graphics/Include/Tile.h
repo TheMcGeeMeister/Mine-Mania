@@ -15,6 +15,7 @@ class Tile
 {
     public:
         Tile();
+		Tile(Position pos);
         virtual ~Tile();
         char getGraphic() const;
 

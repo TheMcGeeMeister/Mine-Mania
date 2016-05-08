@@ -20,6 +20,8 @@ enum SPacketNames
 
 	WaitingPlayer, Start,
 
+	Win,
+
 	PlayerConnect, ServerDisconnect,
 
 	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,

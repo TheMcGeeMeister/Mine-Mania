@@ -10,11 +10,13 @@
 #include "Display.h"
 #include "Bullet.h"
 #include "Turret.h"
+#include "GameManager.h"
 
 namespace game
 {
 	extern System system;
 	extern PlayerHandler pHandler;
+	extern GameManager GameHandler;
 }
 
 extern void setFontInfo(int fontSize, int font);
@@ -1111,6 +1113,8 @@ void Display::newWorldMulti()
 
 void Display::newWorldMulti(int pAmount, std::string names[])
 {
+	game::GameHandler.Reset();
+
 	map<int, Position> p_pos;
 	map<int, Position> p_cpos;
 	p_pos[1] = Position(74, 28);
@@ -1187,6 +1191,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], true), pAmount, 0);
 	Common::CreatePlayerCore(names[0], Position(0, 0));
 	Common::SetStoneFloorAt(Position(0,1), names[0]);
+	game::GameHandler.AddPlayer(names[0]);
 	////////////////////
 
 	for (int x = 1; x < pAmount; x++)
@@ -1194,8 +1199,10 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x]), pAmount, x);
 		Common::SetStoneFloorAt(p_pos[x], names[x]);
 		Common::CreatePlayerCore(names[x], p_cpos[x]);
+		game::GameHandler.AddPlayer(names[x]);
 	}
 
+	game::GameHandler.StartGame();
 	isLoaded_ = true;
 	reloadAll_ = true;
 	isMultiplayer_ = true;
@@ -1244,6 +1251,7 @@ void Display::unloadWorld()
 	isLoaded_ = false;
 	isMultiplayer_ = false;
 	m_map.clear();
+	game::pHandler.getLocalPlayer().reset();
 }
 
 int Display::getSaveAmount()

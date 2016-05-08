@@ -23,6 +23,8 @@ enum PacketNames
 
 	WaitingPlayer, Start,
 
+	Win,
+
 	PlayerConnect, ServerDisconnected,
 
 	Lobby, LobbyAdd, LobbyName, LobbyReady, LobbyUnReady, LobbyStart, LobbyLeave, LobbyGetInfo,

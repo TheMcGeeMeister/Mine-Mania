@@ -96,7 +96,7 @@ namespace Common
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
 		game::system.addEntity(NewCore, "Core");
-		game::game.removeTileAt(pos);
+		//game::game.removeTileAt(pos);
 	}
 
 	void SetStoneFloorAt(Position pos, std::string owner)
@@ -104,6 +104,43 @@ namespace Common
 		gametiles::stone_floor.setPos(pos);
 		gametiles::stone_floor.forceClaim(owner);
 		game::game.getTileRefAt(pos) = gametiles::stone_floor;
+	}
+
+	void SetCursorPosition(int x, int y)
+	{
+		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+		COORD pos = { x,y };
+		SetConsoleCursorPosition(h, pos);
+	}
+
+	inline void DisplayLetterAt(Position pos, std::string g)
+	{
+		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+		COORD rPos;
+		rPos.X = pos.getX();
+		rPos.Y = pos.getY();
+		DWORD o;
+		WriteConsoleOutputCharacter(h, g.c_str(), 1, rPos, &o);
+	}
+
+	void DisplayTextCentered(int x, int line, std::string text)
+	{
+		int start_x;
+		if (text.length() > x) return;
+		if (text.length() != x)
+		{
+			start_x = (x - text.length()) / 2;
+		}
+		else
+		{
+			start_x = 0;
+		}
+		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+		COORD rPos;
+		DWORD o;
+		rPos.Y = line;
+		rPos.X = start_x;
+		WriteConsoleOutputCharacter(h, text.c_str(), text.length(), rPos, &o);
 	}
 
 	bool ShootFrom(Position pos, int direction)

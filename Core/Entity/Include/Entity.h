@@ -36,7 +36,7 @@ public:
 	void addKeyWord(KEYWORD key);
 	
 	bool isSetToUpdate();
-	bool hasKeyWord(KEYWORD key);
+	virtual bool hasKeyWord(KEYWORD key);
 
 	int getID();
 	int& getIDRef();

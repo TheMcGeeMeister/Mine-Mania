@@ -37,7 +37,6 @@ private:
 	bool isPaused_;
 	bool isWaiting_;
 	bool isPlayerConnected_;
-	static bool isInitialized_;
 
 	int id_;
 };

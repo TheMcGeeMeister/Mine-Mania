@@ -31,7 +31,9 @@ namespace game
 	extern UserInterface lobbylist;
 	extern System system;
 	extern SoundManager m_sounds;
+	extern std::string winnerName;
 	extern bool lobbyStart;
+	extern bool gameWon;
 	extern atomic<bool> exitFromDisconnect;
 	extern class Lobby lobby;
 }
@@ -39,6 +41,7 @@ namespace game
 namespace SimpleNet
 {
 	SOCKET ConnectSocket = INVALID_SOCKET;
+	bool isInitialized_ = false;
 }
 
 SimpleNetClient::SimpleNetClient()
@@ -49,7 +52,7 @@ SimpleNetClient::SimpleNetClient()
 	isHostChosen_ = false;
 	isWaiting_ = true;
 	isPlayerConnected_ = false;
-	isInitialized_ = false;
+	SimpleNet::isInitialized_ = false;
 	SimpleNet::ConnectSocket = INVALID_SOCKET;
 	id_ = 0;
 }
@@ -537,6 +540,13 @@ void SimpleNetClient::Do(std::string rMsg)
 			isWaiting_ = false;
 			Log("Start\n");
 		}
+		else if (name == Win)
+		{
+			std::string name;
+			msg >> name;
+			game::winnerName = name;
+			game::gameWon = true;
+		}
 		else if (name == Lobby)
 		{
 			msg >> name;
@@ -650,7 +660,7 @@ void SimpleNetClient::isExit(bool isExit)
 
 bool SimpleNetClient::Initialize()
 {
-	if (isInitialized_ == true) return;
+	if (SimpleNet::isInitialized_ == true) return true;
 	WSADATA wsaData;
 
 	int iResult;
@@ -660,9 +670,9 @@ bool SimpleNetClient::Initialize()
 	if (iResult != 0)
 	{
 		return false;
-		isInitialized_ = false;
+		SimpleNet::isInitialized_ = false;
 	}
-	isInitialized_ = true;
+	SimpleNet::isInitialized_ = true;
 	return true;
 }
 

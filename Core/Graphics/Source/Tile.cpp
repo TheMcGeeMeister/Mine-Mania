@@ -22,6 +22,7 @@ Tile::Tile()
 	graphic_ = TG_StoneFloor;
 	overlayGraphic_ = ' ';
 	color_ = TGC_StoneFloor;
+	background_ = TGB_StoneFloor;
 	gold_ = 0;
 	claimedPercentage_ = 0;
 	objectid_ = 0;
@@ -37,6 +38,28 @@ Tile::Tile()
 	hasGold_ = false;
 	pos_.setX(0);
 	pos_.setY(0);
+}
+
+Tile::Tile(Position pos)
+{
+	graphic_ = TG_StoneFloor;
+	overlayGraphic_ = ' ';
+	color_ = TGC_StoneFloor;
+	background_ = TGB_StoneFloor;
+	gold_ = 0;
+	claimedPercentage_ = 0;
+	objectid_ = 0;
+	isClaimable_ = true;
+	overlayEnabled_ = false;
+	claimedBy_ = "Neutral";
+	curBeingClaimedBy_ = "None";
+	isWalkable_ = true;
+	isFortified_ = false;
+	isDestructable_ = false;
+	isWall_ = false;
+	isClaimed_ = false;
+	hasGold_ = false;
+	pos_ = pos;
 }
 
 Tile::~Tile()
@@ -430,12 +453,11 @@ bool Tile::mine(int damage, Player& underlord)
 		return false;
 
 	if (isDestructable_ == false)
-		if (damage > 0)
 			return false;
 
 	health.getHealthRef() -= damage;
 
-	if (health.getHealthRef() <= 0)
+	if (health.getHealth() <= 0)
 	{
 		isWall_ = false;
 		setGraphic(TG_StoneFloor);
@@ -444,25 +466,23 @@ bool Tile::mine(int damage, Player& underlord)
 		isWalkable_ = true;
 		isDestructable_ = false;
 		isClaimable_ = true;;
-		health.getMaxHealthRef() = 100;
+		health.setMaxHealth(100);
+		health.setHealth(100);
 
 		if (hasGold_)
 		{
 			underlord.addGold(gold_);
 			hasGold_ = false;
 			gold_ = 0;
-			game::m_sounds.ResetSound("MetalBreak");
-			game::m_sounds.PlaySound("MetalBreak");
+			game::m_sounds.PlaySoundR("MetalBreak");
 		}
 		else
 		{
-			game::m_sounds.ResetSound("Break");
-			game::m_sounds.PlaySound("Break");
+			game::m_sounds.PlaySoundR("Break");
 		}
 
 		game::m_sounds.StopSound("Mining");
 
-		health.getHealthRef() = health.getMaxHealthRef();
 		updateTile(pos_);
 		return true;
 	}

@@ -18,6 +18,8 @@ class Player : public Entity
 		Player(Player&);
         virtual ~Player();
 
+		void stopSounds();
+
         /* Getters */
 		//////////////////////////////////
         int getGoldAmount();
