@@ -8,6 +8,7 @@ Bullet::Bullet()
 	ai.setDamage(5);
 	ai.setGraphicNoUpdate('@');
 	ai.setPositionNoUpdate(Position(0, 0));
+	addKeyWord(KEYWORD_BULLET);
 }
 
 Bullet::Bullet(Position sPos, double damage, DIRECTION direction)

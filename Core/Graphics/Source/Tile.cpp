@@ -481,8 +481,6 @@ bool Tile::mine(int damage, Player& underlord)
 			game::m_sounds.PlaySoundR("Break");
 		}
 
-		game::m_sounds.StopSound("Mining");
-
 		updateTile(pos_);
 		return true;
 	}

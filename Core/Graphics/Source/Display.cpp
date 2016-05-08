@@ -1160,6 +1160,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	stone.setGraphic(TG_Stone);
 	stone.setColor(TGC_Stone);
 	stone.setBackground(TGB_Stone);
+	stone.isWalkable(false);
 	stone.isDestructable(true);
 	stone.setMaxHealth(100);
 	stone.setHealth(100);
@@ -1251,7 +1252,9 @@ void Display::unloadWorld()
 	isLoaded_ = false;
 	isMultiplayer_ = false;
 	m_map.clear();
+	std::string local = game::pHandler.getLocalPlayer().getName();
 	game::pHandler.getLocalPlayer().reset();
+	game::pHandler.getLocalPlayer().setName(local);
 }
 
 int Display::getSaveAmount()
@@ -1326,7 +1329,6 @@ bool Display::loadSettings()
 	else
 	{
 		string none;
-		string name;
 		file >> none;
 		file >> none;
 		file >> font_;
@@ -1335,11 +1337,11 @@ bool Display::loadSettings()
 		file >> none;
 		file >> isFullscreen_;
 		file >> none;
-		file >> name;
+		file >> localPlayerName_;
 		file >> none;
 		file >> volume_;
 		setFontInfo(fontSize_, font_);
-		game::pHandler.getLocalPlayer().setName(name);
+		game::pHandler.getLocalPlayer().setName(localPlayerName_);
 		game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
 		if (isFullscreen_)
 		{

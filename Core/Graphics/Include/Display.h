@@ -120,6 +120,7 @@ private:
 	bool isLoaded_;
 	bool isMultiplayer_;
 	string saveSuffix_;
+	string localPlayerName_;
 
 	int font_;
 	int fontSize_;

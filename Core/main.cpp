@@ -44,6 +44,7 @@ namespace game
 	UserInterface tileUI(30, 8, 0, 30, 1);
 	UserInterface SlideUI(25, 15, 75, 0, 1);
 	UserInterface ServerUI(18, 3, 75, 27, 1);
+	UserInterface statsUI(16, 5, 32, 30, 1);
 	SimpleNetClient server;
 	SoundManager m_sounds;
 	std::string winnerName;
@@ -106,10 +107,11 @@ bool isExitGame(Display& game)
 		game::ServerUI.isHidden(true);
 		game::tileUI.isHidden(true);
 		game::SlideUI.isHidden(true);
+		game::statsUI.isHidden(true);
 		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		game::game.isHidden(true);
 		std::stringstream winnerTxt;
-		winnerTxt << "Player " << game::winnerName << " Won the game!";
+		winnerTxt << "Player " << game::winnerName << " won the game!";
 		//Common::DisplayTextCentered(game::game.getWidth(), game::game.getHeight() / 2, winnerTxt.str());
 		Common::SetCursorPosition(0, 0);
 		cout << winnerTxt.str();
@@ -133,6 +135,7 @@ bool isExitGame(Display& game)
 		game::ServerUI.isHidden(true);
 		game::tileUI.isHidden(true);
 		game::SlideUI.isHidden(true);
+		game::statsUI.isHidden(true);
 		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		exit = pauseGameMenu(game);
 		if (exit == false)
@@ -140,6 +143,7 @@ bool isExitGame(Display& game)
 			game::ServerUI.isHidden(false);
 			game::tileUI.isHidden(false);
 			game::SlideUI.isHidden(false);
+			game::statsUI.isHidden(false);
 			game::pHandler.getLocalPlayer().updateMiningUI();
 			clearInput();
 		}
@@ -346,6 +350,14 @@ void updateTileInfo()
     TileInfo.getSectionRef(5).setVar(1, gold.str());
 
     TileInfo.update();
+
+	std::stringstream level;
+	level << player.getLevel();
+	game::statsUI.getSectionRef(2).setVar(1, level.str());
+
+	std::stringstream exp;
+	exp << player.getExp() << "/" << player.getMaxExp();
+	game::statsUI.getSectionRef(3).setVar(1, exp.str());
 }
 
 void sendHostInfo()
@@ -883,6 +895,7 @@ void gameLoop()
 	game::SlideUI.isHidden(false);
 	game::ServerUI.isHidden(false);
 	game::tileUI.isHidden(false);
+	game::statsUI.isHidden(false);
 	player.getUIRef().isHidden(true);
 
 	clearInput();
@@ -902,6 +915,7 @@ void gameLoop()
 		updateTileInfo();
 		game::SlideUI.update();
 		game::ServerUI.update();
+		game::statsUI.update();
 		game::system.update();
 		game::pHandler.update();
 		game::GameHandler.Update();
@@ -918,10 +932,6 @@ void preGameLoop()
 
     Timer InputCoolDown;
     Position newPos(1,1);
-	game::SlideUI.initializeSlideUI();
-
-	game::ServerUI.addSection("Connected:", false, true);
-	game::ServerUI.getSectionRef(1).addVar("False");
 
 	thread sThread;
 
@@ -938,20 +948,6 @@ void preGameLoop()
     core.forceClaim(game::pHandler.getLocalPlayer().getName());
 
     Display& game=game::game;
-
-	UserInterface& TileInfo = game::tileUI;
-    TileInfo.addSection("Health:");
-    TileInfo.getSectionRef(1).push_backVar("100/100");
-    TileInfo.addSection("Tile Owner:");
-    TileInfo.getSectionRef(2).push_backVar(" ");
-    TileInfo.addSection("Claimed:");
-    TileInfo.getSectionRef(3).push_backVar(" ");
-    TileInfo.addSection("Ammo:");
-    TileInfo.getSectionRef(4).push_backVar((int)0);
-    TileInfo.addSection("Player Gold:");
-    TileInfo.getSectionRef(5).push_backVar(" ");
-	TileInfo.addSection("Mode:");
-	TileInfo.getSectionRef(6).push_backVar("Mining");
 	
     game.setSizeX(75);
     game.setSizeY(30);
@@ -1016,6 +1012,35 @@ void preGameLoop()
 	return;
 }
 
+void initializeMenus()
+{
+	game::SlideUI.initializeSlideUI();
+
+	game::ServerUI.addSection("Connected:", false, true);
+	game::ServerUI.getSectionRef(1).addVar("False");
+
+	UserInterface& TileInfo = game::tileUI;
+	TileInfo.addSection("Health:");
+	TileInfo.getSectionRef(1).push_backVar("100/100");
+	TileInfo.addSection("Tile Owner:");
+	TileInfo.getSectionRef(2).push_backVar(" ");
+	TileInfo.addSection("Claimed:");
+	TileInfo.getSectionRef(3).push_backVar(" ");
+	TileInfo.addSection("Ammo:");
+	TileInfo.getSectionRef(4).push_backVar((int)0);
+	TileInfo.addSection("Player Gold:");
+	TileInfo.getSectionRef(5).push_backVar(" ");
+	TileInfo.addSection("Mode:");
+	TileInfo.getSectionRef(6).push_backVar("Mining");
+
+	game::statsUI.addSection("Player", false, true);
+	game::statsUI.addSection("Level:", false, true);
+	game::statsUI.addSection("Exp:", false, true);
+	game::statsUI.getSectionRef(2).push_backVar(" ");
+	game::statsUI.getSectionRef(3).push_backVar(" ");
+
+}
+
 void initializeStdTiles()
 {
 	using namespace gametiles;
@@ -1023,6 +1048,7 @@ void initializeStdTiles()
 	stone_wall.setGraphic(TG_Stone);
 	stone_wall.setColor(TGC_Stone);
 	stone_wall.setBackground(TGB_Stone);
+	stone_wall.isWalkable(false);
 	stone_wall.isDestructable(true);
 	stone_wall.setMaxHealth(100);
 	stone_wall.setHealth(100);
@@ -1074,11 +1100,13 @@ void loadSounds()
 	game::m_sounds.AddSound("MenuSelection", "Sounds//MenuSelection.wav");
 	game::m_sounds.AddSound("Winner", "Sounds//Winner.wav");
 	game::m_sounds.AddSound("Loser", "Sounds//Loser.wav");
+	game::m_sounds.AddSound("Repair", "Sounds//Repair.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");
 	game::m_sounds.SetInfinite("TurretPlayerHit");
 	game::m_sounds.SetInfinite("Menu");
+	game::m_sounds.SetInfinite("Repair");
 }
 
 int main()
@@ -1094,6 +1122,7 @@ int main()
     srand(time(NULL));
 
 	initializeStdTiles();
+	initializeMenus();
 
 	setFullsreen();
 

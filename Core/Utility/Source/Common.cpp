@@ -172,7 +172,7 @@ namespace Common
 
 		nPos.go((DIRECTION)direction);
 
-		if (game::game.getTileRefAt(nPos).isWalkable() == true)
+		if (game::game.getTileRefAt(nPos).isWall() == false)
 		{
 			if (game::system.entityAt(nPos) == false)
 			{

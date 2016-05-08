@@ -43,3 +43,9 @@ void SoundPlayer::SetTimer(double time)
 		soundPlaying_ = true;
 	}
 }
+
+void SoundPlayer::StopSound()
+{
+	game::m_sounds.StopSound(soundName);
+	soundPlaying_ = false;
+}

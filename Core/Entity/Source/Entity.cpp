@@ -11,7 +11,6 @@ Entity::Entity()
 {
 	kill_ = false;
 	isObjectHosted_ = true;
-	keywords_.push_back(KEYWORD_BULLET);
 }
 
 

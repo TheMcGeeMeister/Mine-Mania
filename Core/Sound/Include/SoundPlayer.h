@@ -11,6 +11,7 @@ public:
 	void Update();
 	void SetSound(std::string sound);
 	void SetTimer(double time);
+	void StopSound();
 
 private:
 	Timer soundStop_;

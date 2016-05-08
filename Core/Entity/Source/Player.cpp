@@ -30,14 +30,16 @@ Player::Player() : UI(23, 5, 50, 30, 1)
     manaAmount_ = 500;
     maxManaAmount_ = 500;
 	ammo_ = 0;
+	baseDamage_ = 15.0;
 	handPos.setX(0);
 	handPos.setY(0);
     name_= "None";
 	moved_ = true;
 	mined_ = false;
-	isSoundPlayingM_ = false;
 
 	turret_sound.SetSound("TurretPlayerHit");
+	repair_sound.SetSound("Repair");
+	mine_sound.SetSound("Mining");
 
 	handMode_ = 0;
 
@@ -65,7 +67,9 @@ Player::~Player()
 void Player::stopSounds()
 {
 	game::m_sounds.StopSound("Mining");
-	game::m_sounds.StopSound("TurretPlayerHit");
+	mine_sound.StopSound();
+	turret_sound.StopSound();
+	repair_sound.StopSound();
 }
 
 
@@ -114,6 +118,16 @@ int Player::getLevel()
 int Player::getMaxLevel()
 {
 	return stats.getMaxLevel();
+}
+
+int Player::getExp()
+{
+	return stats.getExp();
+}
+
+int Player::getMaxExp()
+{
+	return stats.getMaxExp();
 }
 
 string Player::getName()
@@ -342,7 +356,7 @@ void Player::mine(DIRECTION direction)
 			Entity* entity;
 			if (game::system.getEntityAt(newPos, &entity))
 			{
-				double tDamage = 25.0 + (25.0 / (5.0 / stats.getStrength()));
+				double tDamage = baseDamage_ + (baseDamage_ / (5.0 / stats.getStrength()));
 				if (entity->damage((int)tDamage, name_))
 				{
 					turret_sound.SetTimer(0.200);
@@ -355,7 +369,7 @@ void Player::mine(DIRECTION direction)
 				return;
 			if (game::game.getTileRefAt(newPos).isWall() == true)
 			{
-				double tDamage = 25.0 + (25.0 / (5.0 / stats.getStrength()));
+				double tDamage = baseDamage_ + (baseDamage_ / (5.0 / stats.getStrength()));
 				if (game::game.getTileRefAt(newPos).mine((int)tDamage, *this))
 				{
 					if (stats.addExp(10))
@@ -366,6 +380,7 @@ void Player::mine(DIRECTION direction)
 						lvlmsg << "Level Up! << " << stats.getLevel();
 						game::SlideUI.addSlide(lvlmsg.str());
 					}
+					mine_sound.StopSound();
 				}
 			}
 			else
@@ -375,17 +390,7 @@ void Player::mine(DIRECTION direction)
 			moved_ = false;
 			if (game::game.getTileRefAt(newPos).isWall() == true)
 			{
-				if (isSoundPlayingM_ == false)
-				{
-					game::m_sounds.ResetSound("Mining");
-					game::m_sounds.PlaySound("Mining");
-					isSoundPlayingM_ = true;
-					miningStopSound.StartNewTimer(0.200);
-				}
-			}
-			else
-			{
-				isSoundPlayingM_ = false;
+				mine_sound.SetTimer(0.200);
 			}
 		}
 	}
@@ -726,20 +731,6 @@ void Player::serialize(fstream& file)
 	stats.serialize(file);
 }
 
-/*void Player::serialize(ofstream& file)
-{
-	file << LOAD::L_Player << endl;
-	file << goldAmount_ << endl;
-	file << maxGoldAmount_ << endl;
-	file << manaAmount_ << endl;
-	file << maxManaAmount_ << endl;
-	file << name_ << endl;
-	file << handPos.getX() << endl;
-	file << handPos.getY() << endl;
-	file << spawnPos.getX() << endl;
-	file << spawnPos.getY() << endl;
-}*/
-
 void Player::serialize(stringstream & file)
 {
 	file << LOAD::L_Player << endl;
@@ -781,27 +772,6 @@ void Player::deserialize(fstream& file)
 	stats.deserialize(file);
 }
 
-/*void Player::deserialize(ifstream& file)
-{
-	int pos_x;
-	int pos_y;
-	int spos_x;
-	int spos_y;
-	file >> goldAmount_;
-	file >> maxGoldAmount_;
-	file >> manaAmount_;
-	file >> maxManaAmount_;
-	file >> name_;
-	file >> pos_x;
-	file >> pos_y;
-	file >> spos_y;
-	file >> spos_x;
-	handPos.setX(pos_x);
-	handPos.setY(pos_y);
-	spawnPos.setX(spos_x);
-	spawnPos.setY(spos_y);
-}*/
-
 void Player::deserialize(stringstream& file)
 {
 	file.clear();
@@ -841,12 +811,15 @@ void Player::update()
 			<< health.getHealth() << EndLine;
 		SendServerLiteral(msg.str());
 	}
-	if (miningStopSound.Update() == true && isSoundPlayingM_ == true)
+	if (expCooldown_.Update() == true)
 	{
-		game::m_sounds.StopSound("Mining");
-		isSoundPlayingM_ = false;
+		stats.addExp(1);
+		expCooldown_.StartNewTimer(1);
+		goldAmount_ += 1;
 	}
 	turret_sound.Update();
+	repair_sound.Update();
+	mine_sound.Update();
 }
 
 bool Player::hasComponent(int id)
@@ -871,7 +844,7 @@ void Player::kill()
 	forceHandPosition(spawnPos, game::game);
 
 	stringstream msg;
-	msg << SendDefault << KillPlayer << EndLine << name_ << EndLine;
+	msg << SendDefault << EndLine << KillPlayer << EndLine << name_ << EndLine;
 	SendServerLiteral(msg.str());
 }
 

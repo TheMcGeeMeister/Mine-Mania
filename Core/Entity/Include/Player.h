@@ -31,6 +31,8 @@ class Player : public Entity
 		int getMaxHealth();
 		int getLevel();
 		int getMaxLevel();
+		int getExp();
+		int getMaxExp();
         string getName();
 		Position getSpawnPos();
 		UserInterface& getUIRef();
@@ -141,15 +143,17 @@ class Player : public Entity
 		int handMode_;
 		int mineProgress_;
 		int ammo_;
+		double baseDamage_;
 
 		HealthComponent health;
 		PlayerStatComponent stats;
 		SoundPlayer turret_sound;
+		SoundPlayer repair_sound;
+		SoundPlayer mine_sound;
 
 		bool moved_;
 		bool mined_;
 		bool isMining_;
-		bool isSoundPlayingM_; // Mining Sound Playing
 		bool isDead_;
 		bool isLocal_;
 
@@ -161,9 +165,10 @@ class Player : public Entity
 
 		UserInterface UI;
 
-		Timer miningStopSound;
 		Timer movementTimer_;
 		Timer shootTimer_;
+		Timer goldCooldown_;
+		Timer expCooldown_;
 
 		void Log(std::string);
 
