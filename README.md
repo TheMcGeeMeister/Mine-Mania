@@ -1,14 +1,19 @@
 
 #Mine - Mania Developer: Mr.McGee
 
-This is something I made from just practice programming in C++
-Over time it developed into something bigger.
+This is something I made from just practicing in c++
 
-This is a grid based game where the player can mine the 'Walls', and 'Gold' to gain money.
-With money you can buy turrets/ammo.
-The player can shoot.
-Placing walls doesn't cost anything atm.
-I've been working on Multiplayer for a while. It works right now, you can see the other player, them moving around etc.
+Grid-Based game in the console where players fight, and win by destroying the other player(s) cores.
+
+Features:
+- Moving
+- Mining
+- Placing
+- Purchase Auto Turrets
+- Purchase Bullets to Shoot yourself
+- GoldSpawns(claim to passively get gold)
+- Wall Repairing
+- Sounds
 
 
 #Controls
@@ -24,7 +29,7 @@ Enter: Continue(In Menu's)
 
 1: Switch Mode to Mining
 
-2: Switch Mode to Placing
+2: Switch Mode to Hand
 
 3: Switch Mode to Weapon
 
