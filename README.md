@@ -13,6 +13,7 @@ Features:
 - Purchase Bullets to Shoot yourself
 - GoldSpawns(claim to passively get gold)
 - Wall Repairing
+- Multiplayer
 - Sounds
 
 
