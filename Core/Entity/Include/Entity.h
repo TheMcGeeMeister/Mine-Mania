@@ -4,6 +4,8 @@
 #include <map>
 #include "Position.h"
 
+class Player;
+
 enum COMPONENT
 {
 	COMPONENT_HEALTH, COMPONENT_HITTABLE
@@ -53,6 +55,7 @@ public:
 	virtual void updateID() = 0;
 	virtual void send() = 0;
 	virtual void render() = 0;
+	virtual void activate(Player* player) = 0;
 	virtual Position getPos() = 0;
 private:
 	int id_;
@@ -88,6 +91,8 @@ public:
 	bool getEntity(int id, Entity** entity);
 
 	bool deleteEntity(int id);
+
+	bool deleteEntityServer(int id);
 
 	void serialize(std::fstream&);
 

@@ -267,8 +267,6 @@ void SimpleNetClient::SetId(int id)
 
 void SimpleNetClient::Do(std::string rMsg)
 {
-	int loopLimit = 1000;
-	int curLoop = 0;
 	std::stringstream msg;
 	msg << rMsg;
 	int name;
@@ -355,6 +353,23 @@ void SimpleNetClient::Do(std::string rMsg)
 		}
 		////////////////////////////////////////////
 
+		/* Tile Update*/
+		////////////////////////////////////////////
+		else if (name == TileUpdate)
+		{
+			msg >> name;
+			if (name == Claim)
+			{
+				std::string name;
+				Position pos;
+				WORD color;
+				pos.deserialize(msg);
+				msg >> color;
+				msg >> name;
+			}
+		}
+		////////////////////////////////////////////
+
 		/* Adds */
 		////////////////////////////////////////////
 		else if (name == AddPlayer)
@@ -387,20 +402,29 @@ void SimpleNetClient::Do(std::string rMsg)
 		////////////////////////////////////////////
 		else if (name == EntityDamage)
 		{
-			int x;
-			int y;
+			/*int id;
 			int damage;
+			msg >> id;
+			msg >> damage;*/
+			Position pos;
 			std::string name;
-			msg >> x
-				>> y
-				>> damage
-				>> name;
+			double damage;
+
+			pos.deserialize(msg);
+			msg >> damage;
+			msg >> name;
 			Entity *entity;
-			if (game::system.getEntityAt(Position(x, y), &entity))
+			if (game::system.getEntityAt(pos, &entity))
 			{
 				entity->damage(damage, name, true);
+				//Log("EntityDamage\n");
 			}
-			Log("EntityDamage\n");
+			else
+			{
+				std::stringstream logMsg;
+				logMsg << "EntityDamage - Failed - " << pos.getX() << "," << pos.getY() << EndLine;
+				Log(logMsg.str());
+			}
 		}
 		else if (name == EntityAdd)
 		{
@@ -443,8 +467,14 @@ void SimpleNetClient::Do(std::string rMsg)
 		{
 			int id;
 			msg >> id;
-			game::system.deleteEntity(id);
-			Log("EntityKill\n");
+			if (game::system.deleteEntityServer(id))
+			{
+				Log("EntityKill\n");
+			}
+			else
+			{
+				Log("EntityKill - Failed\n");
+			}
 		}
 		else if (name == EntityUpdatePosition)
 		{
@@ -455,11 +485,15 @@ void SimpleNetClient::Do(std::string rMsg)
 				>> x
 				>> y;
 			Entity* entity;
-			if (game::system.getEntity(id, &entity))
+			if (game::system.getEntityServer(id, &entity))
 			{
 				entity->setPos(Position(x, y));
+				//Log("EntityUpdatePosition\n");
 			}
-			Log("EntityUpdatePosition\n");
+			else
+			{
+				Log("EntityUpdatePosition - Failed\n");
+			}
 		}
 		////////////////////////////////////////////
 
@@ -516,39 +550,40 @@ void SimpleNetClient::Do(std::string rMsg)
 			wMsg << World << endl;
 			wMsg << world << endl;
 			SendLiteral(wMsg.str());
-			Log("GetWorld\n");
+			//Log("GetWorld\n");
 		}
 		else if (name == World)
 		{
 			game::game.loadWorldServer(msg);
-			Log("World\n");
+			//Log("World\n");
 		}
 		else if (name == SetHost)
 		{
 			msg >> id_;
 			isHost_ = true;
 			isHostChosen_ = true;
-			Log("SetHost\n");
+			//Log("SetHost\n");
 		}
 		else if (name == SetPlayer)
 		{
 			msg >> id_;
 			isHost_ = false;
 			isHostChosen_ = true;
-			Log("SetPlayer\n");
+			//Log("SetPlayer\n");
 		}
 		else if (name == WaitingPlayer)
 		{
+
 		}
 		else if (name == PlayerConnect)
 		{
 			isPlayerConnected_ = true;
-			Log("PlayerConnect\n");
+			//Log("PlayerConnect\n");
 		}
 		else if (name == PacketNames::Start)
 		{
 			isWaiting_ = false;
-			Log("Start\n");
+			//Log("Start\n");
 		}
 		else if (name == Win)
 		{
@@ -596,9 +631,9 @@ void SimpleNetClient::Do(std::string rMsg)
 			}
 			else if (name == LobbyLeave)
 			{
-				std::string name;
-				msg >> name;
-				game::lobby.RemovePlayer(name);
+				/* TO:DO */
+				int id;
+				msg >> id;
 				Log("Lobby Leave\n");
 			}
 			else if (name == LobbyGetInfo)

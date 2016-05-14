@@ -105,7 +105,7 @@ void System::update()
 					file << "System: Entity Deleted ID:" << iter.first << std::endl;
 					/////////////////////////////////
 					std::stringstream msg;
-					msg << SendDefault << EndLine << EntityKill << EndLine << iter.first;
+					msg << SendDefault << EndLine << EntityKill << EndLine << iter.first << EndLine;
 					SendServerLiteral(msg.str());
 					msg.str(std::string());
 					continue;
@@ -117,36 +117,6 @@ void System::update()
 			}
 		}
 	}
-	/*else
-	{
-		if (m_system.empty() == false)
-		{
-			std::stringstream msg;
-			for (auto& iter : m_system)
-			{
-				if (iter.second->isSetToUpdate())
-				{
-					if (iter.second->isKilled() == true)
-					{
-						d_queue.push_back(iter.first);
-						/* Debug
-						/////////////////////////////////
-						std::fstream file("Logs\\Log.txt", std::ios::app);
-						file << "System: Entity Deleted ID:" << iter.first << std::endl;
-						/////////////////////////////////
-						msg << SendDefault << EndLine << EntityKill << EndLine << iter.first;
-						SendServerLiteral(msg.str());
-						msg.str(std::string());
-						continue;
-					}
-					else
-					{
-						iter.second->update();
-					}
-				}
-			}
-		}
-	}*/
 	for (auto& iter : d_queue)
 	{
 		m_system.erase(iter);
@@ -196,6 +166,7 @@ int System::addEntity(std::shared_ptr<Entity> entity, bool send)
 
 int System::addEntityServer(std::shared_ptr<Entity> entity)
 {
+	m_server[entity->getID()] = id_index;
 	entity->setID(id_index);
 	m_system[id_index] = entity;
 	std::fstream file("Logs\\Log.txt", std::ios::app | std::ios::out);
@@ -238,15 +209,9 @@ bool System::getEntityAt(Position pos, Entity ** entity)
 	return false;
 }
 
-bool System::getEntityServer(int id, Entity ** entity)
+bool System::getEntityServer(int i_id, Entity ** entity)
 {
-	/*int id = m_server[i_id];
-	if (m_system.count(id))
-	{
-		*entity = m_system[id].get();
-		return true;
-	}
-	return false;*/
+	int id = m_server[i_id];
 	if (m_system.count(id))
 	{
 		*entity = m_system[id].get();
@@ -277,6 +242,18 @@ bool System::deleteEntity(int id)
 	{
 		return false;
 	}
+}
+
+bool System::deleteEntityServer(int id)
+{
+	if (m_system.count(m_server[id]))
+	{
+		m_system[m_server[id]]->kill();
+		m_system.erase(m_server[id]);
+		m_server.erase(id);
+		return true;
+	}
+	return false;
 }
 
 void System::serialize(std::fstream & file)

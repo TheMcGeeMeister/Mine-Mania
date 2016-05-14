@@ -20,7 +20,7 @@ namespace game
 
 enum PLAYER_MODE
 {
-	MODE_MINING, MODE_PLACING, MODE_SHOOTING,
+	MODE_MINING, MODE_HAND, MODE_SHOOTING,
 };
 
 Player::Player() : UI(23, 5, 50, 30, 1)
@@ -31,6 +31,8 @@ Player::Player() : UI(23, 5, 50, 30, 1)
     maxManaAmount_ = 500;
 	ammo_ = 0;
 	baseDamage_ = 15.0;
+	passiveGoldIncrease_ = 1;
+	claimedColor_ = B_Blue;
 	handPos.setX(0);
 	handPos.setY(0);
     name_= "None";
@@ -139,13 +141,25 @@ Position Player::getSpawnPos()
 {
 	return spawnPos;
 }
+
 UserInterface & Player::getUIRef()
 {
 	return UI;
 }
+
 HealthComponent & Player::getHealthRef()
 {
 	return health;
+}
+
+WORD Player::getClaimedColor()
+{
+	return claimedColor_;
+}
+
+void Player::setClaimedColor(WORD color)
+{
+	claimedColor_ = color;
 }
 ////////////////////////////////////////////////
 
@@ -284,6 +298,7 @@ void Player::moveHand(DIRECTION direction)
 		<< name_ << EndLine
 		<< newPos.getX() << EndLine
 		<< newPos.getY() << EndLine;
+	movementTimer_.StartNewTimer(0.075);
 	SendServerLiteral(msg.str());
 	return;
 }
@@ -334,6 +349,7 @@ void Player::mineRight(Display& game)
 
 void Player::mine(DIRECTION direction)
 {
+	if (mineTimer_.Update() == false) return;
 	if (handMode_ == MODE_MINING)
 	{
 		Position newPos = handPos;
@@ -364,7 +380,7 @@ void Player::mine(DIRECTION direction)
 						game::m_sounds.PlaySoundR("LevelUp");
 						health.setMaxHealth(health.getMaxHealth() + 10);
 						std::stringstream lvlmsg;
-						lvlmsg << "Level Up! << " << stats.getLevel();
+						lvlmsg << "You Leveled Up! Level:" << stats.getLevel();
 						game::SlideUI.addSlide(lvlmsg.str());
 					}
 					mine_sound.StopSound();
@@ -379,41 +395,44 @@ void Player::mine(DIRECTION direction)
 			{
 				mine_sound.SetTimer(0.200);
 			}
+			mineTimer_.StartNewTimer(0.075);
 		}
 	}
-	else if(handMode_ == MODE_PLACING)
+	else if(handMode_ == MODE_HAND)
 	{
 		if (moved_ == true)
 		{
 			moved_ = false;
 			mineProgress_ = 0;
 		}
+		Position newPos = handPos;
+		newPos.go(direction);
+		Entity* entity;
+		if(game::system.getEntityAt(newPos, &entity) == true)
+		{
+			entity->activate(this);
+		}
 		else
 		{
-			mineProgress_ += 25;
-			if (mineProgress_ >= 100)
+			Tile& tile = game::game.getTileRefAt(newPos);
+			if (tile.isWall())
 			{
-				Position newPos = handPos;
-				newPos.go(direction);
-				if (game::system.entityAt(newPos) == false)
+				mineProgress_ += 25;
+				if (mineProgress_ >= 100)
 				{
-					Tile& tile = game::game.getTileRefAt(newPos);
-					if (tile.isWall() == false)
-					{
-						tile.setGraphic(TG_Stone);
-						tile.isWall(true);
-						tile.setColor(TGC_Stone);
-						tile.setBackground(TGB_Stone);
-						tile.isWalkable(false);
-						tile.isDestructable(true);
-						game::m_sounds.ResetSound("Place");
-						game::m_sounds.PlaySound("Place");
-						tile.updateServer();
-					}
+					tile.setGraphic(TG_Stone);
+					tile.isWall(true);
+					tile.setColor(TGC_Stone);
+					tile.setBackground(TGB_Stone);
+					tile.isWalkable(false);
+					tile.isDestructable(true);
+					game::m_sounds.PlaySoundR("Place");
+					tile.updateServer();
+					mineProgress_ = 0;
 				}
-				mineProgress_ = 0;
 			}
 		}
+
 	}
 	else if (handMode_ = MODE_SHOOTING)
 	{
@@ -437,11 +456,6 @@ void Player::mine(DIRECTION direction)
 	}
 }
 
-void Player::attack(DIRECTION direction)
-{
-
-}
-
 void Player::forceHandPosition(Position newPos, Display& game)
 {
 	game.removeSelectedAtTile(handPos);
@@ -461,7 +475,7 @@ void Player::claimOnHand()
 {
 	if (game::game.isClaimedTileNear(handPos, name_))
 	{
-		game::game.getTileRefAt(handPos).claim(10, name_);
+		game::game.getTileRefAt(handPos).claim(10, name_, claimedColor_);
 	}
 }
 
@@ -470,7 +484,7 @@ void Player::switchMode()
 	if (handMode_ == 0)
 	{
 		handMode_ = 1;
-		game::tileUI.getSectionRef(6).setVar(1, "Placing");
+		game::tileUI.getSectionRef(6).setVar(1, "Hand");
 	}
 	else if(handMode_ == 1)
 	{
@@ -490,7 +504,7 @@ void Player::switchModeTo(int mode)
 	switch (mode)
 	{
 	case 0:game::tileUI.getSectionRef(6).setVar(1, "Mining"); break;
-	case 1:game::tileUI.getSectionRef(6).setVar(1, "Placing"); break;
+	case 1:game::tileUI.getSectionRef(6).setVar(1, "Hand"); break;
 	case 2:game::tileUI.getSectionRef(6).setVar(1, "Weapon"); break;
 	}
 }
@@ -509,6 +523,8 @@ void Player::knockbackTo(DIRECTION direction, int amount)
 {
 	Position pPos = handPos; // Previous position
 	Position cPos = handPos;
+	std::stringstream msg;
+	msg << SendDefault << EndLine << PlayerUpdate << EndLine << Knockback << EndLine << name_ << EndLine << 1.5 << EndLine;
 	for (int x = 0; x < amount; x++)
 	{
 		pPos = cPos;
@@ -516,6 +532,8 @@ void Player::knockbackTo(DIRECTION direction, int amount)
 		if (cPos.isValid() == false)
 		{
 			forceHandPosition(pPos);
+			msg << pPos.serializeR();
+			SendServerLiteral(msg.str());
 			return;
 		}
 		if (game::game.getTileRefAt(cPos).isWalkable() == false)
@@ -523,6 +541,8 @@ void Player::knockbackTo(DIRECTION direction, int amount)
 			if (x > 0)
 			{
 				forceHandPosition(pPos);
+				msg << pPos.serializeR();
+				SendServerLiteral(msg.str());
 				return;
 			}
 			return;
@@ -532,12 +552,16 @@ void Player::knockbackTo(DIRECTION direction, int amount)
 			if (x > 0)
 			{
 				forceHandPosition(pPos);
+				msg << pPos.serializeR();
+				SendServerLiteral(msg.str());
 				return;
 			}
 			return;
 		}
 	}
 	forceHandPosition(cPos);
+	msg << cPos.serializeR();
+	SendServerLiteral(msg.str());
 	updatePosition();
 }
 
@@ -581,10 +605,6 @@ void Player::purchaseTurret()
 			goldAmount_ -= 1000;
 			game::m_sounds.PlaySoundR("Money");
 		}
-		else
-		{
-			game::SlideUI.addSlide("Turret Place Failed");
-		}
 	}
 }
 
@@ -603,6 +623,16 @@ void Player::updatePosition()
 	std::stringstream msg;
 	msg << SendDefault << EndLine << UpdatePlayerPosition << EndLine << name_ << EndLine << handPos.serializeR();
 	SendServerLiteral(msg.str());
+}
+
+void Player::isGoldPassive(bool is)
+{
+	isGoldPassive_ = is;
+}
+
+bool Player::isGoldPassive()
+{
+	return isGoldPassive_;
 }
 
 void Player::reset()
@@ -708,34 +738,40 @@ void Player::setMaxGoldAmount(int amount)
 ////////////////////////////////////////////////
 void Player::serialize(fstream& file)
 {
-	file << LOAD::L_Player << endl;
-	file << goldAmount_ << endl;
-	file << maxGoldAmount_ << endl;
-	file << manaAmount_ << endl;
-	file << maxManaAmount_ << endl;
-	file << ammo_ << endl;
-	file << name_ << endl;
-	file << handPos.getX() << endl;
-	file << handPos.getY() << endl;
-	file << spawnPos.getX() << endl;
-	file << spawnPos.getY() << endl;
+	file << LOAD::L_Player << endl
+		 << goldAmount_ << endl
+		 << maxGoldAmount_ << endl
+		 << manaAmount_ << endl
+		 << maxManaAmount_ << endl
+		 << ammo_ << endl
+		 << name_ << endl
+		 << passiveGoldIncrease_ << endl
+		 << isGoldPassive_ << endl
+		 << (int)claimedColor_ << endl
+		 << handPos.getX() << endl
+		 << handPos.getY() << endl
+		 << spawnPos.getX() << endl
+		 << spawnPos.getY() << endl;
 	health.serialize(file);
 	stats.serialize(file);
 }
 
 void Player::serialize(stringstream & file)
 {
-	file << LOAD::L_Player << endl;
-	file << goldAmount_ << endl;
-	file << maxGoldAmount_ << endl;
-	file << manaAmount_ << endl;
-	file << maxManaAmount_ << endl;
-	file << ammo_ << endl;
-	file << name_ << endl;
-	file << handPos.getX() << endl;
-	file << handPos.getY() << endl;
-	file << spawnPos.getX() << endl;
-	file << spawnPos.getY() << endl;
+	file << LOAD::L_Player << endl
+		<< goldAmount_ << endl
+		<< maxGoldAmount_ << endl
+		<< manaAmount_ << endl
+		<< maxManaAmount_ << endl
+		<< ammo_ << endl
+		<< name_ << endl
+		<< passiveGoldIncrease_ << endl
+		<< isGoldPassive_ << endl
+		<< (int)claimedColor_ << endl
+		<< handPos.getX() << endl
+		<< handPos.getY() << endl
+		<< spawnPos.getX() << endl
+		<< spawnPos.getY() << endl;
 	health.serialize(file);
 	stats.serialize(file);
 }
@@ -746,47 +782,56 @@ void Player::deserialize(fstream& file)
 	int pos_y;
 	int spos_x;
 	int spos_y;
-	file >> goldAmount_;
-	file >> maxGoldAmount_;
-	file >> manaAmount_;
-	file >> maxManaAmount_;
-	file >> ammo_;
-	file >> name_;
-	file >> pos_x;
-	file >> pos_y;
-	file >> spos_x;
-	file >> spos_y;
+	int claimedColor;
+	file >> goldAmount_
+		>> maxGoldAmount_
+		>> manaAmount_
+		>> maxManaAmount_
+		>> ammo_
+		>> name_
+		>> passiveGoldIncrease_
+		>> isGoldPassive_
+		>> claimedColor
+		>> pos_x
+		>> pos_y
+		>> spos_x
+		>> spos_y;
 	handPos.setX(pos_x);
 	handPos.setY(pos_y);
 	spawnPos.setX(spos_x);
 	spawnPos.setY(spos_y);
 	health.deserialize(file);
 	stats.deserialize(file);
+	claimedColor_ = claimedColor;
 }
 
 void Player::deserialize(stringstream& file)
 {
-	file.clear();
 	int pos_x;
 	int pos_y;
 	int spos_x;
 	int spos_y;
-	file >> goldAmount_;
-	file >> maxGoldAmount_;
-	file >> manaAmount_;
-	file >> maxManaAmount_;
-	file >> ammo_;
-	file >> name_;
-	file >> pos_x;
-	file >> pos_y;
-	file >> spos_y;
-	file >> spos_x;
+	int claimedColor;
+	file >> goldAmount_
+		>> maxGoldAmount_
+		>> manaAmount_
+		>> maxManaAmount_
+		>> ammo_
+		>> name_
+		>> passiveGoldIncrease_
+		>> isGoldPassive_
+		>> claimedColor
+		>> pos_x
+		>> pos_y
+		>> spos_x
+		>> spos_y;
 	handPos.setX(pos_x);
 	handPos.setY(pos_y);
 	spawnPos.setX(spos_x);
 	spawnPos.setY(spos_y);
 	health.deserialize(file);
 	stats.deserialize(file);
+	claimedColor_ = claimedColor;
 }
 
 void Player::update()
@@ -807,7 +852,14 @@ void Player::update()
 	{
 		stats.addExp(1);
 		expCooldown_.StartNewTimer(1);
-		goldAmount_ += 1;
+	}
+	if (isGoldPassive_ == true)
+	{
+		if (goldCooldown_.Update() == true)
+		{
+			goldAmount_ += passiveGoldIncrease_;
+			goldCooldown_.StartNewTimer(2);
+		}
 	}
 	turret_sound.Update();
 	repair_sound.Update();
@@ -879,6 +931,11 @@ void Player::send()
 }
 
 void Player::render()
+{
+	return;
+}
+
+void Player::activate(Player* player)
 {
 	return;
 }

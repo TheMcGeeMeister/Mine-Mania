@@ -1,4 +1,5 @@
 #include <sstream>
+#include "SimpleNetClient.h"
 #include "GameManager.h"
 #include "Common.h"
 #include "Packet.h"
@@ -7,6 +8,7 @@ namespace game
 {
 	extern bool gameWon;
 	extern std::string winnerName;
+	extern SimpleNetClient server;
 }
 
 
@@ -109,21 +111,24 @@ void GameManager::CoreDestroyed(std::string name)
 
 void GameManager::Update()
 {
-	if (GameOver == false)
+	if (game::server.isHost() == true)
 	{
-		if (CoreDestroyedAmount == (PlayerAmount - 1))
+		if (GameOver == false)
 		{
-			GameOver = true;
-			for (auto& iter : g_players)
+			if (CoreDestroyedAmount == (PlayerAmount - 1))
 			{
-				if (iter.second.isCoreDestroyed == false)
+				GameOver = true;
+				for (auto& iter : g_players)
 				{
-					game::winnerName = iter.first;
-					game::gameWon = true;
-					std::stringstream msg;
-					msg << SendDefault << EndLine << Win << EndLine << game::winnerName << EndLine;
-					SendServerLiteral(msg.str());
-					break;
+					if (iter.second.isCoreDestroyed == false)
+					{
+						game::winnerName = iter.first;
+						game::gameWon = true;
+						std::stringstream msg;
+						msg << SendDefault << EndLine << Win << EndLine << game::winnerName << EndLine;
+						SendServerLiteral(msg.str());
+						break;
+					}
 				}
 			}
 		}

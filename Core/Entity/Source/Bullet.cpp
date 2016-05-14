@@ -167,6 +167,11 @@ void Bullet::render()
 	ai.updateOverlay();
 }
 
+void Bullet::activate(Player* player)
+{
+	return;
+}
+
 Position Bullet::getPos()
 {
 	return ai.getPosition();

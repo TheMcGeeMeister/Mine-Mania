@@ -145,6 +145,14 @@ bool Core::damage(int damage, std::string name, bool isServer)
 	else
 	{
 		health_.damage(damage);
+		if (isSetToUpdate())
+		{
+			if (health_.isDead())
+			{
+				kill();
+				game::GameHandler.CoreDestroyed(owner_);
+			}
+		}
 	}
 }
 
@@ -175,6 +183,11 @@ void Core::send()
 void Core::render()
 {
 	game::game.getTileRefAt(pos_).updateOverlay(true, graphic_);
+}
+
+void Core::activate(Player* player)
+{
+	return;
 }
 
 Position Core::getPos()

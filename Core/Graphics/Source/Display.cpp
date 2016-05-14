@@ -1018,6 +1018,7 @@ void Display::newWorld()
 	core.setPos(corePos);
 	stoneFloor.setPos(startPos);
     m_map[startPos]=stoneFloor;
+	m_map[startPos].setBackground(B_Blue);
     m_map[corePos]=core;
 	isLoaded_ = true;
 	std::stringstream txt;
@@ -1025,6 +1026,7 @@ void Display::newWorld()
 	game::pHandler.getLocalPlayer().setSpawnPos(startPos);
 	reloadAll_ = true;
 	isMultiplayer_ = false;
+	Common::CreatePlayerCore(game::pHandler.getLocalPlayer().getName(), corePos);
 }
 
 void Display::newWorldMulti()
@@ -1118,13 +1120,16 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 
 	map<int, Position> p_pos;
 	map<int, Position> p_cpos;
+	map<int, WORD> p_c;
 	p_pos[1] = Position(74, 28);
 	p_cpos[1] = Position(74, 29);
+	p_c[1] = B_Green;
 	p_pos[2] = Position(74, 1);
 	p_cpos[2] = Position(74, 0);
+	p_c[2] = B_Red;
 	p_pos[3] = Position(1, 29);
 	p_cpos[3] = Position(0, 29);
-	
+	p_c[3] = B_Yellow;
 
 	game::system.clear();
 
@@ -1192,14 +1197,14 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	////////////////////
 	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], true), pAmount, 0);
 	Common::CreatePlayerCore(names[0], Position(0, 0));
-	Common::SetStoneFloorAt(Position(0,1), names[0]);
+	Common::SetStoneFloorAt(Position(0,1), (WORD)B_Blue, names[0]);
 	game::GameHandler.AddPlayer(names[0]);
 	////////////////////
 
 	for (int x = 1; x < pAmount; x++)
 	{
 		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x]), pAmount, x);
-		Common::SetStoneFloorAt(p_pos[x], names[x]);
+		Common::SetStoneFloorAt(p_pos[x], p_c[x], names[x]);
 		Common::CreatePlayerCore(names[x], p_cpos[x]);
 		game::GameHandler.AddPlayer(names[x]);
 	}

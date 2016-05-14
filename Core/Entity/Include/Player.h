@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <windows.h>
 #include "Turret.h"
 #include "Position.h"
 #include "UserInterface.h"
@@ -37,6 +38,12 @@ class Player : public Entity
 		Position getSpawnPos();
 		UserInterface& getUIRef();
 		HealthComponent& getHealthRef();
+		//////////////////////////////////
+
+		/* Colors */
+		//////////////////////////////////
+		WORD getClaimedColor();
+		void setClaimedColor(WORD color);
 		//////////////////////////////////
 
         /* Gold Related */
@@ -80,7 +87,6 @@ class Player : public Entity
 		void mineLeft(Display& game);
 		void mineRight(Display& game);
 		void mine(DIRECTION direction);
-		void attack(DIRECTION direction);
 		void forceHandPosition(Position newPos, Display& game); /* Updates Position on map, and changes variable :: Deprecated Use forceHandPositon(Position);*/
 		void forceHandPosition(Position newPos); /*Also updates position on the map*/
 		void claimOnHand();
@@ -105,6 +111,10 @@ class Player : public Entity
 		//////////////////////////////////
 		void updatePosition();
 		//////////////////////////////////
+		
+		void isGoldPassive(bool);
+		bool isGoldPassive();
+
 		void reset();
 		void updateMiningUI();
 
@@ -131,6 +141,7 @@ class Player : public Entity
 		virtual void updateID(); // Not used for player
 		virtual void send();
 		virtual void render();
+		virtual void activate(Player* player);
 		virtual Position getPos();
 
 		void killS();
@@ -146,7 +157,10 @@ class Player : public Entity
 		int handMode_;
 		int mineProgress_;
 		int ammo_;
+		int passiveGoldIncrease_;
 		double baseDamage_;
+
+		WORD claimedColor_;
 
 		HealthComponent health;
 		PlayerStatComponent stats;
@@ -159,6 +173,7 @@ class Player : public Entity
 		bool isMining_;
 		bool isDead_;
 		bool isLocal_;
+		bool isGoldPassive_;
 
 		Position handPos;
 		Position mineUIPos;
@@ -169,6 +184,7 @@ class Player : public Entity
 		UserInterface UI;
 
 		Timer movementTimer_;
+		Timer mineTimer_;
 		Timer shootTimer_;
 		Timer goldCooldown_;
 		Timer expCooldown_;

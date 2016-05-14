@@ -42,6 +42,7 @@ public:
 	virtual void updateID();
 	virtual void send();
 	virtual void render();
+	virtual void activate(Player* player);
 	virtual Position getPos();
 private:
 	BulletAIComponent ai;

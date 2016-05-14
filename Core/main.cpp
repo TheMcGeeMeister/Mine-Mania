@@ -244,27 +244,6 @@ void swapConsoleFullScreen()
 	}
 }
 
-void removeScrollBar()
-{
-	HANDLE hOut;
-	CONSOLE_SCREEN_BUFFER_INFO SBInfo;
-	COORD NewSBSize;
-	int Status;
-
-	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	GetConsoleScreenBufferInfo(hOut, &SBInfo);
-	NewSBSize.X = SBInfo.dwSize.X - 2;
-	NewSBSize.Y = SBInfo.dwSize.Y;
-
-	Status = SetConsoleScreenBufferSize(hOut, NewSBSize);
-
-	string txt;
-	txt = Status;
-	txt += " :Status";
-	game::SlideUI.addSlide(txt);
-}
-
 void initializeWindowProperties()
 {
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -327,7 +306,7 @@ void loadScreen(int time, string text)
 	return;
 }
 
-void updateTileInfo()
+void updateGameInterface()
 {
 	Player& player = game::pHandler.getLocalPlayer();
 	Display& game = game::game;
@@ -347,9 +326,9 @@ void updateTileInfo()
 
 	std::stringstream gold;
 	gold << player.getGoldAmount();
-    TileInfo.getSectionRef(5).setVar(1, gold.str());
+	TileInfo.getSectionRef(5).setVar(1, gold.str());
 
-    TileInfo.update();
+	TileInfo.update();
 
 	std::stringstream level;
 	level << player.getLevel();
@@ -358,53 +337,6 @@ void updateTileInfo()
 	std::stringstream exp;
 	exp << player.getExp() << "/" << player.getMaxExp();
 	game::statsUI.getSectionRef(3).setVar(1, exp.str());
-}
-
-void sendHostInfo()
-{
-	game::game.newWorldMulti();
-	std::stringstream msg;
-	msg << SendDefault << EndLine 
-		<< World << EndLine 
-		<< game::game.getWorld();
-	game::server.SendLiteral(msg.str());
-	msg.str(string());
-
-	Sleep(30);
-
-	Player* other;
-	if (game::pHandler.getPlayer("Other", &other) == true)
-	{
-		msg << SendDefault << EndLine  << AddPlayerLocal << EndLine ;
-		other->serialize(msg);
-		game::Log("///////////////////////\n" + msg.str() + "///////////////////////");
-		game::server.SendLiteral(msg.str());
-	}
-	else
-	{
-		exit(0);
-	}
-
-	Sleep(10);
-
-	msg.str(string());
-
-	Player& player = game::pHandler.getLocalPlayer();
-	msg << SendDefault << EndLine  << AddPlayer << EndLine ;
-	player.serialize(msg);
-	game::server.SendLiteral(msg.str());
-
-	game::Log("Sent: AddPlayer");
-
-	Sleep(10);
-
-	msg.str(string());
-
-	msg << SendDefault << EndLine  << Start << EndLine ;
-	game::server.SendLiteral(msg.str());
-
-	game::Log("Sent: Start");
-	return;
 }
 
 void lobbyMenu()
@@ -448,7 +380,6 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			game::server.isExit(false);
 			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
 			threadStarted = true;
-			game::Log("Network Thread Started");
 		}
 		game::lobby.Initialize(game::server.isHost());
 		game::lobby.Go();
@@ -913,7 +844,7 @@ void gameLoop()
 		game::RegenHandler.update(game::game);
 		game::TileHandler.update(game::game);
 		player.updateMiningUI();
-		updateTileInfo();
+		updateGameInterface();
 		game::SlideUI.update();
 		game::ServerUI.update();
 		game::statsUI.update();

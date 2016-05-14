@@ -66,7 +66,7 @@ class Tile
         void isDestructable(bool);
         void decrementHealth(int amount);
         void incrementHealth(int amount);
-        void claim(int amount, string claimer);
+        void claim(int amount, string claimer, WORD color);
         void forceClaim(string claim);
         void hasGold(bool hasGold);
         bool mine(int damage, Player&);

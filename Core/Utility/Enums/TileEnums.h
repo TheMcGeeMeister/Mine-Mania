@@ -13,7 +13,7 @@ enum SELECTED
 
 enum COLORS
 {
-	C_Black = 0, C_Blue = 1, C_Green = 2, C_Cyan = 3, C_White = 7
+	C_Black = 0, C_Red = FOREGROUND_RED, C_Blue = 1, C_Green = 2, C_Cyan = 3, C_White = 7
 };
 
 enum BCOLORS
@@ -23,6 +23,12 @@ enum BCOLORS
     B_DarkGray=BACKGROUND_INTENSITY,
 	B_Brown=0,
 	B_Gold=224,
+	B_Red=BACKGROUND_RED,
+	B_Blue=BACKGROUND_BLUE,
+	B_Green=BACKGROUND_GREEN,
+	B_Cyan=48,
+	B_Purple=80,
+	B_Yellow=96,
 };
 
 enum TileGraphics

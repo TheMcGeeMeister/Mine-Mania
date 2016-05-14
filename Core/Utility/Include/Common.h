@@ -29,7 +29,7 @@ namespace Common
 	extern void AddPlayer(Player* player);
 	extern void AddLocalPlayer(Player* player);
 	extern void CreatePlayerCore(std::string name, Position pos);
-	extern void SetStoneFloorAt(Position pos, std::string owner = "NO_OWNER");
+	extern void SetStoneFloorAt(Position pos, WORD color, std::string owner = "NO_OWNER");
 	extern void SetCursorPosition(int x, int y);
 	extern inline void DisplayLetterAt(Position pos, std::string letter);
 	extern void DisplayTextCentered(int x, int line, std::string text);

@@ -32,6 +32,7 @@ public:
 	virtual void updateID(); // Not used for core
 	virtual void send();
 	virtual void render();
+	virtual void activate(Player* player);
 	virtual Position getPos();
 private:
 	Position pos_;

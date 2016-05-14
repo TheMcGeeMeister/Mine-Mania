@@ -390,7 +390,7 @@ void Tile::incrementHealth(int amount)
 	game::server.UpdateTile(pos_.getX(), pos_.getY());
 }
 
-void Tile::claim(int amount, string claimer)
+void Tile::claim(int amount, string claimer, WORD color)
 {
 	if (isClaimable_)
 	{
@@ -407,6 +407,7 @@ void Tile::claim(int amount, string claimer)
 					claimedPercentage_ = 0;
 					isClaimed_ = true;
 					curBeingClaimedBy_ = "None";
+					background_ = color;
 				}
 			}
 			else
@@ -429,6 +430,7 @@ void Tile::claim(int amount, string claimer)
 				claimedPercentage_ = 0;
 				isClaimed_ = false;
 				curBeingClaimedBy_ = claimer;
+				background_ = B_Black;
 			}
 		}
 	}

@@ -99,10 +99,11 @@ namespace Common
 		game::system.addEntity(NewCore, "Core");
 	}
 
-	void SetStoneFloorAt(Position pos, std::string owner)
+	void SetStoneFloorAt(Position pos, WORD color, std::string owner)
 	{
 		gametiles::stone_floor.setPos(pos);
 		gametiles::stone_floor.forceClaim(owner);
+		gametiles::stone_floor.setBackground(color);
 		game::game.getTileRefAt(pos) = gametiles::stone_floor;
 	}
 

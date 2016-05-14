@@ -18,7 +18,7 @@ namespace game
 Turret::Turret()
 {
 	isDestroyed_ = false;
-	graphic = ' ';
+	graphic = '+';
 	owner = "None";
 	health.setMaxHealth(1000);
 }
@@ -28,7 +28,7 @@ Turret::Turret(Position position, std::string owner)
 	this->owner = owner;
 	ai.setPosition(position);
 	isDestroyed_ = false;
-	graphic = ' ';
+	graphic = '+';
 	owner = "None";
 	health.setMaxHealth(1000);
 }
@@ -47,8 +47,7 @@ void Turret::setGraphic(char g)
 {
 	graphic = g;
 	Tile& tile = game::game.getTileRefAt(ai.getPosition());
-	tile.setOverlayEnabled(true);
-	tile.setOverlayGraphic(g);
+	tile.updateOverlay(true, g);
 }
 
 void Turret::setOwner(std::string owner)
@@ -184,6 +183,7 @@ bool Turret::damage(int amount, string name, bool server)
 		}
 		else
 		{
+			health.damage(amount);
 			msg << SendDefault << EndLine << EntityDamage << EndLine << ai.getPosition().serializeR() << amount << EndLine << name << EndLine;
 			SendServerLiteral(msg.str());
 		}
@@ -191,6 +191,14 @@ bool Turret::damage(int amount, string name, bool server)
 	else
 	{
 		health.damage(amount);
+		if (isSetToUpdate() == true)
+		{
+			if (health.isDead())
+			{
+				kill();
+				game::m_sounds.PlaySoundR("Destroy");
+			}
+		}
 	}
 	return true;
 }
@@ -220,6 +228,11 @@ void Turret::send()
 void Turret::render()
 {
 	game::game.getTileRefAt(ai.getPosition()).updateOverlay(true, graphic);
+}
+
+void Turret::activate(Player* player)
+{
+	return;
 }
 
 Position Turret::getPos()
