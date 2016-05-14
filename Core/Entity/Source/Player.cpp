@@ -416,7 +416,7 @@ void Player::mine(DIRECTION direction)
 		else
 		{
 			Tile& tile = game::game.getTileRefAt(newPos);
-			if (tile.isWall())
+			if (tile.isWall() == false)
 			{
 				mineProgress_ += 25;
 				if (mineProgress_ >= 100)
@@ -431,6 +431,10 @@ void Player::mine(DIRECTION direction)
 					tile.updateServer();
 					mineProgress_ = 0;
 				}
+			}
+			else
+			{
+				/* TO:DO Add Tile Reparing*/
 			}
 		}
 

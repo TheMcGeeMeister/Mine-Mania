@@ -10,6 +10,9 @@ public:
 
 	std::string getOwner();
 	void setOwner(std::string owner);
+	
+	Position getPosition();
+	void setPosition(Position pos);
 
 	void serialize(std::stringstream& stream);
 	void deserialize(std::stringstream& stream);

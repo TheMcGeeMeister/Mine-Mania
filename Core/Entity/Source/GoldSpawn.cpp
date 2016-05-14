@@ -4,6 +4,7 @@
 #include "PlayerHandler.h"
 #include "Common.h"
 #include "TileEnums.h"
+#include "LoadEnums.h"
 
 namespace game
 {
@@ -39,6 +40,16 @@ void GoldSpawn::setOwner(std::string owner)
 	claimedPercentage_ = 100;
 }
 
+Position GoldSpawn::getPosition()
+{
+	return pos_;
+}
+
+void GoldSpawn::setPosition(Position pos)
+{
+	pos_ = pos;
+}
+
 bool GoldSpawn::hasComponent(int component)
 {
 	return false;
@@ -62,19 +73,23 @@ void GoldSpawn::clean()
 
 void GoldSpawn::serialize(std::stringstream & stream)
 {
-	stream << claimedPercentage_
+	stream << L_GoldSpawn
+		<< claimedPercentage_
 		<< currentClaimer_
 		<< owner_
 		<< isClaimed_
+		<< color_
 		<< pos_.serializeR();
 }
 
 void GoldSpawn::serialize(std::fstream & stream)
 {
-	stream << claimedPercentage_
+	stream << L_GoldSpawn
+		<< claimedPercentage_
 		<< currentClaimer_
 		<< owner_
 		<< isClaimed_
+		<< color_
 		<< pos_.serializeR();
 }
 
@@ -83,7 +98,8 @@ void GoldSpawn::deserialize(std::stringstream & stream)
 	stream >> claimedPercentage_
 		>> currentClaimer_
 		>> owner_
-		>> isClaimed_;
+		>> isClaimed_
+		>> color_;
 	pos_.deserialize(stream);
 }
 
@@ -92,7 +108,8 @@ void GoldSpawn::deserialize(std::fstream & stream)
 	stream >> claimedPercentage_
 		>> currentClaimer_
 		>> owner_
-		>> isClaimed_;
+		>> isClaimed_
+		>> color_;
 	pos_.deserialize(stream);
 }
 

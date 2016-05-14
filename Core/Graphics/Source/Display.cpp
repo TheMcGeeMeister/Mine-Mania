@@ -11,6 +11,7 @@
 #include "Bullet.h"
 #include "Turret.h"
 #include "GameManager.h"
+#include "GoldSpawn.h"
 
 namespace game
 {
@@ -931,6 +932,12 @@ void Display::loadWorld()
 			turret->deserialize(file);
 			game::system.addEntity(turret);
 		}
+		if (text == LOAD::L_GoldSpawn)
+		{
+			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
+			goldSpawn->deserialize(file);
+			game::system.addEntity(goldSpawn);
+		}
 		file.clear();
 		file >> text;
 	}
@@ -1027,6 +1034,14 @@ void Display::newWorld()
 	reloadAll_ = true;
 	isMultiplayer_ = false;
 	Common::CreatePlayerCore(game::pHandler.getLocalPlayer().getName(), corePos);
+
+	/* Testing GoldSpawn */
+	////////////
+	shared_ptr<GoldSpawn> gSpawnTest = make_shared<GoldSpawn>();
+	gSpawnTest->setPosition(Position(25, 10));
+	gSpawnTest->render();
+	game::system.addEntity(gSpawnTest, false);
+	////////////
 }
 
 void Display::newWorldMulti()
