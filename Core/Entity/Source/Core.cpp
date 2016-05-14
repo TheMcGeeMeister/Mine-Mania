@@ -154,6 +154,7 @@ bool Core::damage(int damage, std::string name, bool isServer)
 			}
 		}
 	}
+	return true;
 }
 
 void Core::setPos(Position iPos)

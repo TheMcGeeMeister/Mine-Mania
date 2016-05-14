@@ -78,10 +78,13 @@ bool PlayerHandler::getPlayerAt(Position pos, Player** player)
 
 bool PlayerHandler::getPlayer(std::string name, Player** player)
 {
-	if (m_players.count(name))
+	for (auto& iter : m_players)
 	{
-		*player = &m_players[name];
-		return true;
+		if (iter.second.getName() == name)
+		{
+			*player = &iter.second;
+			return true;
+		}
 	}
 	return false;
 }

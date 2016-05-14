@@ -111,9 +111,14 @@ class Player : public Entity
 		//////////////////////////////////
 		void updatePosition();
 		//////////////////////////////////
-		
+
+		/* Passive Gold */
+		//////////////////////////////////
 		void isGoldPassive(bool);
 		bool isGoldPassive();
+		void addPassiveGold(int amount);
+		void removePassiveGold(int amount);
+		//////////////////////////////////
 
 		void reset();
 		void updateMiningUI();

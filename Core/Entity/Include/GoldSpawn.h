@@ -1,4 +1,5 @@
 #pragma once
+#include <windows.h>
 #include "Entity.h"
 
 class GoldSpawn : public Entity
@@ -9,6 +10,11 @@ public:
 
 	std::string getOwner();
 	void setOwner(std::string owner);
+
+	void serialize(std::stringstream& stream);
+	void deserialize(std::stringstream& stream);
+
+	virtual void update();
 
 	virtual bool hasComponent(int component);
 	virtual bool isKilled();
@@ -29,6 +35,8 @@ private:
 	int claimedPercentage_;
 	std::string currentClaimer_;
 	std::string owner_;
+	WORD color_;
 	bool isClaimed_;
+	bool isKilled_;
 };
 

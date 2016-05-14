@@ -11,15 +11,16 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <Display.h>
-#include <Lobby.h>
-#include <Bullet.h>
-#include <Entity.h>
-#include <Packet.h>
-#include <UserInterface.h>
-#include <PlayerHandler.h>
-#include <SoundManager.h>
-#include <Core.h>
+#include "Display.h"
+#include "Lobby.h"
+#include "Bullet.h"
+#include "Entity.h"
+#include "Packet.h"
+#include "UserInterface.h"
+#include "PlayerHandler.h"
+#include "SoundManager.h"
+#include "Core.h"
+#include "GoldSpawn.h"
 
 namespace game
 {
@@ -461,6 +462,17 @@ void SimpleNetClient::Do(std::string rMsg)
 				core->render();
 				game::system.addEntityServer(core);
 				Log("EntityAdd\ECore\n");
+			}
+			else if (name == EGoldSpawn)
+			{
+				shared_ptr<GoldSpawn> goldSpawn = make_shared<GoldSpawn>();
+				int none;
+				msg >> none;
+				goldSpawn->deserialize(msg);
+				goldSpawn->setToNoUpdate();
+				goldSpawn->render();
+				game::system.addEntityServer(goldSpawn);
+				Log("EntityAdd\EGoldSpawn\n");
 			}
 		}
 		else if (name == EntityKill)

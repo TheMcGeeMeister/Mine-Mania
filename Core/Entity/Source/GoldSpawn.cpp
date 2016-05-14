@@ -1,16 +1,25 @@
 #include "GoldSpawn.h"
 #include "Player.h"
 #include "Display.h"
+#include "PlayerHandler.h"
+#include "Common.h"
+#include "TileEnums.h"
 
 namespace game
 {
 	extern Display game;
+	extern PlayerHandler pHandler;
 }
 
 
 GoldSpawn::GoldSpawn()
 {
-
+	isClaimed_ = false;
+	isKilled_ = false;
+	currentClaimer_ = "";
+	owner_ = "";
+	claimedPercentage_ = 0;
+	color_ = C_White;
 }
 
 
@@ -37,27 +46,54 @@ bool GoldSpawn::hasComponent(int component)
 
 bool GoldSpawn::isKilled()
 {
-	return false;
+	return isKilled_;
 }
 
 void GoldSpawn::kill()
 {
-
+	clean();
+	isKilled_ = true;
 }
 
 void GoldSpawn::clean()
 {
-
+	game::game.getTileRefAt(pos_).updateOverlayS(false, ' ');
 }
 
-void GoldSpawn::serialize(std::fstream &)
+void GoldSpawn::serialize(std::stringstream & stream)
 {
-
+	stream << claimedPercentage_
+		<< currentClaimer_
+		<< owner_
+		<< isClaimed_
+		<< pos_.serializeR();
 }
 
-void GoldSpawn::deserialize(std::fstream &)
+void GoldSpawn::serialize(std::fstream & stream)
 {
+	stream << claimedPercentage_
+		<< currentClaimer_
+		<< owner_
+		<< isClaimed_
+		<< pos_.serializeR();
+}
 
+void GoldSpawn::deserialize(std::stringstream & stream)
+{
+	stream >> claimedPercentage_
+		>> currentClaimer_
+		>> owner_
+		>> isClaimed_;
+	pos_.deserialize(stream);
+}
+
+void GoldSpawn::deserialize(std::fstream & stream)
+{
+	stream >> claimedPercentage_
+		>> currentClaimer_
+		>> owner_
+		>> isClaimed_;
+	pos_.deserialize(stream);
 }
 
 bool GoldSpawn::damage(int damage, std::string name, bool server)
@@ -82,40 +118,84 @@ void GoldSpawn::updateID()
 
 void GoldSpawn::send()
 {
-
+	std::stringstream msg;
+	msg << SendDefault << EndLine << EntityAdd << EndLine << EGoldSpawn << EndLine;
+	serialize(msg);
+	SendServerLiteral(msg.str());
 }
 
 void GoldSpawn::render()
 {
-
+	game::game.getTileRefAt(pos_).updateOverlay(true, '@');
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pos;
+	pos.X = pos_.getX();
+	pos.Y = pos_.getY();
+	DWORD output;
+	WriteConsoleOutputAttribute(h, &color_, 1, pos, &output);
 }
 
 void GoldSpawn::activate(Player* player)
 {
-	if (currentClaimer_ != player->getName())
+	if (isClaimed_)
 	{
-		claimedPercentage_ -= 10;
-		if (claimedPercentage_ <= 0)
+		if (owner_ == player->getName())
 		{
-			claimedPercentage_ = 0;
-			currentClaimer_ = player->getName();
-			isClaimed_ = false;
-			owner_ = "NONE";
+			if (claimedPercentage_ != 100)
+			{
+				claimedPercentage_ += 10;
+			}
+		}
+		else
+		{
+			claimedPercentage_ -= 10;
+			if (claimedPercentage_ <= 0)
+			{
+				isClaimed_ = false;
+				Player* player;
+				if (game::pHandler.getPlayer(owner_, &player))
+				{
+					player->removePassiveGold(1);
+					color_ = C_White;
+					render();
+				}
+				claimedPercentage_ = 0;
+			}
 		}
 	}
 	else
 	{
-		claimedPercentage_ += 10;
-		if (claimedPercentage_ >= 100)
+		if (currentClaimer_ == player->getName())
 		{
-			claimedPercentage_ = 100;
-			isClaimed_ = true;
-			owner_ = player->getName();
+			claimedPercentage_ += 10;
+			if (claimedPercentage_ >= 100)
+			{
+				isClaimed_ = true;
+				player->addPassiveGold(1);
+				claimedPercentage_ = 100;
+				owner_ = player->getName();
+				color_ = player->getClaimedColor();
+				render();
+			}
+		}
+		else
+		{
+			claimedPercentage_ -= 10;
+			if (claimedPercentage_ <= 10)
+			{
+				currentClaimer_ = player->getName();
+				claimedPercentage_ = 0;
+			}
 		}
 	}
 }
 
+void GoldSpawn::update()
+{
+	return;
+}
+
 Position GoldSpawn::getPos()
 {
-	return Position();
+	return pos_;
 }

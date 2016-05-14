@@ -189,6 +189,7 @@ bool Lobby::Go()
 		}
 		Sleep(10);
 	}
+	return true;
 }
 
 void Lobby::AddPlayer(int id, std::string name, bool isReady)

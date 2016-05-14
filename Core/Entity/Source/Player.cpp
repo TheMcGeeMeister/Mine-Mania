@@ -31,7 +31,8 @@ Player::Player() : UI(23, 5, 50, 30, 1)
     maxManaAmount_ = 500;
 	ammo_ = 0;
 	baseDamage_ = 15.0;
-	passiveGoldIncrease_ = 1;
+	passiveGoldIncrease_ = 0;
+	isGoldPassive_ = false;
 	claimedColor_ = B_Blue;
 	handPos.setX(0);
 	handPos.setY(0);
@@ -633,6 +634,24 @@ void Player::isGoldPassive(bool is)
 bool Player::isGoldPassive()
 {
 	return isGoldPassive_;
+}
+
+void Player::addPassiveGold(int amount)
+{
+	passiveGoldIncrease_ += amount;
+	if (passiveGoldIncrease_ > 0)
+	{
+		isGoldPassive_ = true;
+	}
+}
+
+void Player::removePassiveGold(int amount)
+{
+	passiveGoldIncrease_ -= amount;
+	if (passiveGoldIncrease_ = 0)
+	{
+		isGoldPassive_ = false;
+	}
 }
 
 void Player::reset()

@@ -28,7 +28,13 @@ enum PacketNames
 	///////////////////
 	EntityDamage, EntityKill, EntityUpdatePosition,
 
-	EntityAdd, EBullet, ETurret, ECore,
+	EntityAdd,
+	///////////////////
+	EBullet,
+	ETurret,
+	ECore,
+	EGoldSpawn,
+	///////////////////
 
 	AddPlayer, AddPlayerLocal,
 
