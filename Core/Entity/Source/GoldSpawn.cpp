@@ -182,6 +182,11 @@ void GoldSpawn::activate(Player* player)
 	}
 	else
 	{
+		if (currentClaimer_ == "")
+		{
+			currentClaimer_ = player->getName();
+		}
+
 		if (currentClaimer_ == player->getName())
 		{
 			claimedPercentage_ += 10;

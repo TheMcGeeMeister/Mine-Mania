@@ -794,8 +794,13 @@ void Display::loadWorld(string filename)
 			turret->deserialize(file);
 			game::system.addEntity(turret);
 		}
+		if (text == LOAD::L_GoldSpawn)
+		{
+			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
+			goldSpawn->deserialize(file);
+			game::system.addEntity(goldSpawn);
+		}
 		file.clear();
-		text = 7;
 		file >> text;
 	}
 
