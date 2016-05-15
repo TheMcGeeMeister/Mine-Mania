@@ -762,6 +762,7 @@ void Display::loadWorld(string filename)
 
 	while (text != LOAD::END )
 	{
+
 		if (text == LOAD::L_Tile)
 		{
 			file.clear();
@@ -793,6 +794,12 @@ void Display::loadWorld(string filename)
 			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
 			turret->deserialize(file);
 			game::system.addEntity(turret);
+		}
+		if (text == LOAD::L_Core)
+		{
+			std::shared_ptr<Core> core = std::make_shared<Core>();
+			core->deserialize(file);
+			game::system.addEntity(core);
 		}
 		if (text == LOAD::L_GoldSpawn)
 		{
@@ -936,6 +943,12 @@ void Display::loadWorld()
 			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
 			turret->deserialize(file);
 			game::system.addEntity(turret);
+		}
+		if (text == LOAD::L_Core)
+		{
+			std::shared_ptr<Core> core = std::make_shared<Core>();
+			core->deserialize(file);
+			game::system.addEntity(core);
 		}
 		if (text == LOAD::L_GoldSpawn)
 		{

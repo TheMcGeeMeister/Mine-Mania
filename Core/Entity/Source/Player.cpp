@@ -768,7 +768,7 @@ void Player::serialize(fstream& file)
 		 << maxManaAmount_ << endl
 		 << ammo_ << endl
 		 << name_ << endl
-		 << passiveGoldIncrease_ << endl
+	     << passiveGoldIncrease_ << endl
 		 << isGoldPassive_ << endl
 		 << (int)claimedColor_ << endl
 		 << handPos.getX() << endl
@@ -813,7 +813,7 @@ void Player::deserialize(fstream& file)
 		>> ammo_
 		>> name_
 		>> passiveGoldIncrease_
-		>> isGoldPassive_
+	    >> isGoldPassive_
 		>> claimedColor
 		>> pos_x
 		>> pos_y

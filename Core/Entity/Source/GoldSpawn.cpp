@@ -73,44 +73,48 @@ void GoldSpawn::clean()
 
 void GoldSpawn::serialize(std::stringstream & stream)
 {
-	stream << L_GoldSpawn
-		<< claimedPercentage_
-		<< currentClaimer_
-		<< owner_
-		<< isClaimed_
-		<< color_
+	stream << L_GoldSpawn << EndLine
+		<< claimedPercentage_ << EndLine
+		<< currentClaimer_ << EndLine
+		<< owner_ << EndLine
+		<< isClaimed_ << EndLine
+		<< (int)color_ << EndLine
 		<< pos_.serializeR();
 }
 
 void GoldSpawn::serialize(std::fstream & stream)
 {
-	stream << L_GoldSpawn
-		<< claimedPercentage_
-		<< currentClaimer_
-		<< owner_
-		<< isClaimed_
-		<< color_
+	stream << L_GoldSpawn << EndLine
+		<< claimedPercentage_ << EndLine
+		<< currentClaimer_ << EndLine
+		<< owner_ << EndLine
+		<< isClaimed_ << EndLine
+		<< (int)color_ << EndLine
 		<< pos_.serializeR();
 }
 
 void GoldSpawn::deserialize(std::stringstream & stream)
 {
+	int color;
 	stream >> claimedPercentage_
 		>> currentClaimer_
 		>> owner_
 		>> isClaimed_
-		>> color_;
+		>> color;
 	pos_.deserialize(stream);
+	color_ = color;
 }
 
 void GoldSpawn::deserialize(std::fstream & stream)
 {
+	int color;
 	stream >> claimedPercentage_
 		>> currentClaimer_
 		>> owner_
 		>> isClaimed_
-		>> color_;
+		>> color;
 	pos_.deserialize(stream);
+	color_ = color;
 }
 
 bool GoldSpawn::damage(int damage, std::string name, bool server)
