@@ -128,6 +128,11 @@ bool Tile::isWalkable() const
 	return isWalkable_;
 }
 
+bool Tile::isHealthFull() const
+{
+	return health.getHealth() == health.getMaxHealth();
+}
+
 bool Tile::hasGold() const
 {
 	return hasGold_;
@@ -447,6 +452,11 @@ void Tile::forceClaim(string claim)
 void Tile::hasGold(bool hasGold)
 {
 	hasGold_ = hasGold;
+}
+
+void Tile::heal(int amount)
+{
+	health.heal(amount);
 }
 
 bool Tile::mine(int damage, Player& underlord)

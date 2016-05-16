@@ -434,7 +434,11 @@ void Player::mine(DIRECTION direction)
 			}
 			else
 			{
-				/* TO:DO Add Tile Reparing*/
+				if (tile.isHealthFull() == false)
+				{
+					tile.heal(1);
+					repair_sound.SetTimer(0.2);
+				}
 			}
 		}
 

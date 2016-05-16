@@ -25,6 +25,7 @@ class Tile
 		bool isClaimedBy(string name) const;
         bool isDestructable() const;
         bool isWalkable() const;
+		bool isHealthFull() const;
         bool hasGold() const;
 		bool hasOverlay() const;
         double getHealth() const;
@@ -69,6 +70,7 @@ class Tile
         void claim(int amount, string claimer, WORD color);
         void forceClaim(string claim);
         void hasGold(bool hasGold);
+		void heal(int amount);
         bool mine(int damage, Player&);
 		void removeOverlay();
 		void updateOverlay(bool enabled, char graphic);

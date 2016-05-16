@@ -17,10 +17,10 @@ GoldSpawn::GoldSpawn()
 {
 	isClaimed_ = false;
 	isKilled_ = false;
-	currentClaimer_ = "";
-	owner_ = "";
+	currentClaimer_ = "None";
+	owner_ = "None";
 	claimedPercentage_ = 0;
-	color_ = C_White;
+	color_ = B_DarkGray;
 }
 
 
