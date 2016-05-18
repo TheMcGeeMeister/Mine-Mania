@@ -141,11 +141,11 @@ void HealthComponent::serialize(std::fstream & file)
 
 void HealthComponent::serialize(std::stringstream& stream)
 {
-	stream << health_ << std::endl
-		<< maxHealth_ << std::endl
-		<< healthRegen_ << std::endl
-		<< isRegenEnabled_ << std::endl
-		<< isDead_ << std::endl;
+	stream << health_ << std::endl // Double
+		<< maxHealth_ << std::endl // Double
+		<< healthRegen_ << std::endl // Double
+		<< isRegenEnabled_ << std::endl // Bool
+		<< isDead_ << std::endl; // Bool
 }
 
 void HealthComponent::deserialize(std::fstream & file)

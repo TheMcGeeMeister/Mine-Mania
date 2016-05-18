@@ -84,10 +84,10 @@ std::string Turret::getOwner()
 void Turret::serialize(std::stringstream& file)
 {
 	file << LOAD::L_Turret << std::endl
-		<< owner << std::endl
-		<< (int)graphic << std::endl
-		<< isDestroyed_ << std::endl
-		<< getID() << std::endl;
+		<< owner << std::endl // String
+		<< (int)graphic << std::endl // Int
+		<< isDestroyed_ << std::endl // Bool
+		<< getID() << std::endl; // Int
 	ai.serialize(file);
 	health.serialize(file);
 }

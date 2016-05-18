@@ -24,6 +24,7 @@
 #include "SimpleNetClient.h" // Server class
 #include "PositionVariables.h" // Holds on size, and offset
 #include "TileChangeManager.h" // Updates the Display with changes
+#include "LoadParser.h"
 
 #define DEFAULT_CLEAR_WIDTH 100
 #define DEFAULT_CLEAR_HEIGHT 36
@@ -47,6 +48,7 @@ namespace game
 	UserInterface statsUI(16, 5, 32, 30, 1);
 	SimpleNetClient server;
 	SoundManager m_sounds;
+	LoadParser Parser;
 	std::string winnerName;
 	class Lobby lobby;
 	bool threadExit;
@@ -286,6 +288,7 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				case '1':player.switchModeTo(0); break;
 				case '2':player.switchModeTo(1); break;
 				case '3':player.switchModeTo(2); break;
+				case 'j':game::system.cleanAndUpdateOverlays(); break;
 				default: break;
 				}
 			}

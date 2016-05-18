@@ -178,14 +178,14 @@ std::string TurretAIComponent::getOwner()
 
 void TurretAIComponent::serialize(std::stringstream & file)
 {
-	file << visionRange_ << std::endl
-		<< shootCoolDownTime_ << std::endl
-		<< targetFound_ << std::endl
-		<< targetPosition_.getX() << std::endl
-		<< targetPosition_.getY() << std::endl
-		<< curPosition_.getX() << std::endl
-		<< curPosition_.getY() << std::endl
-		<< owner_ << std::endl;
+	file << visionRange_ << std::endl // int
+		<< shootCoolDownTime_ << std::endl // int
+		<< targetFound_ << std::endl // bool
+		<< targetPosition_.getX() << std::endl // int
+		<< targetPosition_.getY() << std::endl // int
+		<< curPosition_.getX() << std::endl // int 
+		<< curPosition_.getY() << std::endl // int
+		<< owner_ << std::endl; // string
 }
 
 void TurretAIComponent::deserialize(std::stringstream & file)

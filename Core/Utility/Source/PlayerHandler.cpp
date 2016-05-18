@@ -97,8 +97,9 @@ Player & PlayerHandler::getLocalPlayer()
 void PlayerHandler::clear()
 {
 	m_players.clear();
-	Player player;
-	m_players["Local"] = player;
+	std::string name = m_players["Local"].getName();
+	m_players["Local"] = Player();
+	m_players["Local"].setName(name);
 }
 
 void PlayerHandler::serializeAll(std::stringstream & file)

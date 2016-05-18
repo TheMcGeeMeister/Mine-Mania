@@ -155,6 +155,7 @@ void GoldSpawn::render()
 	pos.Y = pos_.getY();
 	DWORD output;
 	WriteConsoleOutputAttribute(h, &color_, 1, pos, &output);
+	game::game.getTileRefAt(pos_).setBackground(color_);
 }
 
 void GoldSpawn::activate(Player* player)

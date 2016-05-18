@@ -727,10 +727,10 @@ string Display::getWorld()
 	return world.str();
 }
 
-void Display::loadWorld(string filename)
+void Display::loadWorld(string file_name)
 {
-    fstream file(filename);
-	if (file.is_open() == false)
+    fstream stream(file_name);
+	if (stream.is_open() == false)
 	{
 		newWorld();
 		saveWorld();
@@ -738,16 +738,16 @@ void Display::loadWorld(string filename)
 		return;
 	}
 
-	saveSuffix_=filename.substr(filename.find("d")+1, 2);
+	saveSuffix_=file_name.substr(file_name.find("d")+1, 2);
 
-	file.seekp(0, ios_base::beg);
+	stream.seekp(0, ios_base::beg);
 
 	game::system.clear();
 
-	int text;
-	file >> text;
+	int name;
+	stream >> name;
 
-	if (text == L_Solo)
+	if (name == L_Solo)
 	{
 		isMultiplayer_ = false;
 	}
@@ -756,61 +756,162 @@ void Display::loadWorld(string filename)
 		isMultiplayer_ = true;
 	}
 
-	file >> text;
+	stream >> name;
 
 	bool localLoaded_ = false;
 
-	while (text != LOAD::END )
+	while (name != LOAD::END )
 	{
-		if (text == LOAD::L_Tile)
+		if (name == LOAD::L_Tile)
 		{
-			file.clear();
 			Tile tile;
-			tile.deserialize(file);
+			tile.deserialize(stream);
 			m_map[tile.getPos()] = tile;
-			file.clear();
 		}
-		else if (text == LOAD::L_Player)
+		else if (name == LOAD::L_Player)
 		{
 			if (localLoaded_ == false)
 			{
-				game::pHandler.getLocalPlayer().deserialize(file);
+				game::pHandler.getLocalPlayer().deserialize(stream);
 				localLoaded_ = true;
 			}
 			else
 			{
-				game::pHandler.addPlayerDeserialize(file);
+				game::pHandler.addPlayerDeserialize(stream);
 			}
 		}
-		else if (text == LOAD::L_Bullet)
+		else if (name == LOAD::L_Bullet)
 		{
 			std::shared_ptr<Bullet> bullet = std::make_shared<Bullet>();
-			bullet->deserialize(file);
+			bullet->deserialize(stream);
 			game::system.addEntity(bullet);
 			Log("LOADED:Bullet\n");
 		}
-		else if (text == LOAD::L_Turret)
+		else if (name == LOAD::L_Turret)
 		{
 			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
-			turret->deserialize(file);
+			turret->deserialize(stream);
+			game::system.addEntity(turret, "Turret");
+			Log("LOADED:Turret\n");
+		}
+		else if (name == LOAD::L_Core)
+		{
+			std::shared_ptr<Core> core = std::make_shared<Core>();
+			core->deserialize(stream);
+			game::system.addEntity(core, "Core");
+			Log("LOADED:Core\n");
+		}
+		else if (name == LOAD::L_GoldSpawn)
+		{
+			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
+			goldSpawn->deserialize(stream);
+			game::system.addEntity(goldSpawn, "GoldSpawn");
+			Log("LOADED:GoldSpawn\n");
+		}
+		if (stream.good() == false)
+		{
+			stream.clear();
+		}
+		name = END;
+		stream >> name;
+	}
+
+	reloadAll_ = true;
+	isLoaded_ = true;
+	return;
+}
+
+void Display::loadWorld()
+{
+	stringstream file_name;
+	getSaveSuffix();
+	file_name << "Save\\" << "World" << saveSuffix_ << ".dat";
+	fstream stream(file_name.str());
+	if (stream.is_open() == false)
+	{
+		newWorld();
+		saveWorld();
+		isLoaded_ = true;
+		return;
+	}
+
+	stream.seekp(0, ios_base::beg);
+
+	int name;
+	stream >> name;
+
+	if (name == L_Solo)
+	{
+		isMultiplayer_ = false;
+	}
+	else
+	{
+		isMultiplayer_ = true;
+	}
+
+	stream >> name;
+
+	bool localLoaded_ = false;
+
+	game::system.clear();
+
+	while (name != LOAD::END)
+	{
+		if (name == LOAD::L_Tile)
+		{
+			stream.clear();
+			Tile tile;
+			tile.deserialize(stream);
+			m_map[tile.getPos()] = tile;
+			stream.clear();
+		}
+		else if (name == LOAD::L_Player)
+		{
+			if (localLoaded_ == false)
+			{
+				game::pHandler.getLocalPlayer().deserialize(stream);
+				localLoaded_ = true;
+			}
+			else
+			{
+				game::pHandler.addPlayerDeserialize(stream);
+			}
+		}
+		else if (name == LOAD::L_Bullet)
+		{
+			std::shared_ptr<Bullet> bullet = std::make_shared<Bullet>();
+			bullet->deserialize(stream);
+			game::system.addEntity(bullet);
+			Log("LOADED:Bullet\n");
+		}
+		else if (name == LOAD::L_Turret)
+		{
+			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
+			turret->deserialize(stream);
 			game::system.addEntity(turret);
 			Log("LOADED:Turret\n");
 		}
-		else if (text == LOAD::L_Core)
+		else if (name == LOAD::L_Core)
 		{
 			std::shared_ptr<Core> core = std::make_shared<Core>();
-			core->deserialize(file);
+			core->deserialize(stream);
 			game::system.addEntity(core);
 			Log("LOADED:Core\n");
 		}
-		else if (text == LOAD::L_GoldSpawn)
+		else if (name == LOAD::L_GoldSpawn)
 		{
 			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
-			goldSpawn->deserialize(file);
+			goldSpawn->deserialize(stream);
 			game::system.addEntity(goldSpawn);
 			Log("LOADED:GoldSpawn\n");
 		}
-		file >> text;
+		if (stream.good() == false)
+		{
+			stream.clear();
+			return;
+		}
+		name = END;
+		stream >> name;
 	}
 
 	reloadAll_ = true;
@@ -872,99 +973,6 @@ void Display::loadWorldServer(stringstream& msg)
 		}
 		msg.clear();
 		msg >> text;
-	}
-
-	reloadAll_ = true;
-	isLoaded_ = true;
-}
-
-void Display::loadWorld()
-{
-	stringstream filename;
-	getSaveSuffix();
-	filename <<"Save\\" << "World" << saveSuffix_ << ".dat";
-	fstream file(filename.str());
-	if (file.is_open() == false)
-	{
-		newWorld();
-		saveWorld();
-		isLoaded_ = true;
-		return;
-	}
-
-	file.seekp(0, ios_base::beg);
-
-	int text;
-	file >> text;
-
-	if (text == L_Solo)
-	{
-		isMultiplayer_ = false;
-	}
-	else
-	{
-		isMultiplayer_ = true;
-	}
-
-	file >> text;
-
-	bool localLoaded_ = false;
-
-	game::system.clear();
-
-	while (text!=LOAD::END)
-	{
-		if (text == LOAD::L_Tile)
-		{
-			file.clear();
-			Tile tile;
-			tile.deserialize(file);
-			m_map[tile.getPos()] = tile;
-			file.clear();
-		}
-		else if (text == LOAD::L_Player)
-		{
-			if (localLoaded_ == false)
-			{
-				game::pHandler.getLocalPlayer().deserialize(file);
-				localLoaded_ = true;
-			}
-			else
-			{
-				game::pHandler.addPlayerDeserialize(file);
-			}
-		}
-		else if (text == LOAD::L_Bullet)
-		{
-			std::shared_ptr<Bullet> bullet = std::make_shared<Bullet>();
-			bullet->deserialize(file);	
-			game::system.addEntity(bullet);
-			Log("LOADED:Bullet\n");
-		}
-		else if (text == LOAD::L_Turret)
-		{
-			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
-			turret->deserialize(file);
-			game::system.addEntity(turret);
-			Log("LOADED:Turret\n");
-		}
-		else if (text == LOAD::L_Core)
-		{
-			std::shared_ptr<Core> core = std::make_shared<Core>();
-			core->deserialize(file);
-			game::system.addEntity(core);
-			Log("LOADED:Core\n");
-		}
-		else if (text == LOAD::L_GoldSpawn)
-		{
-			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
-			goldSpawn->deserialize(file);
-			game::system.addEntity(goldSpawn);
-			Log("LOADED:GoldSpawn\n");
-		}
-		file.clear();
-		text = END;
-		file >> text;
 	}
 
 	reloadAll_ = true;
@@ -1061,7 +1069,7 @@ void Display::newWorld()
 	isMultiplayer_ = false;
 	Common::CreatePlayerCore(game::pHandler.getLocalPlayer().getName(), corePos);
 
-	/* Testing GoldSpawn */
+	//Testing GoldSpawn 
 	////////////
 	shared_ptr<GoldSpawn> gSpawnTest = make_shared<GoldSpawn>();
 	gSpawnTest->setPosition(Position(25, 10));
@@ -1302,6 +1310,7 @@ void Display::unloadWorld()
 	std::string local = game::pHandler.getLocalPlayer().getName();
 	game::pHandler.getLocalPlayer().reset();
 	game::pHandler.getLocalPlayer().setName(local);
+	game::system.clear();
 }
 
 int Display::getSaveAmount()

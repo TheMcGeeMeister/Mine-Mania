@@ -8,6 +8,7 @@
 #include "SoundManager.h"
 #include "TileEnums.h"
 #include "Common.h"
+#include "LoadParser.h"
 
 namespace game
 {
@@ -16,6 +17,7 @@ namespace game
 	extern UserInterface tileUI;
 	extern System system;
 	extern SoundManager m_sounds;
+	extern LoadParser Parser;
 }
 
 enum PLAYER_MODE
@@ -34,8 +36,8 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	passiveGoldIncrease_ = 0;
 	isGoldPassive_ = false;
 	claimedColor_ = B_Blue;
-	handPos.setX(0);
-	handPos.setY(0);
+	handPos(0, 0);
+	spawnPos(0, 0);
     name_= "None";
 	moved_ = true;
 	mined_ = false;
@@ -54,7 +56,6 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	UI.isHidden(true);
 	mineUIPos.setX(0);
 	mineUIPos.setY(0);
-	spawnPos(0, 0);
 }
 
 Player::Player(Player & p)
@@ -763,9 +764,10 @@ void Player::setMaxGoldAmount(int amount)
 
 /* Serialize - Deserialize */
 ////////////////////////////////////////////////
-void Player::serialize(fstream& file)
+void Player::serialize(fstream& stream)
 {
-	file << LOAD::L_Player << endl
+	using namespace game;
+	stream << LOAD::L_Player << endl
 		 << goldAmount_ << endl
 		 << maxGoldAmount_ << endl
 		 << manaAmount_ << endl
@@ -779,8 +781,8 @@ void Player::serialize(fstream& file)
 		 << handPos.getY() << endl
 		 << spawnPos.getX() << endl
 		 << spawnPos.getY() << endl;
-	health.serialize(file);
-	stats.serialize(file);
+	health.serialize(stream);
+	stats.serialize(stream);
 }
 
 void Player::serialize(stringstream & file)
@@ -803,14 +805,14 @@ void Player::serialize(stringstream & file)
 	stats.serialize(file);
 }
 
-void Player::deserialize(fstream& file)
+void Player::deserialize(fstream& stream)
 {
 	int pos_x;
 	int pos_y;
 	int spos_x;
 	int spos_y;
 	int claimedColor;
-	file >> goldAmount_
+	stream >> goldAmount_
 		>> maxGoldAmount_
 		>> manaAmount_
 		>> maxManaAmount_
@@ -827,8 +829,8 @@ void Player::deserialize(fstream& file)
 	handPos.setY(pos_y);
 	spawnPos.setX(spos_x);
 	spawnPos.setY(spos_y);
-	health.deserialize(file);
-	stats.deserialize(file);
+	health.deserialize(stream);
+	stats.deserialize(stream);
 	claimedColor_ = claimedColor;
 }
 

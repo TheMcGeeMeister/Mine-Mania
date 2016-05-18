@@ -8,6 +8,7 @@
 #include "Direction.h"
 #include "Position.h"
 #include "Tile.h"
+#include "LoadParser.h"
 
 using namespace std;
 

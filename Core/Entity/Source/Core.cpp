@@ -76,7 +76,8 @@ void Core::deserialize(std::stringstream & file)
 	int id = 0;
 	file >> graphic
 		>> isDead_
-		>> id;
+		>> id
+		>> owner_;
 	pos_.deserialize(file);
 	health_.deserialize(file);
 	graphic_ = graphic;
@@ -89,7 +90,8 @@ void Core::deserialize(std::fstream & file)
 	int id = 0;
 	file >> graphic
 		>> isDead_
-		>> id;
+		>> id
+		>> owner_;
 	pos_.deserialize(file);
 	health_.deserialize(file);
 	graphic_ = graphic;
