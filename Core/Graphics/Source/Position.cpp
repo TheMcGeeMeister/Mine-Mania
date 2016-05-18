@@ -211,6 +211,16 @@ std::string Position::serializeR()
 	return msg.str();
 }
 
+void Position::serialize(std::stringstream & stream)
+{
+	stream << x_ << EndLine << y_ << EndLine;
+}
+
+void Position::serialize(std::fstream & stream)
+{
+	stream << x_ << EndLine << y_ << EndLine;
+}
+
 void Position::deserialize(std::stringstream & file)
 {
 	file >> x_

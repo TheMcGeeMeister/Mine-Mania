@@ -42,6 +42,8 @@ class Position
 		bool operator==(const Position& pos);
 
 		std::string serializeR();
+		void serialize(std::stringstream& stream);
+		void serialize(std::fstream& stream);
 		void deserialize(std::stringstream& file);
 		void deserialize(std::fstream& file);
 

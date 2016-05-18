@@ -161,6 +161,7 @@ int System::addEntity(std::shared_ptr<Entity> entity, bool send)
 			entity->send();
 		}
 	}
+	entity->render();
 	return (id_index - 1);
 }
 

@@ -21,6 +21,7 @@ GoldSpawn::GoldSpawn()
 	owner_ = "None";
 	claimedPercentage_ = 0;
 	color_ = B_DarkGray;
+	pos_(0, 0);
 }
 
 
@@ -186,7 +187,7 @@ void GoldSpawn::activate(Player* player)
 	}
 	else
 	{
-		if (currentClaimer_ == "")
+		if (currentClaimer_ == "None")
 		{
 			currentClaimer_ = player->getName();
 		}

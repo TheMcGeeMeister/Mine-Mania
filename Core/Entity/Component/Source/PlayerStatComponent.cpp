@@ -95,16 +95,16 @@ void PlayerStatComponent::serialize(std::stringstream & file)
 
 void PlayerStatComponent::serialize(std::fstream & file)
 {
-	file << level_ << EndLine
-		<< maxLevel_ << EndLine
-		<< exp_ << EndLine
-		<< expNeed_ << EndLine
-		<< strength_ << EndLine
-		<< stamina_ << EndLine
-		<< maxStamina_ << EndLine
-		<< magicka_ << EndLine
-		<< maxMagicka_ << EndLine
-		<< speed_ << EndLine;
+	file << level_ << EndLine // int
+		<< maxLevel_ << EndLine // int
+		<< exp_ << EndLine // double
+		<< expNeed_ << EndLine // double
+		<< strength_ << EndLine // int
+		<< stamina_ << EndLine // int
+		<< maxStamina_ << EndLine // int 
+		<< magicka_ << EndLine // int 
+		<< maxMagicka_ << EndLine // int 
+		<< speed_ << EndLine; // double
 }
 
 void PlayerStatComponent::deserialize(std::stringstream & file)

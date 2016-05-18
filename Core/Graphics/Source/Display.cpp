@@ -762,7 +762,6 @@ void Display::loadWorld(string filename)
 
 	while (text != LOAD::END )
 	{
-
 		if (text == LOAD::L_Tile)
 		{
 			file.clear();
@@ -771,43 +770,46 @@ void Display::loadWorld(string filename)
 			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
-		if (text == LOAD::L_Player)
+		else if (text == LOAD::L_Player)
 		{
 			if (localLoaded_ == false)
 			{
 				game::pHandler.getLocalPlayer().deserialize(file);
 				localLoaded_ = true;
-			}else
+			}
+			else
 			{
 				game::pHandler.addPlayerDeserialize(file);
 			}
-			playerAmount_++;
 		}
-		if (text == LOAD::L_Bullet)
+		else if (text == LOAD::L_Bullet)
 		{
 			std::shared_ptr<Bullet> bullet = std::make_shared<Bullet>();
 			bullet->deserialize(file);
 			game::system.addEntity(bullet);
+			Log("LOADED:Bullet\n");
 		}
-		if (text == LOAD::L_Turret)
+		else if (text == LOAD::L_Turret)
 		{
 			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
 			turret->deserialize(file);
 			game::system.addEntity(turret);
+			Log("LOADED:Turret\n");
 		}
-		if (text == LOAD::L_Core)
+		else if (text == LOAD::L_Core)
 		{
 			std::shared_ptr<Core> core = std::make_shared<Core>();
 			core->deserialize(file);
 			game::system.addEntity(core);
+			Log("LOADED:Core\n");
 		}
-		if (text == LOAD::L_GoldSpawn)
+		else if (text == LOAD::L_GoldSpawn)
 		{
 			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
 			goldSpawn->deserialize(file);
 			game::system.addEntity(goldSpawn);
+			Log("LOADED:GoldSpawn\n");
 		}
-		file.clear();
 		file >> text;
 	}
 
@@ -920,7 +922,7 @@ void Display::loadWorld()
 			m_map[tile.getPos()] = tile;
 			file.clear();
 		}
-		if (text == LOAD::L_Player)
+		else if (text == LOAD::L_Player)
 		{
 			if (localLoaded_ == false)
 			{
@@ -932,31 +934,36 @@ void Display::loadWorld()
 				game::pHandler.addPlayerDeserialize(file);
 			}
 		}
-		if (text == LOAD::L_Bullet)
+		else if (text == LOAD::L_Bullet)
 		{
 			std::shared_ptr<Bullet> bullet = std::make_shared<Bullet>();
 			bullet->deserialize(file);	
 			game::system.addEntity(bullet);
+			Log("LOADED:Bullet\n");
 		}
-		if (text == LOAD::L_Turret)
+		else if (text == LOAD::L_Turret)
 		{
 			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
 			turret->deserialize(file);
 			game::system.addEntity(turret);
+			Log("LOADED:Turret\n");
 		}
-		if (text == LOAD::L_Core)
+		else if (text == LOAD::L_Core)
 		{
 			std::shared_ptr<Core> core = std::make_shared<Core>();
 			core->deserialize(file);
 			game::system.addEntity(core);
+			Log("LOADED:Core\n");
 		}
-		if (text == LOAD::L_GoldSpawn)
+		else if (text == LOAD::L_GoldSpawn)
 		{
 			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
 			goldSpawn->deserialize(file);
 			game::system.addEntity(goldSpawn);
+			Log("LOADED:GoldSpawn\n");
 		}
 		file.clear();
+		text = END;
 		file >> text;
 	}
 
@@ -973,6 +980,7 @@ void Display::newWorld()
 	getSaveSuffix();
 
 	game::pHandler.getLocalPlayer().reset();
+	game::pHandler.getLocalPlayer().setName(localPlayerName_);
 
     Tile gold;
     gold.setGraphic(TG_Gold);

@@ -19,6 +19,7 @@ health_(2500, 2500, 2, true)
 	pos_(0, 0);
 	graphic_ = 'C';
 	owner_ = "NO_OWNER";
+	isDead_ = false;
 }
 
 
@@ -30,7 +31,6 @@ Core::~Core()
 void Core::setGraphic(char g)
 {
 	graphic_ = g;
-	game::game.getTileRefAt(pos_).updateOverlay(true, g);
 }
 
 void Core::setOwner(std::string name)
@@ -54,20 +54,46 @@ void Core::serialize(std::stringstream & file)
 		<< (int)graphic_ << EndLine
 		<< isDead_ << EndLine
 		<< getID() << EndLine
-		<< pos_.serializeR() << EndLine
 		<< owner_ << EndLine;
+	pos_.serialize(file);
+	health_.serialize(file);
+}
+
+void Core::serialize(std::fstream & file)
+{
+	file << L_Core << EndLine
+		<< (int)graphic_ << EndLine
+		<< isDead_ << EndLine
+		<< getID() << EndLine
+		<< owner_ << EndLine;
+	pos_.serialize(file);
 	health_.serialize(file);
 }
 
 void Core::deserialize(std::stringstream & file)
 {
-	int g;
-	int id;
-	file >> g >> isDead_ >> id; pos_.deserialize(file);
-	file >> owner_;
-	setID(id);
-	graphic_ = g;
+	int graphic = 0;
+	int id = 0;
+	file >> graphic
+		>> isDead_
+		>> id;
+	pos_.deserialize(file);
 	health_.deserialize(file);
+	graphic_ = graphic;
+	setID(id);
+}
+
+void Core::deserialize(std::fstream & file)
+{
+	int graphic = 0;
+	int id = 0;
+	file >> graphic
+		>> isDead_
+		>> id;
+	pos_.deserialize(file);
+	health_.deserialize(file);
+	graphic_ = graphic;
+	setID(id);
 }
 
 void Core::update()
@@ -94,28 +120,6 @@ void Core::kill()
 void Core::clean()
 {
 	game::game.getTileRefAt(pos_).removeOverlay();
-}
-
-void Core::serialize(std::fstream & file)
-{
-	file << L_Core << EndLine
-		<< (int)graphic_ << EndLine
-		<< isDead_ << EndLine
-		<< getID() << EndLine
-		<< pos_.serializeR() << EndLine
-		<< owner_ << EndLine;
-	health_.serialize(file);
-}
-
-void Core::deserialize(std::fstream & file)
-{
-	int g;
-	int id;
-	file >> g >> isDead_ >> id; pos_.deserialize(file);
-	file >> owner_;
-	setID(id);
-	graphic_ = g;
-	health_.deserialize(file);
 }
 
 bool Core::damage(int damage, std::string name, bool isServer)
@@ -159,9 +163,7 @@ bool Core::damage(int damage, std::string name, bool isServer)
 
 void Core::setPos(Position iPos)
 {
-	game::game.getTileRefAt(pos_).updateOverlay(false, ' ');
 	pos_ = iPos;
-	game::game.getTileRefAt(iPos).updateOverlay(true, graphic_);
 }
 
 void Core::updateOverlay()
