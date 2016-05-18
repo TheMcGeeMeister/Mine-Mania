@@ -384,9 +384,12 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
 			threadStarted = true;
 		}
+		while (game::server.isHostChoosen() == false)
+		{
+			Sleep(10);
+		}
 		game::lobby.Initialize(game::server.isHost());
 		game::lobby.Go();
-		Sleep(250);
 	}
 	ui.isHidden(true);
 	Sleep(50);

@@ -758,6 +758,11 @@ bool SimpleNetClient::isHost()
 	return isHost_;
 }
 
+bool SimpleNetClient::isHostChoosen()
+{
+	return isHostChosen_;
+}
+
 void SimpleNetClient::UpdateTile(int x, int y)
 {
 	Position pos;

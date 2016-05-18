@@ -25,6 +25,7 @@ public:
 	bool isWaiting();
 	bool isPlayerConnected();
 	bool isHost();
+	bool isHostChoosen();
 	void UpdateTile(int x, int y);
 	void Log(std::string text);
 
