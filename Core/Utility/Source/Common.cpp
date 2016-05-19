@@ -114,6 +114,13 @@ namespace Common
 		SetConsoleCursorPosition(h, pos);
 	}
 
+	void SendSound(std::string sound_name)
+	{
+		std::stringstream msg;
+		msg << SendDefault << EndLine << Sound << EndLine << sound_name << EndLine;
+		SendServerLiteral(msg.str());
+	}
+
 	inline void DisplayLetterAt(Position pos, std::string g)
 	{
 		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);

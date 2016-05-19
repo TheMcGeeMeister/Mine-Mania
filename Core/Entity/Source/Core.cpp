@@ -181,7 +181,8 @@ void Core::updateID()
 void Core::send()
 {
 	std::stringstream msg;
-	msg << SendDefault << EndLine << EntityAdd << EndLine << ECore << EndLine; serialize(msg);
+	msg << SendDefault << EndLine << EntityAdd << EndLine << ECore << EndLine;
+	serialize(msg);
 	SendServerLiteral(msg.str());
 }
 

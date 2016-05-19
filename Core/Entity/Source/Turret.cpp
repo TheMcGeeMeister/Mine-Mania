@@ -221,7 +221,8 @@ void Turret::updateID()
 void Turret::send()
 {
 	std::stringstream msg;
-	msg << SendDefault << EndLine << EntityAdd << EndLine << ETurret << EndLine; serialize(msg);
+	msg << SendDefault << EndLine << EntityAdd << EndLine << ETurret << EndLine;
+	serialize(msg);
 	SendServerLiteral(msg.str());
 }
 

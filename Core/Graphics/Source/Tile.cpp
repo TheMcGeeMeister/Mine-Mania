@@ -439,6 +439,7 @@ void Tile::claim(int amount, string claimer, WORD color)
 			}
 		}
 	}
+	updateServer();
 }
 
 void Tile::forceClaim(string claim)

@@ -330,9 +330,9 @@ void SimpleNetClient::Do(std::string rMsg)
 		else if (name == UpdatePlayerPosition)
 		{
 			string name;
-			msg >> name;
 			int x;
 			int y;
+			msg >> name;
 			msg >> x;
 			msg >> y;
 			Player* player;
@@ -443,6 +443,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			}
 			else if (name == ETurret)
 			{
+				std::stringstream stream;
 				shared_ptr<Turret> turret = make_shared<Turret>();
 				int none;
 				msg >> none;
@@ -450,7 +451,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				turret->setToNoUpdate();
 				turret->render();
 				game::system.addEntityServer(turret);
-				Log("EntityAdd\ETurret\n");
+				Log(stream.str());
 			}
 			else if (name == ECore)
 			{

@@ -611,7 +611,6 @@ void Player::purchaseTurret()
 			turret->setRange(8);
 			turret->setOwner(name_);
 			game::system.addEntity(turret, "Turret");
-			Common::SendTurret(turret.get());
 			goldAmount_ -= 1000;
 			game::m_sounds.PlaySoundR("Money");
 		}
@@ -703,7 +702,7 @@ void Player::updateMiningUI()
 	UI.update();
 }
 
-void Player::operator=(Player & player)
+/*void Player::operator=(Player & player)
 {
 	goldAmount_ = player.goldAmount_;
 	maxGoldAmount_ = player.maxGoldAmount_;
@@ -721,7 +720,7 @@ void Player::operator=(Player & player)
 	mineUIPos = player.mineUIPos;
 	spawnPos = player.spawnPos;
 	name_ = player.name_;
-}
+}*/
 
 
 
@@ -1002,12 +1001,13 @@ Player CreatePlayerAndSendAt(Position pos, std::string name, list<int> toSend) /
 	return NewPlayer;
 }
 
-Player Common::CreatePlayer(Position pos, std::string name, bool isLocal)
+Player Common::CreatePlayer(Position pos, std::string name, WORD claim_color, bool isLocal)
 {
 	Player NewPlayer;
 	NewPlayer.setHandPosNoUpdate(pos);
 	NewPlayer.setSpawnPos(pos);
 	NewPlayer.setName(name);
+	NewPlayer.setClaimedColor(claim_color);
 	if (isLocal)
 	{
 		Common::AddLocalPlayer(&NewPlayer);

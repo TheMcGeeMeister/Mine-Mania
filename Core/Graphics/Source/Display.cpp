@@ -1244,7 +1244,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 
 	/* Local */
 	////////////////////
-	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], true), pAmount, 0);
+	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], (WORD)B_Blue, true), pAmount, 0);
 	Common::CreatePlayerCore(names[0], Position(0, 0));
 	Common::SetStoneFloorAt(Position(0,1), (WORD)B_Blue, names[0]);
 	game::GameHandler.AddPlayer(names[0]);
@@ -1252,7 +1252,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 
 	for (int x = 1; x < pAmount; x++)
 	{
-		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x]), pAmount, x);
+		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x], p_c[x]), pAmount, x);
 		Common::SetStoneFloorAt(p_pos[x], p_c[x], names[x]);
 		Common::CreatePlayerCore(names[x], p_cpos[x]);
 		game::GameHandler.AddPlayer(names[x]);

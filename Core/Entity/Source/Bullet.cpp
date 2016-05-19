@@ -158,7 +158,8 @@ void Bullet::updateID()
 void Bullet::send()
 {
 	std::stringstream msg;
-	msg << SendDefault << EndLine << EntityAdd << EndLine << EBullet << EndLine; serialize(msg);
+	msg << SendDefault << EndLine << EntityAdd << EndLine << EBullet << EndLine;
+	serialize(msg);
 	SendServerLiteral(msg.str());
 }
 

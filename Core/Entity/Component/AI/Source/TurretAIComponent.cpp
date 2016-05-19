@@ -20,6 +20,15 @@ namespace game
 
 TurretAIComponent::TurretAIComponent()
 {
+	/*	int visionRange_;
+	int shootCoolDownTime_;
+	Timer shootCoolDown_;
+	Timer targetSearchCoolDown_;
+	bool targetFound_;
+	Position targetPosition_;
+	Position curPosition_;
+	std::string owner_;*/
+	targetFound_ = false;
 	visionRange_ = 3;
 	shootCoolDownTime_ = 4;
 	owner_ = "None";
@@ -157,6 +166,7 @@ void TurretAIComponent::shoot(DIRECTION direction)
 	{
 		player->damage(25, owner_);
 		game::m_sounds.PlaySoundR("TurretShoot");
+		Common::SendSound("TurretShoot");
 		bullet->clean();
 		return;
 	}
@@ -164,6 +174,7 @@ void TurretAIComponent::shoot(DIRECTION direction)
 	game::system.addEntity(bullet, "Bullet");
 
 	game::m_sounds.PlaySoundR("TurretShoot");
+	Common::SendSound("TurretShoot");
 }
 
 Position TurretAIComponent::getPosition()

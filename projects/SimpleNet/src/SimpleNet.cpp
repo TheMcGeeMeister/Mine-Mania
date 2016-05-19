@@ -42,8 +42,10 @@ namespace SimpleNet
 	bool ListenLoopContinue = true;
 	bool PlayerLoopExit = false;
 	bool HostConnected = false;
+	bool LoggingEnabled = false;
 	void Log(std::string text)
 	{
+		if (LoggingEnabled == false) return;
 		std::fstream file("Log.txt", std::ios::app);
 		file << text << std::endl;
 		if (!file)
@@ -611,6 +613,18 @@ bool ProcessCommand(std::string cmd)
 	{
 		std::cout << End << "Exiting..." << End;
 		return true;
+	}
+	else if (cmd == "log")
+	{
+		SimpleNet::LoggingEnabled = !SimpleNet::LoggingEnabled;
+		if (SimpleNet::LoggingEnabled == true)
+		{
+			std::cout << End << "Logging: Enabled" << End;
+		}
+		else
+		{
+			std::cout << End << "Logging: Disabled" << End;
+		}
 	}
 	return false;
 }

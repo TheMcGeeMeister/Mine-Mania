@@ -238,6 +238,7 @@ void BulletAIComponent::update()
 				game::m_sounds.PlaySoundR("Bullet");
 				std::stringstream msg;
 				msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
+				SendServerLiteral(msg.str());
 				isDestroyed(true);
 				clean();
 				return;

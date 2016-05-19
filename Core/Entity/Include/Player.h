@@ -123,15 +123,13 @@ class Player : public Entity
 		void reset();
 		void updateMiningUI();
 
-		void operator=(Player& player);
+		//void operator=(Player& player);
 
 		/* Serialize / Deserialize */
 		//////////////////////////////////
 		void serialize(fstream& file);
-		//void serialize(ofstream& file);
 		void serialize(stringstream& file);
 		void deserialize(fstream& file);
-		//void deserialize(ifstream& file);
 		void deserialize(stringstream& file);
 		//////////////////////////////////
 
@@ -200,5 +198,5 @@ class Player : public Entity
 
 namespace Common
 {
-	extern Player CreatePlayer(Position pos, std::string name, bool isLocal = false);
+	extern Player CreatePlayer(Position pos, std::string name, WORD claim_color, bool isLocal = false);
 }
