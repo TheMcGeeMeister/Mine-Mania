@@ -1041,6 +1041,7 @@ void loadSounds()
 	game::m_sounds.AddSound("Winner", "Sounds//Winner.wav");
 	game::m_sounds.AddSound("Loser", "Sounds//Loser.wav");
 	game::m_sounds.AddSound("Repair", "Sounds//Repair.wav");
+	game::m_sounds.AddSound("Swap", "Sounds//Swap.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");

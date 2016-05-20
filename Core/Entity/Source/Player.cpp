@@ -70,7 +70,6 @@ Player::~Player()
 
 void Player::stopSounds()
 {
-	game::m_sounds.StopSound("Mining");
 	mine_sound.StopSound();
 	turret_sound.StopSound();
 	repair_sound.StopSound();
@@ -285,6 +284,7 @@ void Player::moveHand(DIRECTION direction)
 			game::m_sounds.PlaySoundR("Bullet");
 			std::stringstream msg;
 			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
+			SendServerLiteral(msg.str());
 		}
 		return;
 	}
@@ -506,6 +506,7 @@ void Player::switchMode()
 		handMode_ = 0;
 		game::tileUI.getSectionRef(6).setVar(1, "Mining");
 	}
+	game::m_sounds.PlaySoundR("Swap");
 }
 
 void Player::switchModeTo(int mode)
@@ -517,6 +518,7 @@ void Player::switchModeTo(int mode)
 	case 1:game::tileUI.getSectionRef(6).setVar(1, "Hand"); break;
 	case 2:game::tileUI.getSectionRef(6).setVar(1, "Weapon"); break;
 	}
+	game::m_sounds.PlaySoundR("Swap");
 }
 
 void Player::updateHandPos()
@@ -580,30 +582,11 @@ Position Player::getHandPosition()
 	return handPos;
 }
 ////////////////////////////////////////////////
-
-
-
-void Player::placeObject(uint16_t objectID)
-{
-
-}
-
-void Player::spawnTurret(Position pos)
-{
-	shared_ptr<Turret> turret = make_shared<Turret>();
-	turret->setPosition(pos);
-	turret->setGraphic('+');
-	turret->setRange(5);
-	turret->setOwner(name_);
-	turret->setShootCoolDown(1);
-	game::system.addEntity(turret, "Turret");
-}
-
 void Player::purchaseTurret()
 {
 	if (goldAmount_ >= 1000)
 	{
-		if (game::system.entityAt(handPos) == false)
+		if (game::system.entityAt(handPos) == false && game::game.getTileRefAt(handPos).isClaimedBy(name_))
 		{
 			shared_ptr<Turret> turret = make_shared<Turret>();
 			turret->setPosition(handPos);
@@ -701,26 +684,6 @@ void Player::updateMiningUI()
 	}
 	UI.update();
 }
-
-/*void Player::operator=(Player & player)
-{
-	goldAmount_ = player.goldAmount_;
-	maxGoldAmount_ = player.maxGoldAmount_;
-	manaAmount_ = player.manaAmount_;
-	maxManaAmount_ = player.maxManaAmount_;
-	health.setHealth(player.health.getHealth());
-	health.setHealthRegen(player.health.getHealthRegen());
-	health.setMaxHealth(player.health.getMaxHealth());
-	health.isRegenEnabled(player.health.isRegenEnabled());
-	moved_ = player.moved_;
-	mined_ = player.mined_;
-	isDead_ = player.isDead_;
-	isLocal_ = player.isLocal_;
-	handPos = player.handPos;
-	mineUIPos = player.mineUIPos;
-	spawnPos = player.spawnPos;
-	name_ = player.name_;
-}*/
 
 
 

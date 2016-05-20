@@ -186,6 +186,10 @@ bool Turret::damage(int amount, string name, bool server)
 			health.damage(amount);
 			msg << SendDefault << EndLine << EntityDamage << EndLine << ai.getPosition().serializeR() << amount << EndLine << name << EndLine;
 			SendServerLiteral(msg.str());
+			if (health.isDead())
+			{
+				game::m_sounds.PlaySoundR("Destroy");
+			}
 		}
 	}
 	else

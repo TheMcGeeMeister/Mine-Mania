@@ -54,7 +54,6 @@ public:
 	void saveWorld(string filename);
 	string getWorld();
     void newWorld();
-	void newWorldMulti();
 	void newWorldMulti(int pAmount, std::string names[]);
 	void getSaveSuffix();
 	void unloadWorld();

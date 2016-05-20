@@ -1,6 +1,7 @@
 #pragma once
 #include "Entity.h"
 #include "HealthComponent.h"
+#include "SoundPlayer.h"
 
 class Core :
 	public Entity
@@ -40,5 +41,6 @@ private:
 	char graphic_;
 	std::string owner_;
 	HealthComponent health_;
+	SoundPlayer m_repair_;
 };
 

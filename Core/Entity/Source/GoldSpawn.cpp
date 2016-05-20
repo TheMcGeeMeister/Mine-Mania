@@ -149,12 +149,6 @@ void GoldSpawn::send()
 void GoldSpawn::render()
 {
 	game::game.getTileRefAt(pos_).updateOverlay(true, '@');
-	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD pos;
-	pos.X = pos_.getX();
-	pos.Y = pos_.getY();
-	DWORD output;
-	WriteConsoleOutputAttribute(h, &color_, 1, pos, &output);
 	game::game.getTileRefAt(pos_).setBackground(color_);
 }
 
@@ -179,7 +173,7 @@ void GoldSpawn::activate(Player* player)
 				if (game::pHandler.getPlayer(owner_, &player))
 				{
 					player->removePassiveGold(1);
-					color_ = C_White;
+					color_ = B_DarkGray;
 					render();
 				}
 				claimedPercentage_ = 0;
@@ -209,7 +203,7 @@ void GoldSpawn::activate(Player* player)
 		else
 		{
 			claimedPercentage_ -= 10;
-			if (claimedPercentage_ <= 10)
+			if (claimedPercentage_ <= 0)
 			{
 				currentClaimer_ = player->getName();
 				claimedPercentage_ = 0;

@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "LoadEnums.h"
 #include "GameManager.h"
+#include "Player.h"
 
 namespace game
 {
@@ -20,6 +21,7 @@ health_(2500, 2500, 2, true)
 	graphic_ = 'C';
 	owner_ = "NO_OWNER";
 	isDead_ = false;
+	m_repair_.SetSound("Repair");
 }
 
 
@@ -101,6 +103,7 @@ void Core::deserialize(std::fstream & file)
 void Core::update()
 {
 	health_.update();
+	m_repair_.Update();
 }
 
 bool Core::hasComponent(int component)
@@ -193,7 +196,14 @@ void Core::render()
 
 void Core::activate(Player* player)
 {
-	return;
+	if (player->getName() == owner_)
+	{
+		if (health_.getHealth() != health_.getMaxHealth())
+		{
+			health_.heal(1);
+			m_repair_.SetTimer(0.200);
+		}
+	}
 }
 
 Position Core::getPos()

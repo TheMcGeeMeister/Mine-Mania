@@ -100,9 +100,6 @@ class Player : public Entity
 
 		/* Object Place */
 		//////////////////////////////////
-		void placeObject(uint16_t objectID);
-		void spawnTurret(Position pos);
-
 		void purchaseTurret();
 		void purchaseBullet();
 		//////////////////////////////////
@@ -122,8 +119,6 @@ class Player : public Entity
 
 		void reset();
 		void updateMiningUI();
-
-		//void operator=(Player& player);
 
 		/* Serialize / Deserialize */
 		//////////////////////////////////

@@ -406,7 +406,7 @@ void Tile::claim(int amount, string claimer, WORD color)
 			if (curBeingClaimedBy_ == claimer)
 			{
 				claimedPercentage_ += amount;
-				if (claimedPercentage_ > 100)
+				if (claimedPercentage_ >= 100)
 				{
 					claimedBy_ = claimer;
 					claimedPercentage_ = 0;
@@ -417,26 +417,25 @@ void Tile::claim(int amount, string claimer, WORD color)
 			}
 			else
 			{
-				int newClaim;
-				newClaim = claimedPercentage_ - amount;
-				if (newClaim <= 0)
+				claimedPercentage_ -= amount;
+				if (claimedPercentage_ <= 0)
 				{
-					claimedPercentage_ += amount + newClaim;
+					claimedPercentage_ = 0;
 					curBeingClaimedBy_ = claimer;
 				}
 			}
 		}
 		else
 		{
-			claimedPercentage_ += amount;
-			if (claimedPercentage_ >= 100)
-			{
-				claimedBy_ = "Neutral";
-				claimedPercentage_ = 0;
-				isClaimed_ = false;
-				curBeingClaimedBy_ = claimer;
-				background_ = B_Black;
-			}
+				claimedPercentage_ += amount;
+				if (claimedPercentage_ >= 100)
+				{
+					claimedBy_ = "Neutral";
+					claimedPercentage_ = 0;
+					isClaimed_ = false;
+					curBeingClaimedBy_ = claimer;
+					background_ = B_Black;
+				}
 		}
 	}
 	updateServer();

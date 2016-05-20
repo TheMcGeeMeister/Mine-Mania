@@ -631,9 +631,9 @@ bool ProcessCommand(std::string cmd)
 int main()
 {
 	if (Initialize() == false)
-		exit(1);
+		return 1;
 	if (StartServer() == false)
-		exit(1);
+		return 1;
 
 	SimpleNet::ListenLoopContinue = true;
 
