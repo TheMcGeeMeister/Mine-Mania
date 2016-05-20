@@ -73,6 +73,7 @@ public:
 	int getWidth();
 	int getHeight();
 	int getVolume();
+	int getPlayerAmount();
 
 	void claimNameChange(string currentName, string newName);
 

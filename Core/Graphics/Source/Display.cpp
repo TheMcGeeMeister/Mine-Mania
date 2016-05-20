@@ -586,6 +586,11 @@ int Display::getVolume()
 	return volume_;
 }
 
+int Display::getPlayerAmount()
+{
+	return playerAmount_;
+}
+
 int Display::getMaxWidth()
 {
 	return size_x_ + offset_x_;
@@ -1081,6 +1086,8 @@ void Display::newWorld()
 void Display::newWorldMulti(int pAmount, std::string names[])
 {
 	game::GameHandler.Reset();
+
+	playerAmount_ = pAmount;
 
 	map<int, Position> p_pos;
 	map<int, Position> p_cpos;

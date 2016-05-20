@@ -26,6 +26,8 @@ public:
 	bool isPlayerConnected();
 	bool isHost();
 	bool isHostChoosen();
+	bool isSynced();
+	void SyncPlayers();
 	void UpdateTile(int x, int y);
 	void Log(std::string text);
 
@@ -38,6 +40,8 @@ private:
 	bool isPaused_;
 	bool isWaiting_;
 	bool isPlayerConnected_;
+	bool isSynced_;
 
 	int id_;
+	int sync_amount_;
 };

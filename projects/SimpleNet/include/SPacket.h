@@ -15,6 +15,7 @@ enum SPacketNames
 	Knockback,
 	Health,
 	Kill,
+	PSync,
 	///////////////////
 	EntityDamage, EntityKill, EntityUpdatePosition,
 

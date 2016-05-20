@@ -53,9 +53,11 @@ SimpleNetClient::SimpleNetClient()
 	isHostChosen_ = false;
 	isWaiting_ = true;
 	isPlayerConnected_ = false;
+	isSynced_ = false;
 	SimpleNet::isInitialized_ = false;
 	SimpleNet::ConnectSocket = INVALID_SOCKET;
 	id_ = 0;
+	sync_amount_ = 0;
 }
 
 SimpleNetClient::~SimpleNetClient()
@@ -313,19 +315,14 @@ void SimpleNetClient::Do(std::string rMsg)
 		////////////////////////////////////////////
 		else if (name == UpdatePlayer)
 		{
+			std::string name;
 			msg >> name;
-			if (name == Health)
+			Player* player;
+			if(game::pHandler.getPlayer(name, &player))
 			{
-				int health;
-				string player_name;
-				msg >> player_name;
-				msg >> health;
-				Player *player;
-				if (game::pHandler.getPlayer(player_name, &player))
-				{
-					player->getHealthRef().setHealth(health);
-				}
+				player->deserialize(msg);
 			}
+			sync_amount_++;
 		}
 		else if (name == UpdatePlayerPosition)
 		{
@@ -552,6 +549,13 @@ void SimpleNetClient::Do(std::string rMsg)
 					player->killS();
 				}
 			}
+			else if (name == PSync)
+			{
+				std::stringstream msg;
+				msg << SendDefault << EndLine << UpdatePlayer << EndLine << game::pHandler.getLocalPlayer().getName() << EndLine;
+				game::pHandler.getLocalPlayer().serialize(msg);
+				SendLiteral(msg.str());
+			}
 		}
 		////////////////////////////////////////////
 
@@ -762,6 +766,39 @@ bool SimpleNetClient::isHost()
 bool SimpleNetClient::isHostChoosen()
 {
 	return isHostChosen_;
+}
+
+void SimpleNetClient::SyncPlayers()
+{
+	Timer time;
+	sync_amount_ = 0;
+	std::stringstream msg;
+	msg << SendDefault << EndLine << PlayerUpdate << EndLine << PSync << EndLine;
+	SendLiteral(msg.str());
+	int goal = game::game.getPlayerAmount() - 1;
+	time.StartNewTimer(5);
+	while (sync_amount_ != goal)
+	{
+		if (time.Update() == true)
+		{
+			return;
+		}
+		Sleep(1);
+	}
+	return;
+}
+
+bool SimpleNetClient::isSynced()
+{
+	if (isSynced_)
+	{
+		isSynced_ = false;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void SimpleNetClient::UpdateTile(int x, int y)

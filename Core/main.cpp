@@ -738,7 +738,7 @@ bool pauseGameMenu(Display& game)
 			switch (ui.getActivatedSection())
 			{
 			case 1: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return false;
-			case 2: {ui.isHidden(true); thread load(loadScreen, 500, "Saving..."); game.saveWorld(); load.join(); ui.isHidden(false); break; }
+			case 2: {ui.isHidden(true); thread load(loadScreen, 500, "Saving..."); game::server.SyncPlayers(); game.saveWorld(); load.join(); ui.isHidden(false); break; }
 			case 3: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return true;
 			}
 		}
