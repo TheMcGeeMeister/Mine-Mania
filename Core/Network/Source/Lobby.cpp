@@ -150,12 +150,18 @@ bool Lobby::Go()
 						Player* player = &game::pHandler.getLocalPlayer();
 						std::string local = game::pHandler.getLocalPlayer().getName();
 						Common::SendPlayer(player, player_amount, 0);
+						std::fstream stream("Logs\\Log.txt");
 						for (auto& iter : m_players_t)
 						{
+							stream << "LOOKING FOR:" << iter.second.first << "\n";
 							if (iter.second.first == local) continue;
 							if (game::pHandler.getPlayer(iter.second.first, &player))
 							{
 								Common::SendPlayer(player, player_amount, iter.first);
+							}
+							else
+							{
+								stream << "ERROR: " << iter.second.first << " NOT FOUND\n";
 							}
 						}
 						//////////////////////////

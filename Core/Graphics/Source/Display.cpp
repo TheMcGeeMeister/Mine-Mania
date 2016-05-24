@@ -763,8 +763,6 @@ void Display::loadWorld(string file_name)
 
 	stream >> name;
 
-	bool localLoaded_ = false;
-
 	while (name != LOAD::END )
 	{
 		if (name == LOAD::L_Tile)
@@ -775,14 +773,17 @@ void Display::loadWorld(string file_name)
 		}
 		else if (name == LOAD::L_Player)
 		{
-			if (localLoaded_ == false)
+			Player player;
+			player.deserialize(stream);
+			if (player.getName() == localPlayerName_)
 			{
-				game::pHandler.getLocalPlayer().deserialize(stream);
-				localLoaded_ = true;
+				game::pHandler.getLocalPlayer() = player;
+				Log("LOADED:Player - Local");
 			}
 			else
 			{
-				game::pHandler.addPlayerDeserialize(stream);
+				game::pHandler.addPlayer(player);
+				Log("LOADED:Player - " + player.getName());
 			}
 		}
 		else if (name == LOAD::L_Bullet)
@@ -1170,6 +1171,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	Common::CreatePlayerCore(names[0], Position(0, 0));
 	Common::SetStoneFloorAt(Position(0,1), (WORD)B_Blue, names[0]);
 	game::GameHandler.AddPlayer(names[0]);
+	m_map[Position(0, 1)].setBackground((WORD)B_Blue);
 	////////////////////
 
 	for (int x = 1; x < pAmount; x++)
@@ -1178,6 +1180,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 		Common::SetStoneFloorAt(p_pos[x], p_c[x], names[x]);
 		Common::CreatePlayerCore(names[x], p_cpos[x]);
 		game::GameHandler.AddPlayer(names[x]);
+		m_map[p_pos[x]].setBackground(p_c[x]);
 	}
 
 	game::GameHandler.StartGame();

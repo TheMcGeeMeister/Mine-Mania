@@ -104,9 +104,11 @@ void PlayerHandler::clear()
 
 void PlayerHandler::serializeAll(std::stringstream & file)
 {
+	m_players["Local"].serialize(file);
 	for (auto& iter : m_players)
 	{
-		iter.second.serialize(file);
+		if (iter.first != "Local")
+			iter.second.serialize(file);
 	}
 }
 

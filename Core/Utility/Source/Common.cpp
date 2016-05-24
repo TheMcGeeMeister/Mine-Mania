@@ -186,8 +186,8 @@ namespace Common
 			{
 				shared_ptr<Bullet> bullet = make_shared<Bullet>();
 				bullet->setDirection((DIRECTION)direction);
-				bullet->setPosition(nPos);
-				bullet->setGraphic(250);
+				bullet->setPositionNoUpdate(nPos);
+				bullet->setGraphicNoUpdate(250);
 				bullet->setBulletRange(bullet_range);
 
 				game::system.addEntity(bullet, "Bullet");

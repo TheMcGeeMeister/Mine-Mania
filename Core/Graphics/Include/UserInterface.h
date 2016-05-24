@@ -54,6 +54,7 @@ public:
 	void isISection(bool isISection);
 	void isNumberHidden(bool isHidden);
 	void isHidden(bool isHidden);
+	void isColored(bool isColored);
 	void setText(std::string text);
 	void setIndex(uint16_t index);
 	void setMaxIText(int length);
@@ -84,11 +85,15 @@ public:
 
 	std::string operator()();
 
+	void setColor(WORD color);
+	WORD getColor();
+
 
 	bool isHidden();
 	bool isSelectable();
 	bool isNumberHidden();
 	bool isISection();
+	bool isColored();
 	bool redraw();
 private:
 	uint16_t index_;
@@ -98,7 +103,9 @@ private:
 	bool isNumberHidden_;
 	bool isHidden_;
 	bool isISection_;
+	bool isColored_;
 	bool redraw_;
+	WORD color_;
 	std::string iText_;
 	std::string text_;
 	std::map <uint16_t, Variable> variables; // DFNC - Doesn't Follow Naming Convention

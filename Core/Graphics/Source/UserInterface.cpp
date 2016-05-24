@@ -6,6 +6,7 @@
 #include "BorderEnums.h"
 #include "UserInterface.h"
 #include "SoundManager.h"
+#include "TileEnums.h"
 
 using namespace std;
 
@@ -68,6 +69,7 @@ UserInterface::UserInterface(unsigned int size_x, unsigned int size_y, unsigned 
 UserInterface::~UserInterface()
 {
 	iManager.isExit(true);
+	isHidden(true);
 }
 
 void UserInterface::isHidden(bool isHidden)
@@ -622,7 +624,58 @@ void UserInterface::draw(uint16_t index)
 		}
 		if(spaces > 0)
 			text << string(spaces, ' ');
-		cout << text.str();
+		//cout << text.str();
+		/* Add Color Output 
+		if (sections[index].isColored())
+		{
+			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+			int x_ = positionVars_.offset_x + positionVars_.border_width;
+			DWORD output;
+			COORD pos;
+			pos.Y = offset_y;
+			pos.X = x_;
+			WORD a = sections[index].getColor();
+			WriteConsoleOutputCharacter(h, text.str().c_str(), text.str().length(), pos, &output);
+			WriteConsoleOutputAttribute(h, &a, text.str().length(), pos, &output);
+		}
+		else
+		{
+			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+			int x_ = positionVars_.offset_x + positionVars_.border_width;
+			DWORD output;
+			COORD pos;
+			pos.Y = offset_y;
+			pos.X = x_;
+			vector<WORD> attributes(text.str().length(), C_White);
+			WriteConsoleOutputCharacter(h, text.str().c_str(), text.str().length(), pos, &output);
+			WriteConsoleOutputAttribute(h, &attributes[0], text.str().length(), pos, &output);
+			//WriteConsoleOutputAttribute(h, &a, text.str().length(), pos, &output);
+		}*/
+		if (index == curSelected_)
+		{
+			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+			int x_ = positionVars_.offset_x + positionVars_.border_width;
+			DWORD output;
+			COORD pos;
+			pos.Y = offset_y;
+			pos.X = x_;
+			vector<WORD> attributes(text.str().length(), B_Blue | C_White);
+			WriteConsoleOutputCharacter(h, text.str().c_str(), text.str().length(), pos, &output);
+			WriteConsoleOutputAttribute(h, &attributes[0], text.str().length(), pos, &output);
+		}
+		else
+		{
+			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+			int x_ = positionVars_.offset_x + positionVars_.border_width;
+			DWORD output;
+			COORD pos;
+			pos.Y = offset_y;
+			pos.X = x_;
+			vector<WORD> attributes(text.str().length(), C_White);
+			WriteConsoleOutputCharacter(h, text.str().c_str(), text.str().length(), pos, &output);
+			WriteConsoleOutputAttribute(h, &attributes[0], text.str().length(), pos, &output);
+			//WriteConsoleOutputAttribute(h, &a, text.str().length(), pos, &output);
+		}
 	}
 }
 
@@ -745,7 +798,14 @@ void UserInterface::hide()
 		SetCursorPosition(positionVars_.offset_x + positionVars_.border_width, offset_y);
 		string text = iter.second();
 		if (iter.second.getIndex() == curSelected_)
-			text += " <-    ";
+			text += " <-";
+		int length = text.length();
+		int spaces = 0;
+		if (length <= positionVars_.size_x)
+		{
+			spaces = positionVars_.size_x - length;
+		}
+		text += string(spaces, ' ');
 		cout << createClearLine(text.length());
 	}
 	if (positionVars_.border_width > 0)
@@ -785,8 +845,10 @@ Section::Section()
 	isNumberHidden_ = true;
 	isHidden_ = false;
 	isISection_ = false;
+	isColored_ = false;
 	redraw_ = false;
 	maxIText_ = 20;
+	color_ = 0;
 }
 
 Section::Section(uint16_t index, string text)
@@ -799,7 +861,9 @@ Section::Section(uint16_t index, string text)
 	isHidden_ = false;
 	redraw_ = false;
 	isISection_ = false;
+	isColored_ = false;
 	maxIText_ = 20;
+	color_ = 0;
 }
 
 Section::Section(uint16_t index, string text, bool isSelectable)
@@ -812,7 +876,9 @@ Section::Section(uint16_t index, string text, bool isSelectable)
 	isHidden_ = false;
 	redraw_ = false;
 	isISection_ = false;
+	isColored_ = false;
 	maxIText_ = 20;
+	color_ = 0;
 }
 
 Section::Section(uint16_t index, string text, bool isSelectable, bool isNumberHidden)
@@ -825,7 +891,9 @@ Section::Section(uint16_t index, string text, bool isSelectable, bool isNumberHi
 	isHidden_ = false;
 	redraw_ = false;
 	isISection_ = false;
+	isColored_ = false;
 	maxIText_ = 20;
+	color_ = 0;
 }
 
 uint16_t Section::getIndex()
@@ -846,6 +914,12 @@ void Section::isNumberHidden(bool isHidden)
 void Section::isHidden(bool isHidden)
 {
 	isHidden_ = isHidden;
+}
+
+void Section::isColored(bool isColored)
+{
+	isColored_ = isColored;
+	redraw_ = true;
 }
 
 void Section::setText(string text)
@@ -1108,6 +1182,17 @@ string Section::operator()()
 	return text.str();
 }
 
+void Section::setColor(WORD color)
+{
+	color_ = color;
+	redraw_ = true;
+}
+
+WORD Section::getColor()
+{
+	return color_;
+}
+
 bool Section::isHidden()
 {
 	return isHidden_;
@@ -1121,6 +1206,11 @@ bool Section::isSelectable()
 bool Section::isISection()
 {
 	return isISection_;
+}
+
+bool Section::isColored()
+{
+	return isColored_;
 }
 
 bool Section::redraw()

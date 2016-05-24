@@ -379,7 +379,6 @@ void Player::mine(DIRECTION direction)
 				{
 					if (stats.addExp(10))
 					{
-						game::m_sounds.PlaySoundR("LevelUp");
 						health.setMaxHealth(health.getMaxHealth() + 10);
 						std::stringstream lvlmsg;
 						lvlmsg << "You Leveled Up! Level:" << stats.getLevel();
@@ -833,7 +832,7 @@ void Player::update()
 	{
 		std::stringstream msg;
 		msg << SendDefault << EndLine
-			<< UpdatePlayer << EndLine
+			<< PlayerUpdate << EndLine
 			<< Health << EndLine
 			<< name_ << EndLine
 			<< health.getHealth() << EndLine;

@@ -9,7 +9,7 @@
 #include "game.h"
 #include "LoadEnums.h"
 #include "Common.h"
-#include "GameManager.h"
+#include "GameManager.h" // Handles winning/losing
 #include "Timer.h" // Timer utility class
 #include "Player.h" // Player Class
 #include "Tile.h" // Tile Class
@@ -24,7 +24,7 @@
 #include "SimpleNetClient.h" // Server class
 #include "PositionVariables.h" // Holds on size, and offset
 #include "TileChangeManager.h" // Updates the Display with changes
-#include "LoadParser.h"
+#include "LoadParser.h" // Not really being used, but was going to be used for debbugging any saving problems
 
 #define DEFAULT_CLEAR_WIDTH 100
 #define DEFAULT_CLEAR_HEIGHT 36
@@ -113,7 +113,7 @@ bool isExitGame(Display& game)
 		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		game::game.isHidden(true);
 		std::stringstream winnerTxt;
-		winnerTxt << "Player " << game::winnerName << " won the game!";
+		winnerTxt << "Player " << game::winnerName << " won the game!\n";
 		//Common::DisplayTextCentered(game::game.getWidth(), game::game.getHeight() / 2, winnerTxt.str());
 		Common::SetCursorPosition(0, 0);
 		cout << winnerTxt.str();
@@ -126,7 +126,16 @@ bool isExitGame(Display& game)
 			game::m_sounds.PlaySoundR("Loser");
 		}
 		game::game.unloadWorld();
-		Sleep(4000);
+		
+		/* Exit on Continue*/
+		cout << "Press enter to continue";
+		bool exitFlag = false;
+		while (exitFlag == false)
+		{
+			exitFlag = isExit();
+			Sleep(1);
+		}
+
 		game::gameWon = false;
 		return true;
 	}
@@ -353,7 +362,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 	UserInterface ui(30, 9, 0, 0, 1);
 	ui.drawBorder();
 	ui.push_isection("Address:");
-	ui.push_back("Continue" , true, true);
+	ui.push_back("Connect" , true, true);
 	ui.push_back("Return", true, true);
 
 	ui.getSectionRef(1).setIVar("127.0.0.1");
@@ -366,9 +375,29 @@ void connectMenu(thread& sThread, bool& threadStarted)
 		{
 			switch (ui.getActivatedSection())
 			{
-			case 1: continue; Sleep(250); break;
-			case 2: {ui.isHidden(true); game::server.Initialize(); thread load(loadScreen, 500, "Loading..."); game::server.Connect(ui.getSectionRef(1).getIVar());
-				setCursorPos(0, 0); load.join(); ui.isHidden(false);
+			case 2: {
+				ui.isHidden(true); game::server.Initialize(); thread load(loadScreen, 500, "Connecting..."); 
+				if (game::server.Connect(ui.getSectionRef(1).getIVar()) == false)
+				{
+					loadScreen(1500, "Connection Failed...");
+				}
+				setCursorPos(0, 0); load.join();
+				if (game::server.isConnected() == true)
+				{
+					if (threadStarted == false)
+					{
+						game::server.isExit(false);
+						sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
+						threadStarted = true;
+					}
+					while (game::server.isHostChoosen() == false)
+					{
+						Sleep(10);
+					}
+					game::lobby.Initialize(game::server.isHost());
+					game::lobby.Go();
+					exitFlag = true;
+				}
 				continue; break;}
 			case 3: exitFlag = true; Sleep(250); break;
 			}
@@ -376,23 +405,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 		Sleep(10);
 	}
 	ui.isHidden(true);
-	if (game::server.isConnected() == true)
-	{
-		if (threadStarted == false)
-		{
-			game::server.isExit(false);
-			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
-			threadStarted = true;
-		}
-		while (game::server.isHostChoosen() == false)
-		{
-			Sleep(10);
-		}
-		game::lobby.Initialize(game::server.isHost());
-		game::lobby.Go();
-	}
-	ui.isHidden(true);
-	Sleep(50);
+	return;
 }
 
 bool loadMenu(Display& game)
@@ -738,7 +751,7 @@ bool pauseGameMenu(Display& game)
 			switch (ui.getActivatedSection())
 			{
 			case 1: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return false;
-			case 2: {ui.isHidden(true); thread load(loadScreen, 500, "Saving..."); game::server.SyncPlayers(); game.saveWorld(); load.join(); ui.isHidden(false); break; }
+			case 2: {ui.isHidden(true); thread load(loadScreen, 500, "Saving..."); /*game::server.SyncPlayers();*/ game.saveWorld(); load.join(); ui.isHidden(false); break; }
 			case 3: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return true;
 			}
 		}
@@ -756,13 +769,13 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 	PositionVariables pVar(30, 9, 0, 0);
 	menu.setPositionVariables(pVar);
 	menu.drawBorder();
-    menu.addSection("Continue", true, false);
-    menu.addSection("Save", true, false);
-    menu.addSection("Load", true, false);
-	menu.addSection("Settings", true, false);
-    menu.addSection("New World", true, false);
-	menu.addSection("Connect", true, false);
-    menu.addSection("Exit", true, false);
+    menu.addSection("Continue", true, true);
+    menu.addSection("Save", true, true);
+    menu.addSection("Load", true, true);
+	menu.addSection("Settings", true, true);
+    menu.addSection("New World", true, true);
+	menu.addSection("Multiplayer", true, true);
+    menu.addSection("Exit", true, true);
     menu.update();
     bool exitFlag=false;
     while(exitFlag==false)

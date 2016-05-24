@@ -315,12 +315,18 @@ void SimpleNetClient::Do(std::string rMsg)
 		////////////////////////////////////////////
 		else if (name == UpdatePlayer)
 		{
-			std::string name;
-			msg >> name;
+			std::string pName;
+			msg >> pName;
 			Player* player;
-			if(game::pHandler.getPlayer(name, &player))
+			if(game::pHandler.getPlayer(pName, &player))
 			{
 				player->deserialize(msg);
+			}
+			else
+			{
+				Player tPlayer;
+				tPlayer.deserialize(msg);
+				Log("UpdatePlayer - Failed:" + pName + "\n");
 			}
 			sync_amount_++;
 		}
@@ -339,7 +345,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				player->forceHandPosition(pos, game::game);
 			}
 			else
-				Log("UpdatePlayerPosition Failed - \n" + name);
+				Log("UpdatePlayerPosition Failed - " + name + "\n");
 		}
 		else if (name == PacketNames::UpdateTile)
 		{
@@ -372,27 +378,23 @@ void SimpleNetClient::Do(std::string rMsg)
 		////////////////////////////////////////////
 		else if (name == AddPlayer)
 		{
-			//Log("//////////////////\n" + msg.str() + "///////////////////");
 			Player player;
 			std::string null;
 			msg >> null;
 			player.deserialize(msg);
 			player.updateHandPos();
 			game::pHandler.addPlayer(player);
-			//Log("Player Added - " + player.getName());
-			Log("AddPlayer\n");
+			Log("Player Added - " + player.getName() + "\n");
 		}
 		else if (name == AddPlayerLocal)
 		{
-			//Log("//////////////////\n" + msg.str() + "///////////////////");
 			Player player;
 			std::string null;
 			msg >> null;
 			player.deserialize(msg);
 			player.updateHandPos();
 			game::pHandler.addLocalPlayer(player);
-			//Log("Local Player Added - " + player.getName());
-			Log("AddPlayerLocal\n");
+			Log("Local Player Added - " + player.getName() + "\n");
 		}
 		////////////////////////////////////////////
 
@@ -400,10 +402,6 @@ void SimpleNetClient::Do(std::string rMsg)
 		////////////////////////////////////////////
 		else if (name == EntityDamage)
 		{
-			/*int id;
-			int damage;
-			msg >> id;
-			msg >> damage;*/
 			Position pos;
 			std::string name;
 			double damage;
@@ -415,7 +413,6 @@ void SimpleNetClient::Do(std::string rMsg)
 			if (game::system.getEntityAt(pos, &entity))
 			{
 				entity->damage(damage, name, true);
-				//Log("EntityDamage\n");
 			}
 			else
 			{
@@ -440,7 +437,6 @@ void SimpleNetClient::Do(std::string rMsg)
 			}
 			else if (name == ETurret)
 			{
-				std::stringstream stream;
 				shared_ptr<Turret> turret = make_shared<Turret>();
 				int none;
 				msg >> none;
@@ -448,7 +444,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				turret->setToNoUpdate();
 				turret->render();
 				game::system.addEntityServer(turret);
-				Log(stream.str());
+				Log("EntityAdd\ETurret\n");
 			}
 			else if (name == ECore)
 			{

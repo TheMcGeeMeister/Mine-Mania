@@ -1,6 +1,12 @@
 #include <sstream>
 #include <fstream>
 #include "PlayerStatComponent.h"
+#include "SoundManager.h"
+
+namespace game
+{
+	extern SoundManager m_sounds;
+}
 
 #define EndLine "\n"
 
@@ -149,6 +155,7 @@ bool PlayerStatComponent::addExp(double exp)
 			speed_ -= 0.01;
 			exp_ = exp_ - expNeed_;
 			expNeed_ += expNeed_ * 0.3;
+			game::m_sounds.PlaySoundR("LevelUp");
 			return true;
 		}
 		else
@@ -166,6 +173,7 @@ bool PlayerStatComponent::addExp(double exp)
 				speed_ -= 0.01;
 				exp_ = exp_ - expNeed_;
 				expNeed_ += expNeed_ * 0.3;
+				game::m_sounds.PlaySoundR("LevelUp");
 				return true;
 			}
 		}
