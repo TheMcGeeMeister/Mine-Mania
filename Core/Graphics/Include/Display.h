@@ -65,6 +65,7 @@ public:
 
     Tile& getTileRefAt(Position);
 	Tile& getTileRefAt(int x, int y);
+	bool getTilePAt(Position _in_pos, Tile** _out_tile);
 
 	int getFont();
 	int getFontSize();

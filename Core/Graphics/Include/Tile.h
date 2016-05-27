@@ -69,6 +69,7 @@ class Tile
         void incrementHealth(int amount);
         void claim(int amount, string claimer, WORD color);
         void forceClaim(string claim);
+		void fortify(int amount);
         void hasGold(bool hasGold);
 		void heal(int amount);
         bool mine(int damage, Player&);
@@ -76,6 +77,7 @@ class Tile
 		void updateOverlay(bool enabled, char graphic);
 		void updateOverlayS(bool enabled, char graphic); // Updates Overlay without sending to server
 		void updateServer();
+		void updateFortify();
 
       void serialize(fstream& stream);
 	  void serialize(ofstream& stream);
@@ -92,6 +94,7 @@ class Tile
         int claimedPercentage_;
         int gold_;
 		int objectid_;
+		int fortifyAmount_;
         char graphic_;
 		char overlayGraphic_;
         string claimedBy_;

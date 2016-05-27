@@ -63,6 +63,9 @@ projects/Saves/
 projects/SimpleNet/objectstuffidk/
 projects/SimpleNet/bin/
 projects/ReadMe.txt
+projects/Updater/
+projects/Updater Server/
+projects/Release/
 bin/Game_r.exe
 bin/Game_r.pdb
 *.user

@@ -561,6 +561,12 @@ Tile& Display::getTileRefAt(int x, int y)
 	return m_map[Position(x, y)];
 }
 
+bool Display::getTilePAt(Position _in_pos, Tile ** _out_tile)
+{
+	*_out_tile = &m_map[_in_pos];
+	return true;
+}
+
 int Display::getFont()
 {
 	return font_;

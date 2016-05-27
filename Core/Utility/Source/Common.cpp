@@ -8,6 +8,7 @@
 #include "Display.h"
 #include "PlayerHandler.h"
 #include "SimpleNetClient.h"
+#include "TileEnums.h"
 
 #define EndLine "\n"
 
@@ -121,6 +122,17 @@ namespace Common
 		SendServerLiteral(msg.str());
 	}
 
+	void ResizeWindowUntilFit(int x, int y)
+	{
+		/*pair<int, int> size = GetWindowSize();
+		while (size.first < x && size.second < y)
+		{
+			DWORD fontSize;
+			GetConsoleFontSize(GetStdHandle(STD_OUTPUT_HANDLE), );
+		}*/
+		// TO:DO This
+	}
+
 	inline void DisplayLetterAt(Position pos, std::string g)
 	{
 		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -148,7 +160,9 @@ namespace Common
 		DWORD o;
 		rPos.Y = line;
 		rPos.X = start_x;
+		vector<WORD> attributes(text.length(), C_White);
 		WriteConsoleOutputCharacter(h, text.c_str(), text.length(), rPos, &o);
+		WriteConsoleOutputAttribute(h, &attributes[0], text.length(), rPos, &o);
 	}
 
 	bool ShootFrom(Position pos, int direction)
@@ -228,15 +242,41 @@ namespace Common
 	{
 		return game::game.getMaxHeight();
 	}
-}
-
-
-namespace Network
-{
-	extern void SendCore(Core* core)
+	int GetWindowWidth()
 	{
-		std::stringstream msg;
-		msg << SendDefault << EndLine << EntityAdd << EndLine << ECore << EndLine; core->serialize(msg);
-		SendServerLiteral(msg.str());
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		int columns, rows;
+
+		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+		columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+		return columns;
+	}
+	int GetWindowHeight()
+	{
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		int columns, rows;
+
+		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+		rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+		return rows;
+	}
+
+	bool GetTileAt(Position pos, Tile** _out_tile)
+	{
+		Tile* temp;
+		game::game.getTilePAt(pos, &temp);
+		*_out_tile = temp;
+		return true;
+	}
+	std::pair<int, int> GetWindowSize()
+	{
+		pair<int, int> size;
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		int columns, rows;
+
+		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+		size.first = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+		size.second = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+		return size;
 	}
 }

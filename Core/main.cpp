@@ -113,10 +113,10 @@ bool isExitGame(Display& game)
 		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		game::game.isHidden(true);
 		std::stringstream winnerTxt;
-		winnerTxt << "Player " << game::winnerName << " won the game!\n";
-		//Common::DisplayTextCentered(game::game.getWidth(), game::game.getHeight() / 2, winnerTxt.str());
+		winnerTxt << "Player " << game::winnerName << " won the game!";
+		Common::DisplayTextCentered(game::game.getWidth(), game::game.getHeight() / 2, winnerTxt.str());
+		Common::DisplayTextCentered(game::game.getWidth(), (game::game.getHeight() + 2) / 2, "Press Enter to Continue");
 		Common::SetCursorPosition(0, 0);
-		cout << winnerTxt.str();
 		if (game::pHandler.getLocalPlayer().getName() == game::winnerName)
 		{
 			game::m_sounds.PlaySoundR("Winner");
@@ -128,11 +128,16 @@ bool isExitGame(Display& game)
 		game::game.unloadWorld();
 		
 		/* Exit on Continue*/
-		cout << "Press enter to continue";
-		bool exitFlag = false;
-		while (exitFlag == false)
+		while (true)
 		{
-			exitFlag = isExit();
+			if (_kbhit())
+			{
+				char g = _getch();
+				if (g == VK_RETURN)
+				{
+					return true;
+				}
+			}
 			Sleep(1);
 		}
 
@@ -376,12 +381,14 @@ void connectMenu(thread& sThread, bool& threadStarted)
 			switch (ui.getActivatedSection())
 			{
 			case 2: {
+				setCursorPos(0, 0);
 				ui.isHidden(true); game::server.Initialize(); thread load(loadScreen, 500, "Connecting..."); 
 				if (game::server.Connect(ui.getSectionRef(1).getIVar()) == false)
 				{
 					loadScreen(1500, "Connection Failed...");
-				}
-				setCursorPos(0, 0); load.join();
+					ui.isHidden(false);
+				} 
+				load.join();
 				if (game::server.isConnected() == true)
 				{
 					if (threadStarted == false)
@@ -398,13 +405,14 @@ void connectMenu(thread& sThread, bool& threadStarted)
 					game::lobby.Go();
 					exitFlag = true;
 				}
-				continue; break;}
+				continue;
+			}
 			case 3: exitFlag = true; Sleep(250); break;
 			}
 		}
 		Sleep(10);
 	}
-	ui.isHidden(true);
+	setCursorPos(0, 0);
 	return;
 }
 

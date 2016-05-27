@@ -1,4 +1,5 @@
 #pragma once
+#include <utility>
 #include <string>
 #include <Windows.h>
 #include "Position.h"
@@ -8,6 +9,7 @@ class Turret;
 class Bullet;
 class Player;
 class Core;
+class Tile;
 
 enum COLOR
 {
@@ -32,18 +34,18 @@ namespace Common
 	extern void SetStoneFloorAt(Position pos, WORD color, std::string owner = "NO_OWNER");
 	extern void SetCursorPosition(int x, int y);
 	extern void SendSound(std::string sound_name);
+	extern void ResizeWindowUntilFit(int x, int y);
 	extern inline void DisplayLetterAt(Position pos, std::string letter);
 	extern void DisplayTextCentered(int x, int line, std::string text);
 	extern bool ShootFrom(Position pos, int direction);
 	extern bool ShootFrom(Position pos, int direction, int bullet_range);
+	extern bool GetTileAt(Position _in_pos, Tile** _out_tile);
 	extern bool isConnected();
 	extern int GetBulletDamage(Entity* entity);
 	extern int GetBulletDirection(Entity* entity);
 	extern int GetDisplayMaxWidth();
 	extern int GetDisplayMaxHeight();
-}
-
-namespace Network
-{
-	extern void SendCore(Core* core);
+	extern int GetWindowWidth();
+	extern int GetWindowHeight();
+	extern std::pair<int, int> GetWindowSize();
 }

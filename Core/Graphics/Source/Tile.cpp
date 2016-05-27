@@ -25,6 +25,7 @@ Tile::Tile()
 	background_ = TGB_StoneFloor;
 	gold_ = 0;
 	claimedPercentage_ = 0;
+	fortifyAmount_ = 0;
 	objectid_ = 0;
 	isClaimable_ = true;
 	overlayEnabled_ = false;
@@ -449,6 +450,79 @@ void Tile::forceClaim(string claim)
 	curBeingClaimedBy_ = "None";
 }
 
+void Tile::fortify(int amount)
+{
+	if (isFortified_) return;
+	fortifyAmount_ += amount;
+	fortifyAmount_ = 100;
+	if (fortifyAmount_ > 99)
+	{
+		health.getMaxHealthRef() += 100;
+		health.getHealthRef() += 100;
+		WORD color = C_White;
+		Position cPos = pos_;
+		if (pos_.go(DIRECTION_UP))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color = color | S_Top;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		if (pos_.go(DIRECTION_DOWN))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color = color | S_Bottom;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		if (pos_.go(DIRECTION_LEFT))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color = color | S_Left;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		if (pos_.go(DIRECTION_RIGHT))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color = color | S_Right;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		setColor(color);
+		isFortified_ = true;
+		updateServer();
+	}
+}
+
 void Tile::hasGold(bool hasGold)
 {
 	hasGold_ = hasGold;
@@ -459,7 +533,7 @@ void Tile::heal(int amount)
 	health.heal(amount);
 }
 
-bool Tile::mine(int damage, Player& underlord)
+bool Tile::mine(int damage, Player& player)
 {
 	if (isWall_ == false)
 		return false;
@@ -477,13 +551,14 @@ bool Tile::mine(int damage, Player& underlord)
 		setBackground(TGB_StoneFloor);
 		isWalkable_ = true;
 		isDestructable_ = false;
-		isClaimable_ = true;;
+		isClaimable_ = true;
+		isFortified_ = false;
 		health.setMaxHealth(100);
 		health.setHealth(100);
 
 		if (hasGold_)
 		{
-			underlord.addGold(gold_);
+			player.addGold(gold_);
 			hasGold_ = false;
 			gold_ = 0;
 			game::m_sounds.PlaySoundR("MetalBreak");
@@ -492,7 +567,38 @@ bool Tile::mine(int damage, Player& underlord)
 		{
 			game::m_sounds.PlaySoundR("Break");
 		}
-
+		/* Update Wall Fortifcations Around this block */
+		////////////////////
+		Position cPos = pos_;
+		if (cPos.go(DIRECTION_UP))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			tile->updateFortify();
+			cPos = pos_;
+		}
+		if (cPos.go(DIRECTION_DOWN))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			tile->updateFortify();
+			cPos = pos_;
+		}
+		if (cPos.go(DIRECTION_LEFT))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			tile->updateFortify();
+			cPos = pos_;
+		}
+		if (cPos.go(DIRECTION_RIGHT))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			tile->updateFortify();
+			cPos = pos_;
+		}
+		////////////////////
 		updateTile(pos_);
 		return true;
 	}
@@ -531,6 +637,57 @@ void Tile::updateServer()
 	msg << SendDefault << EndLine << UpdateTile << EndLine;
 	serialize(msg);
 	SendServerLiteral(msg.str());
+}
+
+void Tile::updateFortify()
+{
+	return;
+	/* temp */
+	if (isFortified_ == false) return;
+	WORD color = C_White;
+	Position cPos = pos_;
+	if (pos_.go(DIRECTION_UP))
+	{
+		Tile* tile;
+		Common::GetTileAt(cPos, &tile);
+		if (tile->isFortified() == false)
+		{
+			color = color | S_Top;
+		}
+		cPos = pos_;
+	}
+	if (pos_.go(DIRECTION_DOWN))
+	{
+		Tile* tile;
+		Common::GetTileAt(cPos, &tile);
+		if (tile->isFortified() == false)
+		{
+			color = color | S_Bottom;
+		}
+		cPos = pos_;
+	}
+	if (pos_.go(DIRECTION_LEFT))
+	{
+		Tile* tile;
+		Common::GetTileAt(cPos, &tile);
+		if (tile->isFortified() == false)
+		{
+			color = color | S_Left;
+		}
+		cPos = pos_;
+	}
+	if (pos_.go(DIRECTION_RIGHT))
+	{
+		Tile* tile;
+		Common::GetTileAt(cPos, &tile);
+		if (tile->isFortified() == false)
+		{
+			color = color | S_Right;
+		}
+		cPos = pos_;
+	}
+	setColor(color);
+	updateServer();
 }
 
 void Tile::update()

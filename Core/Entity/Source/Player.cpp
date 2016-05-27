@@ -439,6 +439,10 @@ void Player::mine(DIRECTION direction)
 					tile.heal(1);
 					repair_sound.SetTimer(0.2);
 				}
+				else
+				{
+					//tile.fortify(1);
+				}
 			}
 		}
 
