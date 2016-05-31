@@ -35,7 +35,6 @@ void Lobby::Initialize(bool isHost)
 	if (isHost)
 	{
 		ui.push_back("Start", true, true);
-		//ui.push_back("Load", true, true);
 	}
 
 	ui.getSectionRef(1).setIVar(game::pHandler.getLocalPlayer().getName());
@@ -185,9 +184,6 @@ bool Lobby::Go()
 					}
 				}
 			}
-			/*else if (selected == 4) Load
-			{
-			}*/
 		}
 		if (started_ == true)
 		{

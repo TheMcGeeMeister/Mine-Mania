@@ -44,6 +44,19 @@ namespace Common
 		game::game.cleanOverlays();
 	}
 
+	bool GetPlayerByName(std::string name, Player ** player)
+	{
+		if (game::pHandler.getPlayer(name, player))
+		{
+			return true;
+		}
+		else
+		{
+			*player = nullptr;
+			return false;
+		}
+	}
+
 	void SendBullet(Bullet* bullet)
 	{
 		std::stringstream msg;
@@ -104,7 +117,7 @@ namespace Common
 	{
 		gametiles::stone_floor.setPos(pos);
 		gametiles::stone_floor.forceClaim(owner);
-		gametiles::stone_floor.setBackground(color);
+		gametiles::stone_floor.setClaimColor(color);
 		game::game.getTileRefAt(pos) = gametiles::stone_floor;
 	}
 
@@ -216,6 +229,18 @@ namespace Common
 		return game::server.isConnected();
 	}
 
+	bool isFocused()
+	{
+		HANDLE h = GetActiveWindow();
+		HANDLE focus = GetFocus();
+		if (h != focus)
+		{
+			return false;
+		}
+		else
+			return true;
+	}
+
 	int GetBulletDamage(Entity * entity)
 	{
 		Bullet* bullet = dynamic_cast<Bullet*>(entity);
@@ -261,13 +286,14 @@ namespace Common
 		return rows;
 	}
 
-	bool GetTileAt(Position pos, Tile** _out_tile)
+	bool GetTileAt(Position _in_pos, Tile** _out_tile)
 	{
 		Tile* temp;
-		game::game.getTilePAt(pos, &temp);
+		game::game.getTilePAt(_in_pos, &temp);
 		*_out_tile = temp;
 		return true;
 	}
+
 	std::pair<int, int> GetWindowSize()
 	{
 		pair<int, int> size;

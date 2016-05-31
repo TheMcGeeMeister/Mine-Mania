@@ -13,6 +13,7 @@ namespace game
 {
 	extern SimpleNetClient server;
 	extern SoundManager m_sounds;
+	extern TileChangeManager TileHandler;
 }
 
 extern void updateTile(Position pos);
@@ -22,6 +23,7 @@ Tile::Tile()
 	graphic_ = TG_StoneFloor;
 	overlayGraphic_ = ' ';
 	color_ = TGC_StoneFloor;
+	claimColor_ = B_Black;
 	background_ = TGB_StoneFloor;
 	gold_ = 0;
 	claimedPercentage_ = 0;
@@ -46,6 +48,7 @@ Tile::Tile(Position pos)
 	graphic_ = TG_StoneFloor;
 	overlayGraphic_ = ' ';
 	color_ = TGC_StoneFloor;
+	claimColor_ = B_Black;
 	background_ = TGB_StoneFloor;
 	gold_ = 0;
 	claimedPercentage_ = 0;
@@ -199,6 +202,15 @@ void Tile::setColor(WORD color)
 	if (color_ == color) return;
 	color_ = color;
 	game::TileHandler.push_back(pos_);
+}
+
+void Tile::setClaimColor(WORD color)
+{
+	claimColor_ = color;
+	if (isClaimed_)
+	{
+		background_ = claimColor_;
+	}
 }
 
 void Tile::setIsWall(bool wall)
@@ -414,6 +426,7 @@ void Tile::claim(int amount, string claimer, WORD color)
 					isClaimed_ = true;
 					curBeingClaimedBy_ = "None";
 					background_ = color;
+					claimColor_ = color;
 				}
 			}
 			else
@@ -436,6 +449,7 @@ void Tile::claim(int amount, string claimer, WORD color)
 					isClaimed_ = false;
 					curBeingClaimedBy_ = claimer;
 					background_ = B_Black;
+					claimColor_ = B_Black;
 				}
 		}
 	}
@@ -461,64 +475,85 @@ void Tile::fortify(int amount)
 		health.getHealthRef() += 100;
 		WORD color = C_White;
 		Position cPos = pos_;
-		if (pos_.go(DIRECTION_UP))
-		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			if (tile->isFortified() == false)
-			{
-				color = color | S_Top;
-			}
-			else
-			{
-				tile->updateFortify();
-			}
-			cPos = pos_;
-		}
-		if (pos_.go(DIRECTION_DOWN))
-		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			if (tile->isFortified() == false)
-			{
-				color = color | S_Bottom;
-			}
-			else
-			{
-				tile->updateFortify();
-			}
-			cPos = pos_;
-		}
-		if (pos_.go(DIRECTION_LEFT))
-		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			if (tile->isFortified() == false)
-			{
-				color = color | S_Left;
-			}
-			else
-			{
-				tile->updateFortify();
-			}
-			cPos = pos_;
-		}
-		if (pos_.go(DIRECTION_RIGHT))
-		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			if (tile->isFortified() == false)
-			{
-				color = color | S_Right;
-			}
-			else
-			{
-				tile->updateFortify();
-			}
-			cPos = pos_;
-		}
-		setColor(color);
 		isFortified_ = true;
+		if (cPos.go(DIRECTION_UP))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color |= S_Top;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		else
+		{
+			color |= S_Top;
+			cPos = pos_;
+		}
+		if (cPos.go(DIRECTION_DOWN))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color |= S_Bottom;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		else
+		{
+			color |= S_Bottom;
+			cPos = pos_;
+		}
+		if (cPos.go(DIRECTION_LEFT))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color |= S_Left;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		else
+		{
+			color |= S_Left;
+			cPos = pos_;
+		}
+		if (cPos.go(DIRECTION_RIGHT))
+		{
+			Tile* tile;
+			Common::GetTileAt(cPos, &tile);
+			if (tile->isFortified() == false)
+			{
+				color |= S_Right;
+			}
+			else
+			{
+				tile->updateFortify();
+			}
+			cPos = pos_;
+		}
+		else
+		{
+			color |= S_Right;
+			cPos = pos_;
+		}
+		color_ = color;
+		game::TileHandler.push_back(pos_);
 		updateServer();
 	}
 }
@@ -542,19 +577,27 @@ bool Tile::mine(int damage, Player& player)
 			return false;
 
 	health.getHealthRef() -= damage;
+	health.damage(damage);
 
-	if (health.getHealth() <= 0)
+	if (health.isDead())
 	{
+		health.isDead(false);
+		health.setMaxHealth(100);
+		health.setHealth(100);
 		isWall_ = false;
-		setGraphic(TG_StoneFloor);
-		setColor(TGC_StoneFloor);
-		setBackground(TGB_StoneFloor);
+		graphic_ = TG_StoneFloor;
+		color_ = TGC_StoneFloor;
+		if (isClaimed_ == false)
+		{
+			setBackground(TGB_StoneFloor);
+		}
+		else
+		{
+			background_ = claimColor_;
+		}
 		isWalkable_ = true;
 		isDestructable_ = false;
 		isClaimable_ = true;
-		isFortified_ = false;
-		health.setMaxHealth(100);
-		health.setHealth(100);
 
 		if (hasGold_)
 		{
@@ -569,37 +612,42 @@ bool Tile::mine(int damage, Player& player)
 		}
 		/* Update Wall Fortifcations Around this block */
 		////////////////////
-		Position cPos = pos_;
-		if (cPos.go(DIRECTION_UP))
+		if (isFortified())
 		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			tile->updateFortify();
-			cPos = pos_;
-		}
-		if (cPos.go(DIRECTION_DOWN))
-		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			tile->updateFortify();
-			cPos = pos_;
-		}
-		if (cPos.go(DIRECTION_LEFT))
-		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			tile->updateFortify();
-			cPos = pos_;
-		}
-		if (cPos.go(DIRECTION_RIGHT))
-		{
-			Tile* tile;
-			Common::GetTileAt(cPos, &tile);
-			tile->updateFortify();
-			cPos = pos_;
+			isFortified_ = false;
+			Position cPos = pos_;
+			if (cPos.go(DIRECTION_UP))
+			{
+				Tile* tile;
+				Common::GetTileAt(cPos, &tile);
+				tile->updateFortify();
+				cPos = pos_;
+			}
+			if (cPos.go(DIRECTION_DOWN))
+			{
+				Tile* tile;
+				Common::GetTileAt(cPos, &tile);
+				tile->updateFortify();
+				cPos = pos_;
+			}
+			if (cPos.go(DIRECTION_LEFT))
+			{
+				Tile* tile;
+				Common::GetTileAt(cPos, &tile);
+				tile->updateFortify();
+				cPos = pos_;
+			}
+			if (cPos.go(DIRECTION_RIGHT))
+			{
+				Tile* tile;
+				Common::GetTileAt(cPos, &tile);
+				tile->updateFortify();
+				cPos = pos_;
+			}
 		}
 		////////////////////
 		updateTile(pos_);
+		game::TileHandler.push_back(pos_);
 		return true;
 	}
 	else if (health.getHealthRef() > health.getMaxHealthRef())
@@ -641,52 +689,72 @@ void Tile::updateServer()
 
 void Tile::updateFortify()
 {
-	return;
-	/* temp */
 	if (isFortified_ == false) return;
+
 	WORD color = C_White;
 	Position cPos = pos_;
-	if (pos_.go(DIRECTION_UP))
+	if (cPos.go(DIRECTION_UP))
 	{
 		Tile* tile;
 		Common::GetTileAt(cPos, &tile);
 		if (tile->isFortified() == false)
 		{
-			color = color | S_Top;
+			color |= S_Top;
 		}
 		cPos = pos_;
 	}
-	if (pos_.go(DIRECTION_DOWN))
+	else
+	{
+		color |= S_Top;
+		cPos = pos_;
+	}
+	if (cPos.go(DIRECTION_DOWN))
 	{
 		Tile* tile;
 		Common::GetTileAt(cPos, &tile);
 		if (tile->isFortified() == false)
 		{
-			color = color | S_Bottom;
+			color |= S_Bottom;
 		}
 		cPos = pos_;
 	}
-	if (pos_.go(DIRECTION_LEFT))
+	else
+	{
+		color |= S_Bottom;
+		cPos = pos_;
+	}
+	if (cPos.go(DIRECTION_LEFT))
 	{
 		Tile* tile;
 		Common::GetTileAt(cPos, &tile);
 		if (tile->isFortified() == false)
 		{
-			color = color | S_Left;
+			color |= S_Left;
 		}
 		cPos = pos_;
 	}
-	if (pos_.go(DIRECTION_RIGHT))
+	else
+	{
+		color |= S_Left;
+		cPos = pos_;
+	}
+	if (cPos.go(DIRECTION_RIGHT))
 	{
 		Tile* tile;
 		Common::GetTileAt(cPos, &tile);
 		if (tile->isFortified() == false)
 		{
-			color = color | S_Right;
+			color |= S_Right;
 		}
 		cPos = pos_;
 	}
-	setColor(color);
+	else
+	{
+		color |= S_Right;
+		cPos = pos_;
+	}
+	color_ = color;
+	game::TileHandler.push_back(pos_);
 	updateServer();
 }
 
@@ -709,6 +777,7 @@ void Tile::serialize(fstream& stream)
 	 << claimedBy_ << endl
 	 << curBeingClaimedBy_ << endl
 	 << color_ << endl
+	 << claimColor_ << endl
 	 << background_ << endl
 	 << isClaimable_ << endl
 	 << isWalkable_ << endl
@@ -736,6 +805,7 @@ void Tile::serialize(ofstream& stream)
 		<< claimedBy_ << endl
 		<< curBeingClaimedBy_ << endl
 		<< color_ << endl
+		<< claimColor_ << endl
 		<< background_ << endl
 		<< isClaimable_ << endl
 		<< isWalkable_ << endl
@@ -763,6 +833,7 @@ void Tile::serialize(stringstream& stream)
 		<< claimedBy_ << endl
 		<< curBeingClaimedBy_ << endl
 		<< color_ << endl
+		<< claimColor_ << endl
 		<< background_ << endl
 		<< isClaimable_ << endl
 		<< isWalkable_ << endl
@@ -791,6 +862,7 @@ void Tile::deserialize(stringstream& stream)
 	 >> claimedBy_
 	 >> curBeingClaimedBy_
 	 >> color_
+	 >> claimColor_
 	 >> background_
 	 >> isClaimable_
 	 >> isWalkable_
@@ -823,6 +895,7 @@ void Tile::deserialize(fstream& stream)
 		>> claimedBy_
 		>> curBeingClaimedBy_
 		>> color_
+		>> claimColor_
 		>> background_
 		>> isClaimable_
 		>> isWalkable_
@@ -855,6 +928,7 @@ void Tile::deserialize(ifstream& stream)
 		>> claimedBy_
 		>> curBeingClaimedBy_
 		>> color_
+		>> claimColor_
 		>> background_
 		>> isClaimable_
 		>> isWalkable_

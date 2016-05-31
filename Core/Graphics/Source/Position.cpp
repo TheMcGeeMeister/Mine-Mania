@@ -11,14 +11,14 @@ Position::Position()
 {
 	x_ = 1;
 	y_ = 1;
-    isValid_=true;
+    isValid_ = true;
 }
 
 Position::Position(int _x, int _y)
 {
     x_=_x;
     y_=_y;
-    isValid_=true;
+    isValid_ = true;
     return;
 }
 
@@ -29,17 +29,17 @@ Position::~Position()
 
 void Position::setX(int _x)
 {
-    x_=_x;
+    x_ = _x;
 }
 
 void Position::setY(int _y)
 {
-    y_=_y;
+    y_ = _y;
 }
 
 void Position::isValid(bool isValid)
 {
-    isValid_=isValid;
+    isValid_ = isValid;
 }
 
 int Position::getX() const
@@ -106,6 +106,7 @@ void Position::down()
 	y_++;
 	if (y_ == Common::GetDisplayMaxHeight())
 	{
+		y_--;
 		isValid_ = false;
 	}
 	else
@@ -130,6 +131,7 @@ void Position::right()
 	x_++;
 	if (x_ == Common::GetDisplayMaxWidth())
 	{
+		x_--;
 		isValid_ = false;
 	}
 	else
@@ -152,12 +154,13 @@ bool Position::go(DIRECTION direction)
 
 bool Position::go(DIRECTION direction, int amount)
 {
-	switch(direction)
+	for (int x = 0; x < amount; x++)
 	{
-	case DIRECTION_UP:y_ -= amount; if (y_ < 0) y_ = 0; break;
-	case DIRECTION_DOWN:y_ += amount; break;
-	case DIRECTION_LEFT:x_ -= amount; if (x_ < 0) x_ = 0;  break;
-	case DIRECTION_RIGHT:x_ += amount; break;
+		go(direction);
+		if (isValid_ == false)
+		{
+			return false;
+		}
 	}
 	return isValid_;
 }

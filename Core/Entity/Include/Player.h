@@ -34,6 +34,7 @@ class Player : public Entity
 		int getMaxLevel();
 		int getExp();
 		int getMaxExp();
+		int getID();
         string getName();
 		Position getSpawnPos();
 		UserInterface& getUIRef();
@@ -65,6 +66,7 @@ class Player : public Entity
 		void setHandPosNoUpdate(Position pos);
 		void setHealth(int amount);
 		void setMaxHealth(int amount);
+		void setID(int id);
 		//////////////////////////////////
 
 		/* Stats*/
@@ -156,6 +158,7 @@ class Player : public Entity
 		int mineProgress_;
 		int ammo_;
 		int passiveGoldIncrease_;
+		int id_;
 		double baseDamage_;
 
 		WORD claimedColor_;
@@ -173,9 +176,9 @@ class Player : public Entity
 		bool isLocal_;
 		bool isGoldPassive_;
 
-		Position handPos;
-		Position mineUIPos;
-		Position spawnPos;
+		Position pos_;
+		Position mineUIPos_;
+		Position spawnPos_;
 
         string name_;
 
@@ -193,5 +196,5 @@ class Player : public Entity
 
 namespace Common
 {
-	extern Player CreatePlayer(Position pos, std::string name, WORD claim_color, bool isLocal = false);
+	extern Player CreatePlayer(Position pos, std::string name, WORD claim_color, int id, bool isLocal = false);
 }

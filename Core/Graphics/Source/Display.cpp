@@ -35,8 +35,8 @@ Display::Display()
 	borderWidth_ = 0;
 	offset_x_ = 0;
 	offset_y_ = 0;
-	int font = 0;
-	int fontSize = 28;
+	font_ = 0;
+	fontSize_ = 28;
 	saveSuffix_ = "0";
 }
 
@@ -77,27 +77,27 @@ void Display::updatePos(Position pos_)
 {
 	if (!m_map.count(pos_))
 		return;
-    Position CurrentPosition;
-    CurrentPosition=pos_;
-    const char graphic=m_map[CurrentPosition].getGraphic();
-    WORD color=m_map[CurrentPosition].getColor();
-    if(m_map[CurrentPosition].getBackground()!=0)
+
+    const char graphic = m_map[pos_].getGraphic();
+	WORD attribute = m_map[pos_].getColor();
+
+    if(m_map[pos_].getBackground()!=0)
     {
-        color=color | m_map[CurrentPosition].getBackground();
+        attribute |= m_map[pos_].getBackground();
     }
+
 	if (isSelected_.count(pos_))
 	{
 		if (isSelected_[pos_] == true)
 		{
-			color = S_Box | C_White;
+			attribute = S_Box | C_White;
 		}
 	}
-    pos.X=CurrentPosition.getX();
-    pos.Y=CurrentPosition.getY();
-    //ReadConsoleOutputCharacter(h, &readConsole_, nlength, pos, &output);
-    //if (readConsole_ == graphic) return;
+
+    pos.X=pos_.getX();
+    pos.Y=pos_.getY();
     WriteConsoleOutputCharacter(h, &graphic, nlength, pos, &output);
-    WriteConsoleOutputAttribute(h, &color, nlength , pos, &output);
+    WriteConsoleOutputAttribute(h, &attribute, nlength , pos, &output);
 }
 
 void Display::reloadAll()
@@ -355,7 +355,7 @@ bool Display::isHidden()
 
 bool Display::isValidPosition(Position pos, bool isPlayer)
 {
-	if (pos.getX() <=offset_x_+borderWidth_ - 1)
+	if (pos.getX() <= offset_x_ + borderWidth_ - 1)
 		return false;
 	if (pos.getX() >= offset_x_ + size_x_ + (borderWidth_ * 2))
 		return false;
@@ -1173,7 +1173,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 
 	/* Local */
 	////////////////////
-	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], (WORD)B_Blue, true), pAmount, 0);
+	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], (WORD)B_Blue, 0, true), pAmount, 0);
 	Common::CreatePlayerCore(names[0], Position(0, 0));
 	Common::SetStoneFloorAt(Position(0,1), (WORD)B_Blue, names[0]);
 	game::GameHandler.AddPlayer(names[0]);
@@ -1182,7 +1182,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 
 	for (int x = 1; x < pAmount; x++)
 	{
-		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x], p_c[x]), pAmount, x);
+		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x], p_c[x], x), pAmount, x);
 		Common::SetStoneFloorAt(p_pos[x], p_c[x], names[x]);
 		Common::CreatePlayerCore(names[x], p_cpos[x]);
 		game::GameHandler.AddPlayer(names[x]);

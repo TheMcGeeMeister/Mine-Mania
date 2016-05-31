@@ -34,10 +34,11 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	ammo_ = 0;
 	baseDamage_ = 15.0;
 	passiveGoldIncrease_ = 0;
+	id_ = 0;
 	isGoldPassive_ = false;
 	claimedColor_ = B_Blue;
-	handPos(0, 0);
-	spawnPos(0, 0);
+	pos_(0, 0);
+	spawnPos_(0, 0);
     name_= "None";
 	moved_ = true;
 	mined_ = false;
@@ -54,8 +55,8 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	UI.getSectionRef(2).push_backVar(" ");
 	UI.getSectionRef(3).push_backVar(" ");
 	UI.isHidden(true);
-	mineUIPos.setX(0);
-	mineUIPos.setY(0);
+	mineUIPos_.setX(0);
+	mineUIPos_.setY(0);
 }
 
 Player::Player(Player & p)
@@ -133,6 +134,11 @@ int Player::getMaxExp()
 	return stats.getMaxExp();
 }
 
+int Player::getID()
+{
+	return id_;
+}
+
 string Player::getName()
 {
     return name_;
@@ -140,7 +146,7 @@ string Player::getName()
 
 Position Player::getSpawnPos()
 {
-	return spawnPos;
+	return spawnPos_;
 }
 
 UserInterface & Player::getUIRef()
@@ -194,17 +200,17 @@ void Player::setName(string name)
 
 void Player::setSpawnPos(Position pos)
 {
-	spawnPos = pos;
+	spawnPos_ = pos;
 }
 
 void Player::setHandPos(Position pos)
 {
-	handPos = pos;
+	pos_ = pos;
 }
 
 void Player::setHandPosNoUpdate(Position pos)
 {
-	handPos = pos;
+	pos_ = pos;
 }
 
 void Player::setHealth(int amount)
@@ -215,6 +221,11 @@ void Player::setHealth(int amount)
 void Player::setMaxHealth(int amount)
 {
 	health.setMaxHealth(amount);
+}
+
+void Player::setID(int id)
+{
+	id_ = id;
 }
 
 bool Player::damage(int amount, string name, bool server)
@@ -266,8 +277,9 @@ void Player::healS(int amount)
 void Player::moveHand(DIRECTION direction)
 {
 	if (movementTimer_.Update() == false) return;
-	Position newPos = handPos;
+	Position newPos = pos_; // The position that the player is moving to
 	newPos.go(direction);
+
 	/* Collision Checking */
 	///////////////////////////////////
 	if (game::game.isValidPosition(newPos, true) == false)
@@ -289,9 +301,10 @@ void Player::moveHand(DIRECTION direction)
 		return;
 	}
 	///////////////////////////////////
-	game::game.removeSelectedAtTile(handPos);
+
+	game::game.removeSelectedAtTile(pos_);
 	game::game.setTileAsSelected(newPos);
-	handPos = newPos;
+	pos_ = newPos;
 	moved_ = true;
 	mined_ = false;
 	std::stringstream msg;
@@ -354,7 +367,7 @@ void Player::mine(DIRECTION direction)
 	if (mineTimer_.Update() == false) return;
 	if (handMode_ == MODE_MINING)
 	{
-		Position newPos = handPos;
+		Position newPos = pos_;
 		newPos.go(direction);
 		if (game::system.entityAt(newPos))
 		{
@@ -389,7 +402,7 @@ void Player::mine(DIRECTION direction)
 			}
 			else
 				return;
-			mineUIPos = newPos;
+			mineUIPos_ = newPos;
 			mined_ = true;
 			moved_ = false;
 			if (game::game.getTileRefAt(newPos).isWall() == true)
@@ -406,7 +419,7 @@ void Player::mine(DIRECTION direction)
 			moved_ = false;
 			mineProgress_ = 0;
 		}
-		Position newPos = handPos;
+		Position newPos = pos_;
 		newPos.go(direction);
 		Entity* entity;
 		if(game::system.getEntityAt(newPos, &entity) == true)
@@ -441,7 +454,7 @@ void Player::mine(DIRECTION direction)
 				}
 				else
 				{
-					//tile.fortify(1);
+					tile.fortify(1);
 				}
 			}
 		}
@@ -453,7 +466,7 @@ void Player::mine(DIRECTION direction)
 		{
 			if (shootTimer_.Update() == true)
 			{
-				if (Common::ShootFrom(handPos, direction, 50))
+				if (Common::ShootFrom(pos_, direction, 50))
 				{
 					shootTimer_.StartNewTimer(0.35);
 					game::m_sounds.PlaySoundR("TurretShoot");
@@ -471,24 +484,24 @@ void Player::mine(DIRECTION direction)
 
 void Player::forceHandPosition(Position newPos, Display& game)
 {
-	game.removeSelectedAtTile(handPos);
-	handPos = newPos;
+	game.removeSelectedAtTile(pos_);
+	pos_ = newPos;
 	game.setTileAsSelected(newPos);
 }
 
 void Player::forceHandPosition(Position newPos)
 {
-	game::game.removeSelectedAtTile(handPos);
-	handPos = newPos;
+	game::game.removeSelectedAtTile(pos_);
+	pos_ = newPos;
 	game::game.setTileAsSelected(newPos);
 
 }
 
 void Player::claimOnHand()
 {
-	if (game::game.isClaimedTileNear(handPos, name_))
+	if (game::game.isClaimedTileNear(pos_, name_))
 	{
-		game::game.getTileRefAt(handPos).claim(10, name_, claimedColor_);
+		game::game.getTileRefAt(pos_).claim(10, name_, claimedColor_);
 	}
 }
 
@@ -526,7 +539,7 @@ void Player::switchModeTo(int mode)
 
 void Player::updateHandPos()
 {
-	game::game.setTileAsSelectedS(handPos);
+	game::game.setTileAsSelectedS(pos_);
 }
 
 void Player::disableMovementFor(int time)
@@ -536,8 +549,8 @@ void Player::disableMovementFor(int time)
 
 void Player::knockbackTo(DIRECTION direction, int amount)
 {
-	Position pPos = handPos; // Previous position
-	Position cPos = handPos;
+	Position pPos = pos_; // Previous position
+	Position cPos = pos_;
 	std::stringstream msg;
 	msg << SendDefault << EndLine << PlayerUpdate << EndLine << Knockback << EndLine << name_ << EndLine << 1.5 << EndLine;
 	for (int x = 0; x < amount; x++)
@@ -582,17 +595,17 @@ void Player::knockbackTo(DIRECTION direction, int amount)
 
 Position Player::getHandPosition()
 {
-	return handPos;
+	return pos_;
 }
 ////////////////////////////////////////////////
 void Player::purchaseTurret()
 {
 	if (goldAmount_ >= 1000)
 	{
-		if (game::system.entityAt(handPos) == false && game::game.getTileRefAt(handPos).isClaimedBy(name_))
+		if (game::system.entityAt(pos_) == false && game::game.getTileRefAt(pos_).isClaimedBy(name_))
 		{
 			shared_ptr<Turret> turret = make_shared<Turret>();
-			turret->setPosition(handPos);
+			turret->setPosition(pos_);
 			turret->setGraphic('+');
 			turret->setRange(8);
 			turret->setOwner(name_);
@@ -616,7 +629,7 @@ void Player::purchaseBullet()
 void Player::updatePosition()
 {
 	std::stringstream msg;
-	msg << SendDefault << EndLine << UpdatePlayerPosition << EndLine << name_ << EndLine << handPos.serializeR();
+	msg << SendDefault << EndLine << UpdatePlayerPosition << EndLine << name_ << EndLine << pos_.serializeR();
 	SendServerLiteral(msg.str());
 }
 
@@ -662,7 +675,7 @@ void Player::updateMiningUI()
 		{
 			UI.isHidden(false);
 		}
-		Tile& tile = game::game.getTileRefAt(mineUIPos);
+		Tile& tile = game::game.getTileRefAt(mineUIPos_);
 
 		health << tile.getHealth() << "/" << tile.getMaxHealth();
 		UI.getSectionRef(2).setVar(1, health.str());
@@ -733,26 +746,7 @@ void Player::serialize(fstream& stream)
 {
 	using namespace game;
 	stream << LOAD::L_Player << endl
-		 << goldAmount_ << endl
-		 << maxGoldAmount_ << endl
-		 << manaAmount_ << endl
-		 << maxManaAmount_ << endl
-		 << ammo_ << endl
-		 << name_ << endl
-	     << passiveGoldIncrease_ << endl
-		 << isGoldPassive_ << endl
-		 << (int)claimedColor_ << endl
-		 << handPos.getX() << endl
-		 << handPos.getY() << endl
-		 << spawnPos.getX() << endl
-		 << spawnPos.getY() << endl;
-	health.serialize(stream);
-	stats.serialize(stream);
-}
-
-void Player::serialize(stringstream & file)
-{
-	file << LOAD::L_Player << endl
+		<< id_ << endl
 		<< goldAmount_ << endl
 		<< maxGoldAmount_ << endl
 		<< manaAmount_ << endl
@@ -762,12 +756,33 @@ void Player::serialize(stringstream & file)
 		<< passiveGoldIncrease_ << endl
 		<< isGoldPassive_ << endl
 		<< (int)claimedColor_ << endl
-		<< handPos.getX() << endl
-		<< handPos.getY() << endl
-		<< spawnPos.getX() << endl
-		<< spawnPos.getY() << endl;
-	health.serialize(file);
-	stats.serialize(file);
+		<< pos_.getX() << endl
+		<< pos_.getY() << endl
+		<< spawnPos_.getX() << endl
+		<< spawnPos_.getY() << endl;
+	health.serialize(stream);
+	stats.serialize(stream);
+}
+
+void Player::serialize(stringstream & stream)
+{
+	stream << LOAD::L_Player << endl
+		<< id_ << endl
+		<< goldAmount_ << endl
+		<< maxGoldAmount_ << endl
+		<< manaAmount_ << endl
+		<< maxManaAmount_ << endl
+		<< ammo_ << endl
+		<< name_ << endl
+		<< passiveGoldIncrease_ << endl
+		<< isGoldPassive_ << endl
+		<< (int)claimedColor_ << endl
+		<< pos_.getX() << endl
+		<< pos_.getY() << endl
+		<< spawnPos_.getX() << endl
+		<< spawnPos_.getY() << endl;
+	health.serialize(stream);
+	stats.serialize(stream);
 }
 
 void Player::deserialize(fstream& stream)
@@ -777,7 +792,8 @@ void Player::deserialize(fstream& stream)
 	int spos_x;
 	int spos_y;
 	int claimedColor;
-	stream >> goldAmount_
+	stream >> id_
+		>> goldAmount_
 		>> maxGoldAmount_
 		>> manaAmount_
 		>> maxManaAmount_
@@ -790,23 +806,24 @@ void Player::deserialize(fstream& stream)
 		>> pos_y
 		>> spos_x
 		>> spos_y;
-	handPos.setX(pos_x);
-	handPos.setY(pos_y);
-	spawnPos.setX(spos_x);
-	spawnPos.setY(spos_y);
+	pos_.setX(pos_x);
+	pos_.setY(pos_y);
+	spawnPos_.setX(spos_x);
+	spawnPos_.setY(spos_y);
 	health.deserialize(stream);
 	stats.deserialize(stream);
 	claimedColor_ = claimedColor;
 }
 
-void Player::deserialize(stringstream& file)
+void Player::deserialize(stringstream& stream)
 {
 	int pos_x;
 	int pos_y;
 	int spos_x;
 	int spos_y;
 	int claimedColor;
-	file >> goldAmount_
+	stream >> id_
+		>> goldAmount_
 		>> maxGoldAmount_
 		>> manaAmount_
 		>> maxManaAmount_
@@ -819,12 +836,12 @@ void Player::deserialize(stringstream& file)
 		>> pos_y
 		>> spos_x
 		>> spos_y;
-	handPos.setX(pos_x);
-	handPos.setY(pos_y);
-	spawnPos.setX(spos_x);
-	spawnPos.setY(spos_y);
-	health.deserialize(file);
-	stats.deserialize(file);
+	pos_.setX(pos_x);
+	pos_.setY(pos_y);
+	spawnPos_.setX(spos_x);
+	spawnPos_.setY(spos_y);
+	health.deserialize(stream);
+	stats.deserialize(stream);
 	claimedColor_ = claimedColor;
 }
 
@@ -876,7 +893,7 @@ bool Player::isKilled()
 
 void Player::kill()
 {
-	forceHandPosition(spawnPos, game::game);
+	forceHandPosition(spawnPos_, game::game);
 	health.reset();
 	stats = PlayerStatComponent();
 
@@ -889,7 +906,7 @@ void Player::killS()
 {
 	health.reset();
 	stats = PlayerStatComponent();
-	forceHandPosition(spawnPos, game::game);
+	forceHandPosition(spawnPos_, game::game);
 }
 
 void Player::Log(std::string txt)
@@ -901,7 +918,7 @@ void Player::Log(std::string txt)
 
 void Player::clean()
 {
-	game::game.removeSelectedAtTile(handPos);
+	game::game.removeSelectedAtTile(pos_);
 }
 
 void Player::setPos(Position pos)
@@ -926,7 +943,7 @@ void Player::send()
 
 void Player::render()
 {
-	return;
+	game::game.setTileAsSelected(pos_);
 }
 
 void Player::activate(Player* player)
@@ -936,7 +953,7 @@ void Player::activate(Player* player)
 
 Position Player::getPos()
 {
-	return handPos;
+	return pos_;
 }
 
 ////////////////////////////////////////////////
@@ -967,13 +984,14 @@ Player CreatePlayerAndSendAt(Position pos, std::string name, list<int> toSend) /
 	return NewPlayer;
 }
 
-Player Common::CreatePlayer(Position pos, std::string name, WORD claim_color, bool isLocal)
+Player Common::CreatePlayer(Position pos, std::string name, WORD claim_color, int id, bool isLocal)
 {
 	Player NewPlayer;
 	NewPlayer.setHandPosNoUpdate(pos);
 	NewPlayer.setSpawnPos(pos);
 	NewPlayer.setName(name);
 	NewPlayer.setClaimedColor(claim_color);
+	NewPlayer.setID(id);
 	if (isLocal)
 	{
 		Common::AddLocalPlayer(&NewPlayer);

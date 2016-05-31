@@ -39,9 +39,11 @@ class Tile
         WORD getColor() const;
         WORD getBackground() const;
         WORD getAttribute() const;
+		WORD getRenderColor() const;
         Position getPos() const;
 
         void setColor(WORD color);
+		void setClaimColor(WORD color);
         void setBackground(WORD background);
         void setGraphic(char graphic);
         void setGoldAmount(int amount);
@@ -101,6 +103,7 @@ class Tile
         string curBeingClaimedBy_;
         WORD color_;
         WORD background_;
+		WORD claimColor_;
         bool isClaimable_;
         bool isWalkable_;
         bool isDestructable_;

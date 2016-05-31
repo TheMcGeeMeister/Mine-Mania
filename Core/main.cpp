@@ -54,6 +54,7 @@ namespace game
 	bool threadExit;
 	bool lobbyStart = false;
 	bool gameWon = false;
+	bool isEscapedPressed_ = false;
 	std::atomic<bool> exitFromDisconnect = false;
 	int curFont;
 	void Log(string txt)
@@ -61,8 +62,19 @@ namespace game
 		fstream file("Logs\\Log.txt", ios::app);
 		file << txt << endl;
 	}
-
 	int CoreDestroyedAmount = 0;
+	bool isEscapedPressed()
+	{
+		if (isEscapedPressed_)
+		{
+			isEscapedPressed_ = false;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 namespace gametiles
@@ -114,8 +126,8 @@ bool isExitGame(Display& game)
 		game::game.isHidden(true);
 		std::stringstream winnerTxt;
 		winnerTxt << "Player " << game::winnerName << " won the game!";
-		Common::DisplayTextCentered(game::game.getWidth(), game::game.getHeight() / 2, winnerTxt.str());
-		Common::DisplayTextCentered(game::game.getWidth(), (game::game.getHeight() + 2) / 2, "Press Enter to Continue");
+		Common::DisplayTextCentered(Common::GetWindowWidth(), Common::GetWindowHeight() / 2, winnerTxt.str());
+		Common::DisplayTextCentered(Common::GetWindowWidth(), (Common::GetWindowHeight() + 2) / 2, "Press Enter to Continue");
 		Common::SetCursorPosition(0, 0);
 		if (game::pHandler.getLocalPlayer().getName() == game::winnerName)
 		{
@@ -125,6 +137,7 @@ bool isExitGame(Display& game)
 		{
 			game::m_sounds.PlaySoundR("Loser");
 		}
+		game::server.Disconnect();
 		game::game.unloadWorld();
 		
 		/* Exit on Continue*/
@@ -145,7 +158,7 @@ bool isExitGame(Display& game)
 		return true;
 	}
 	///////////////////////////////////////////
-	if (GetAsyncKeyState(VK_ESCAPE))
+	if (game::isEscapedPressed())
 	{
 		bool exit = false;
 		game::ServerUI.isHidden(true);
@@ -303,6 +316,7 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				case '2':player.switchModeTo(1); break;
 				case '3':player.switchModeTo(2); break;
 				case 'j':game::system.cleanAndUpdateOverlays(); break;
+				case VK_ESCAPE: game::isEscapedPressed_ = true;
 				default: break;
 				}
 			}
@@ -748,7 +762,21 @@ bool pauseGameMenu(Display& game)
 	UserInterface ui(30, 5, 0, 0, 1);
 	ui.drawBorder();
 	ui.push_back("Continue", true, true);
-	ui.push_back("Save", true, true);
+	if (game::server.isConnected())
+	{
+		if (game::server.isHost())
+		{
+			ui.push_back("Save", true, true);
+		}
+		else
+		{
+			ui.push_back("Save(Host Only)", false, true);
+		}
+	}
+	else
+	{
+		ui.push_back("Save", true, true);
+	}
 	ui.push_back("Exit", true, true);
 	bool exitFlag = false;
 	while (exitFlag == false)
@@ -759,7 +787,32 @@ bool pauseGameMenu(Display& game)
 			switch (ui.getActivatedSection())
 			{
 			case 1: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return false;
-			case 2: {ui.isHidden(true); thread load(loadScreen, 500, "Saving..."); /*game::server.SyncPlayers();*/ game.saveWorld(); load.join(); ui.isHidden(false); break; }
+			case 2:
+				if (game::server.isConnected())
+				{
+					if (game::server.isHost())
+					{
+						ui.isHidden(true);
+						thread load(loadScreen, 500, "Saving...");
+						game::server.SyncPlayers();
+						game.saveWorld();
+						load.join();
+						ui.isHidden(false);
+						break;
+					}
+					else
+						break;
+				}
+				else
+				{
+					ui.isHidden(true);
+					thread load(loadScreen, 500, "Saving...");
+					game::server.SyncPlayers();
+					game.saveWorld();
+					load.join();
+					ui.isHidden(false);
+					break;
+				}
 			case 3: game.reloadAll(); FlushConsoleInputBuffer(GetStdHandle(STD_OUTPUT_HANDLE)); return true;
 			}
 		}

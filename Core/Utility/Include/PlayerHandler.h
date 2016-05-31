@@ -10,6 +10,8 @@ public:
 
 	void updateAllPositions();
 
+	void setLocalID(int id);
+
 	void addPlayer(Player& player);
 	void addPlayerDeserialize(std::fstream& file);
 	void addPlayerDeserialize(std::stringstream& file);
@@ -22,6 +24,7 @@ public:
 	bool getPlayerAt(Position pos, Player** player);
 
 	bool getPlayer(std::string name, Player** player);
+	bool getPlayerByID(int id, Player** player);
 
 	Player& getLocalPlayer();
 
@@ -29,6 +32,7 @@ public:
 	void serializeAll(std::stringstream& file);
 	void serializeAll(std::fstream& file);
 private:
-	map <std::string, Player> m_players;
+	map <int, Player> m_players;
+	int local;
 };
 

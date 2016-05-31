@@ -315,11 +315,15 @@ void SimpleNetClient::Do(std::string rMsg)
 		////////////////////////////////////////////
 		else if (name == UpdatePlayer)
 		{
-			std::string pName;
-			msg >> pName;
+			int player_id;
+			msg >> player_id;
 			Player* player;
-			if(game::pHandler.getPlayer(pName, &player))
+			std::string pName;
+			if(game::pHandler.getPlayerByID(player_id, &player))
 			{
+				pName = player->getName();
+				int null;
+				msg >> null;
 				player->deserialize(msg);
 			}
 			else
@@ -342,7 +346,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			if (game::pHandler.getPlayer(name, &player) == true)
 			{
 				Position pos(x, y);
-				player->forceHandPosition(pos, game::game);
+				player->forceHandPosition(pos);
 			}
 			else
 				Log("UpdatePlayerPosition Failed - " + name + "\n");
@@ -382,7 +386,6 @@ void SimpleNetClient::Do(std::string rMsg)
 			std::string null;
 			msg >> null;
 			player.deserialize(msg);
-			player.updateHandPos();
 			game::pHandler.addPlayer(player);
 			Log("Player Added - " + player.getName() + "\n");
 		}
@@ -392,7 +395,6 @@ void SimpleNetClient::Do(std::string rMsg)
 			std::string null;
 			msg >> null;
 			player.deserialize(msg);
-			player.updateHandPos();
 			game::pHandler.addLocalPlayer(player);
 			Log("Local Player Added - " + player.getName() + "\n");
 		}
@@ -548,7 +550,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			else if (name == PSync)
 			{
 				std::stringstream msg;
-				msg << SendDefault << EndLine << UpdatePlayer << EndLine << game::pHandler.getLocalPlayer().getName() << EndLine;
+				msg << SendDefault << EndLine << UpdatePlayer << EndLine << game::pHandler.getLocalPlayer().getID() << EndLine;
 				game::pHandler.getLocalPlayer().serialize(msg);
 				SendLiteral(msg.str());
 			}
@@ -575,6 +577,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			msg >> id_;
 			isHost_ = true;
 			isHostChosen_ = true;
+			game::pHandler.setLocalID(id_);
 			//Log("SetHost\n");
 		}
 		else if (name == SetPlayer)
@@ -582,6 +585,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			msg >> id_;
 			isHost_ = false;
 			isHostChosen_ = true;
+			game::pHandler.setLocalID(id_);
 			//Log("SetPlayer\n");
 		}
 		else if (name == WaitingPlayer)
