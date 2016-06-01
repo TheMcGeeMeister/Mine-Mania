@@ -236,7 +236,7 @@ void LogTry(std::string rmsg)
 		//	Player *player;
 		//	if (game::pHandler.getPlayer(player_name, &player))
 		//	{
-		//		player->getHealthRef().setHealth(health);
+		//		player->getHealthComponentRef().setHealth(health);
 		//	}
 		//
 		SimpleNet::Log("UpdatePlayer\n");

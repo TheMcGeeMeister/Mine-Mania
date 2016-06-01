@@ -7,7 +7,7 @@
 
 enum PacketNames
 {
-	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
+	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, SendPlayer, SendHost, SendDefault,
 
 	UpdatePlayerPosition, 
 	
@@ -25,6 +25,8 @@ enum PacketNames
 	Knockback,
 	Health,
 	Kill,
+	Exp,
+	Stats,
 	PSync,
 	///////////////////
 	EntityDamage, EntityKill, EntityUpdatePosition,

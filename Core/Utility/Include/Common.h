@@ -33,6 +33,8 @@ namespace Common
 	extern void SendPlayer(Player* player, int playerAmount, int player_);
 	extern void SetStoneFloorAt(Position pos, WORD color, std::string owner = "NO_OWNER");
 	extern void SetCursorPosition(int x, int y);
+	extern void SetFontSize(int fontSize);
+	extern void SetFont(int font);
 	extern void SendSound(std::string sound_name);
 	extern void ResizeWindowUntilFit(int x, int y);
 	extern inline void DisplayLetterAt(Position pos, std::string letter);
@@ -43,8 +45,8 @@ namespace Common
 	extern bool GetTileAt(Position _in_pos, Tile** _out_tile);
 	extern bool isConnected();
 	extern bool isFocused();
-	extern int GetBulletDamage(Entity* entity);
-	extern int GetBulletDirection(Entity* entity);
+	extern int GetBulletDamageFromEntity(Entity* entity);
+	extern int GetBulletDirectionFromEntity(Entity* entity);
 	extern int GetDisplayMaxWidth();
 	extern int GetDisplayMaxHeight();
 	extern int GetWindowWidth();

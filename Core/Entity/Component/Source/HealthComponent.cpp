@@ -126,7 +126,9 @@ void HealthComponent::forceHealth(double amount)
 
 void HealthComponent::reset()
 {
-	health_ = maxHealth_;
+	maxHealth_ = 100;
+	health_ = 100;
+	healthRegen_ = 1;
 	isDead_ = false;
 }
 

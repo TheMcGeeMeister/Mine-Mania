@@ -23,6 +23,8 @@ public:
 
 	void setLevel(int level);
 	void setLevelWithScale(int level);
+	void setExp(int exp);
+	void setMaxExp(int exp);
 	void setMaxLevel(int maxLevel);
 	void setStamina(int stamina);
 	void setMaxStamina(int stamina);

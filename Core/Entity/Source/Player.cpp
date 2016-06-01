@@ -9,6 +9,7 @@
 #include "TileEnums.h"
 #include "Common.h"
 #include "LoadParser.h"
+#include "Message.h"
 
 namespace game
 {
@@ -154,9 +155,14 @@ UserInterface & Player::getUIRef()
 	return UI;
 }
 
-HealthComponent & Player::getHealthRef()
+HealthComponent & Player::getHealthComponentRef()
 {
 	return health;
+}
+
+PlayerStatComponent& Player::getStatComponentRef()
+{
+	return stats;
 }
 
 WORD Player::getClaimedColor()
@@ -228,31 +234,49 @@ void Player::setID(int id)
 	id_ = id;
 }
 
-bool Player::damage(int amount, string name, bool server)
+bool Player::damage(int amount, string name, bool isServer)
 {
-	health.damage(amount);
-
-
-	std::stringstream slide;
-	slide << name_ << " -" << amount << " Health";
-	game::SlideUI.addSlide(slide.str());
-
-	if (health.isDead() == true)
+	if (isServer == false)
 	{
-		game::SlideUI.addSlide(name_ + " Died");
-		kill();
+		health.damage(amount);
+
+
+		std::stringstream slide;
+		slide << name_ << " -" << amount << " Health";
+		game::SlideUI.addSlide(slide.str());
+
+		if (health.isDead() == true)
+		{
+			game::SlideUI.addSlide(name_ + " Died");
+			kill();
+			return true;
+		}
+		else
+		{
+			stringstream msg;
+			msg << SendDefault << EndLine
+				<< PlayerUpdate << EndLine
+				<< Health << EndLine
+				<< id_ << EndLine
+				<< health.getHealth() << EndLine;
+			SendServerLiteral(msg.str());
+		}
 	}
 	else
 	{
-		stringstream msg;
-		msg << SendDefault << EndLine
-			<< PlayerUpdate << EndLine
-			<< Health << EndLine
-			<< name_ << EndLine
-			<< health.getHealth() << EndLine;
-		SendServerLiteral(msg.str());
+		health.damage(amount);
+
+		std::stringstream slide;
+		slide << name_ << " -" << amount << " Health";
+		game::SlideUI.addSlide(slide.str());
+
+		if (health.isDead())
+		{
+			killS();
+			return true;
+		}
 	}
-	return true;
+	return false;
 }
 
 void Player::damageS(int amount)
@@ -289,9 +313,9 @@ void Player::moveHand(DIRECTION direction)
 	{
 		if (entity->hasKeyWord(KEYWORD_BULLET))
 		{
-			damage(Common::GetBulletDamage(entity));
+			damage(Common::GetBulletDamageFromEntity(entity));
 			forceHandPosition(newPos);
-			knockbackTo((DIRECTION)Common::GetBulletDirection(entity), 1);
+			knockbackTo((DIRECTION)Common::GetBulletDirectionFromEntity(entity), 1);
 			entity->kill();
 			game::m_sounds.PlaySoundR("Bullet");
 			std::stringstream msg;
@@ -396,6 +420,21 @@ void Player::mine(DIRECTION direction)
 						std::stringstream lvlmsg;
 						lvlmsg << "You Leveled Up! Level:" << stats.getLevel();
 						game::SlideUI.addSlide(lvlmsg.str());
+
+						/////////* Sync *//////////
+						Message msg(true);
+						msg << PlayerUpdate << Stats << id_;
+						stats.serialize(msg.get());
+						msg.Send();
+						/////////* Sync *//////////
+					}
+					else
+					{
+						/////////* Sync *//////////
+						Message msg(true);
+						msg << PlayerUpdate << Exp << id_ << stats.getExp();
+						msg.Send();
+						/////////* Sync *//////////
 					}
 					mine_sound.StopSound();
 				}
@@ -855,13 +894,25 @@ void Player::update()
 		msg << SendDefault << EndLine
 			<< PlayerUpdate << EndLine
 			<< Health << EndLine
-			<< name_ << EndLine
+			<< id_ << EndLine
 			<< health.getHealth() << EndLine;
 		SendServerLiteral(msg.str());
 	}
 	if (expCooldown_.Update() == true)
 	{
-		stats.addExp(1);
+		if (stats.addExp(1) == false)
+		{
+			Message msg(true);
+			msg << PlayerUpdate << Exp << id_ << stats.getExp();
+			msg.Send();
+		}
+		else
+		{
+			Message msg(true);
+			msg << PlayerUpdate << Stats << id_;
+			stats.serialize(msg.get());
+			msg.Send();
+		}
 		expCooldown_.StartNewTimer(1);
 	}
 	if (isGoldPassive_ == true)
@@ -898,7 +949,7 @@ void Player::kill()
 	stats = PlayerStatComponent();
 
 	stringstream msg;
-	msg << SendDefault << EndLine << PlayerUpdate << EndLine << Kill << EndLine << name_ << EndLine;
+	msg << SendDefault << EndLine << PlayerUpdate << EndLine << Kill << EndLine << id_ << EndLine;
 	SendServerLiteral(msg.str());
 }
 

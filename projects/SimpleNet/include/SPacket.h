@@ -4,7 +4,7 @@
 
 enum SPacketNames
 {
-	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, Message, SendPlayer, SendHost, SendDefault,
+	None, Sound, MultiPackets, SetHost, SetPlayer, GetWorld, World, SetTile, SetSelected, RemoveSelected, SendPlayer, SendHost, SendDefault,
 
 	UpdatePlayerPosition, UpdateTile,
 
@@ -15,6 +15,8 @@ enum SPacketNames
 	Knockback,
 	Health,
 	Kill,
+	Exp,
+	Stats,
 	PSync,
 	///////////////////
 	EntityDamage, EntityKill, EntityUpdatePosition,

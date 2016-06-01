@@ -6,6 +6,7 @@
 #include "Common.h"
 #include "Display.h"
 #include "Entity.h"
+#include "Message.h"
 
 namespace game
 {
@@ -48,20 +49,18 @@ bool Lobby::Go()
 	DrawList();
 	if (isHost_ == false)
 	{
-		std::stringstream msg;
-		msg << SendDefault << EndLine
-			<< PacketNames::Lobby << EndLine
-			<< LobbyGetInfo << EndLine
-			<< game::server.getId() << EndLine;
-		game::server.SendLiteral(msg.str());
-		msg.str(string());
-		msg << SendDefault << EndLine
-			<< PacketNames::Lobby << EndLine
-			<< LobbyAdd << EndLine
-			<< game::pHandler.getLocalPlayer().getName() << EndLine
-			<< false << EndLine
-			<< game::server.getId() << EndLine;
-		game::server.SendLiteral(msg.str());
+		Message msg(true);
+		msg << PacketNames::Lobby
+			<< LobbyGetInfo
+			<< game::server.getId();
+		msg.SendAndReset();
+		msg << SendDefault
+			<< PacketNames::Lobby
+			<< LobbyAdd
+			<< game::pHandler.getLocalPlayer().getName()
+			<< false
+			<< game::server.getId();
+		msg.Send();
 	}
 	Sleep(250);
 	bool exitFlag = false;

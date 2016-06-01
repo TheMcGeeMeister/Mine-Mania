@@ -128,6 +128,56 @@ namespace Common
 		SetConsoleCursorPosition(h, pos);
 	}
 
+	void SetFontSize(int fontSize)
+	{
+		int font = game::game.getFont();
+		if (fontSize < 5 || fontSize > 72)
+			fontSize = 28;
+		if (font == 0)
+		{
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = fontSize; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), NULL, &info);
+		}
+		else
+		{
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = fontSize; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Consolas");
+			SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), NULL, &info);
+		}
+		game::game.setFontSize(fontSize);
+	}
+
+	void SetFont(int font)
+	{
+		int fontSize = game::game.getFontSize();
+		if (font == 0)
+		{
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = fontSize; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Lucida Console");
+			SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), NULL, &info);
+		}
+		else
+		{
+			CONSOLE_FONT_INFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.dwFontSize.Y = fontSize; // leave X as zero
+			info.FontWeight = FW_NORMAL;
+			wcscpy(info.FaceName, L"Consolas");
+			SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), NULL, &info);
+		}
+		game::game.setFont(font);
+	}
+
 	void SendSound(std::string sound_name)
 	{
 		std::stringstream msg;
@@ -137,13 +187,13 @@ namespace Common
 
 	void ResizeWindowUntilFit(int x, int y)
 	{
-		/*pair<int, int> size = GetWindowSize();
+		int fontSize = game::game.getFontSize();
+		pair<int, int> size = GetWindowSize();
 		while (size.first < x && size.second < y)
 		{
-			DWORD fontSize;
-			GetConsoleFontSize(GetStdHandle(STD_OUTPUT_HANDLE), );
-		}*/
-		// TO:DO This
+			fontSize--;
+			SetFontSize(fontSize);
+		}
 	}
 
 	inline void DisplayLetterAt(Position pos, std::string g)
@@ -182,20 +232,21 @@ namespace Common
 	{
 		Position nPos = pos;
 
-		nPos.go((DIRECTION)direction);
-
-		if (game::game.getTileRefAt(nPos).isWalkable() == true)
+		if (nPos.go((DIRECTION)direction))
 		{
-			if (game::system.entityAt(nPos) == false)
+			if (game::game.getTileRefAt(nPos).isWalkable() == true)
 			{
-				shared_ptr<Bullet> bullet = make_shared<Bullet>();
-				bullet->setDirection((DIRECTION)direction);
-				bullet->setPosition(nPos);
-				bullet->setGraphic(250);
-				bullet->addKeyWord(KEYWORD_BULLET);
+				if (game::system.entityAt(nPos) == false)
+				{
+					shared_ptr<Bullet> bullet = make_shared<Bullet>();
+					bullet->setDirection((DIRECTION)direction);
+					bullet->setPosition(nPos);
+					bullet->setGraphic(250);
+					bullet->addKeyWord(KEYWORD_BULLET);
 
-				game::system.addEntity(bullet, "Bullet");
-				return true;
+					game::system.addEntity(bullet, "Bullet");
+					return true;
+				}
 			}
 		}
 		return false;
@@ -205,20 +256,21 @@ namespace Common
 	{
 		Position nPos = pos;
 
-		nPos.go((DIRECTION)direction);
-
-		if (game::game.getTileRefAt(nPos).isWall() == false)
+		if (nPos.go((DIRECTION)direction))
 		{
-			if (game::system.entityAt(nPos) == false)
+			if (game::game.getTileRefAt(nPos).isWall() == false)
 			{
-				shared_ptr<Bullet> bullet = make_shared<Bullet>();
-				bullet->setDirection((DIRECTION)direction);
-				bullet->setPositionNoUpdate(nPos);
-				bullet->setGraphicNoUpdate(250);
-				bullet->setBulletRange(bullet_range);
+				if (game::system.entityAt(nPos) == false)
+				{
+					shared_ptr<Bullet> bullet = make_shared<Bullet>();
+					bullet->setDirection((DIRECTION)direction);
+					bullet->setPositionNoUpdate(nPos);
+					bullet->setGraphicNoUpdate(250);
+					bullet->setBulletRange(bullet_range);
 
-				game::system.addEntity(bullet, "Bullet");
-				return true;
+					game::system.addEntity(bullet, "Bullet");
+					return true;
+				}
 			}
 		}
 		return false;
@@ -241,7 +293,7 @@ namespace Common
 			return true;
 	}
 
-	int GetBulletDamage(Entity * entity)
+	int GetBulletDamageFromEntity(Entity * entity)
 	{
 		Bullet* bullet = dynamic_cast<Bullet*>(entity);
 		if (bullet == nullptr)
@@ -250,7 +302,7 @@ namespace Common
 		}
 		return bullet->getDamage();
 	}
-	int GetBulletDirection(Entity * entity)
+	int GetBulletDirectionFromEntity(Entity * entity)
 	{
 		Bullet* bullet = dynamic_cast<Bullet*>(entity);
 		if (bullet == nullptr)

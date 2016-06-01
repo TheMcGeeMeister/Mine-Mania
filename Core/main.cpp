@@ -938,7 +938,6 @@ void gameLoop()
 
 void preGameLoop()
 {
-	game::game.loadSettings();
 
 	game::m_sounds.SetVolume((double)game::game.getVolume() / 100);
 
@@ -1139,11 +1138,11 @@ int main()
 	initializeStdTiles();
 	initializeMenus();
 
-	setFullsreen();
-
 	game::m_sounds.Initialize();
 
 	loadSounds();
+
+	game::game.loadSettings();
 
 	preGameLoop();
 

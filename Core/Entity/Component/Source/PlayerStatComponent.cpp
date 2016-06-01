@@ -202,6 +202,16 @@ void PlayerStatComponent::setLevelWithScale(int level)
 	}
 }
 
+void PlayerStatComponent::setExp(int exp)
+{
+	exp_ = exp;
+}
+
+void PlayerStatComponent::setMaxExp(int exp)
+{
+	expNeed_ = exp;
+}
+
 void PlayerStatComponent::setMaxLevel(int maxLevel)
 {
 	maxLevel_ = maxLevel;

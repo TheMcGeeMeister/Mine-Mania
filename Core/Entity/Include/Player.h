@@ -38,7 +38,8 @@ class Player : public Entity
         string getName();
 		Position getSpawnPos();
 		UserInterface& getUIRef();
-		HealthComponent& getHealthRef();
+		HealthComponent& getHealthComponentRef();
+		PlayerStatComponent& getStatComponentRef();
 		//////////////////////////////////
 
 		/* Colors */
@@ -135,7 +136,7 @@ class Player : public Entity
 		virtual bool isKilled();
 		virtual void kill();
 		virtual void clean();
-		virtual bool damage(int damage, string name = "", bool server=false);
+		virtual bool damage(int damage, string name = "", bool isServer=false);
 		virtual void setPos(Position pos); // Calls forceHandPosition(Position)
 		virtual void updateOverlay();
 		virtual void updateID(); // Not used for player

@@ -194,6 +194,7 @@ void SimpleNetClient::Disconnect()
 	if (isConnected_ == false) return;
 	isConnected_ = false;
 	isExit_ = true;
+	shutdown(SimpleNet::ConnectSocket, 0);
 	closesocket(SimpleNet::ConnectSocket);
 	game::ServerUI.getSectionRef(1).setVar(1, "False");
 }
@@ -527,25 +528,58 @@ void SimpleNetClient::Do(std::string rMsg)
 			}
 			else if (name == Health)
 			{
-				std::string name;
-				msg >> name;
+				int id;
+				msg >> id;
 				int health;
 				msg >> health;
 				Player* player;
-				if (game::pHandler.getPlayer(name, &player))
+				if (game::pHandler.getPlayerByID(id, &player))
 				{
 					player->setHealth(health);
 				}
 			}
 			else if (name == Kill)
 			{
-				std::string name;
-				msg >> name;
+				int id;
+				msg >> id;
 				Player* player;
-				if (game::pHandler.getPlayer(name, &player))
+				if (game::pHandler.getPlayerByID(id, &player))
 				{
 					player->killS();
 				}
+			}
+			else if (name == Exp)
+			{
+				int id;
+				int exp;
+				msg >> id;
+				msg >> exp;
+				Player* player;
+				if (game::pHandler.getPlayerByID(id, &player))
+				{
+					PlayerStatComponent& stats = player->getStatComponentRef();
+					stats.setExp(exp);
+				}
+				else
+				{
+					Log("Error PlayerUpdateExp - Cannot Find Player: " + std::string() = id + "\n");
+				}
+			}
+			else if (name == Stats)
+			{
+				int id;
+				msg >> id;
+				Player* player;
+				if (game::pHandler.getPlayerByID(id, &player))
+				{
+					PlayerStatComponent& stats = player->getStatComponentRef();
+					stats.deserialize(msg);
+				}
+				else
+				{
+					Log("Error PlayerUpdateExp - Cannot Find Player: " + std::string() = id + "\n");
+				}
+				Log("Stats Updated\n");
 			}
 			else if (name == PSync)
 			{
