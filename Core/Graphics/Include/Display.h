@@ -27,7 +27,7 @@ public:
 	void setFontSize(int fontSize);
 	void setVolume(int volume);
 	void isHidden(bool hidden);
-	void isFullScreen(bool is);
+	void isFullscreen(bool is);
 
     bool isTileNear(Tile& Seek, Position pos);
     bool isWalkableTileNear(Position pos);
@@ -36,7 +36,7 @@ public:
 	bool isHidden();
 	bool isValidPosition(Position pos, bool player);
 	bool isValidPosition(Position pos);
-	bool isFullScreen();
+	bool isFullscreen();
 	bool isLoadedMultiplayer();
 
 	void updateTileServer(Position pos);

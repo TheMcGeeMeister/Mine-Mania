@@ -84,6 +84,11 @@ bool HealthComponent::isDead() const
 	return isDead_;
 }
 
+bool HealthComponent::isFull() const
+{
+	return health_ == maxHealth_;
+}
+
 double & HealthComponent::getHealthRef()
 {
 	return health_;

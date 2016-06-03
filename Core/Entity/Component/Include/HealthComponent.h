@@ -22,6 +22,7 @@ public:
 	double getHealthRegen() const;
 	bool isRegenEnabled() const;
 	bool isDead() const;
+	bool isFull() const;
 
 	double& getHealthRef();
 	double& getMaxHealthRef();

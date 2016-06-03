@@ -433,7 +433,6 @@ void connectMenu(thread& sThread, bool& threadStarted)
 bool loadMenu(Display& game)
 {
 	clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
-	Sleep(500);
 	UserInterface menu(30, 9, 0, 0, 1);
 	int worldAmount = game.getSaveAmount();
 	bool exitFlag = false;
@@ -514,7 +513,6 @@ bool loadMenu(Display& game)
 				filename << "Saves\\" << "World" << "0" << menu.getActivatedSection() << ".dat";
 				game.loadWorld(filename.str());
 				exitFlag = true;
-				Sleep(250);
 				return true;
 			}
 			else
@@ -523,14 +521,12 @@ bool loadMenu(Display& game)
 				filename << "Saves\\" << "World" << menu.getActivatedSection() << ".dat";
 				game.loadWorld(filename.str());
 				exitFlag = true;
-				Sleep(250);
 				return true;
  			}
 		}
 		Sleep(10);
 	}
 	menu.isHidden(true);
-	Sleep(250);
 	return false;
 }
 
@@ -636,7 +632,7 @@ void settingsMenu()
 
 	bool exitFlag = false;
 	
-	bool isFullScreen = game::game.isFullScreen();
+	bool isFullscreen = game::game.isFullscreen();
 	int font = game::game.getFont();
 	int fontSize = game::game.getFontSize();
 	int volume = game::game.getVolume();
@@ -648,7 +644,7 @@ void settingsMenu()
 	menu.getSectionRef(1).setIVar(txt.str());
 	menu.getSectionRef(2).setVar(1, fontTxt);
 
-	if (isFullScreen) { menu.getSectionRef(3).setVar(1, "True"); }
+	if (isFullscreen) { menu.getSectionRef(3).setVar(1, "True"); }
 	else { menu.getSectionRef(3).setVar(1, "False"); }
 	
 	while (exitFlag == false)
@@ -666,8 +662,8 @@ void settingsMenu()
 				else { fontTxt = "Consolas"; font = 0; setFontInfo(fontSize, font); }
 				menu.getSectionRef(2).setVar(1, fontTxt); break;
 			case 3:
-				if (isFullScreen) { isFullScreen = false; menu.getSectionRef(3).setVar(1, "False"); swapConsoleFullScreen(); }
-				else { isFullScreen = true; menu.getSectionRef(3).setVar(1, "True"); setFullsreen(); menu.reDrawAll(); }
+				if (isFullscreen) { isFullscreen = false; menu.getSectionRef(3).setVar(1, "False"); swapConsoleFullScreen(); }
+				else { isFullscreen = true; menu.getSectionRef(3).setVar(1, "True"); setFullsreen(); menu.reDrawAll(); }
 				break;
 			case 4:
 				game::pHandler.getLocalPlayer().setName(menu.getSectionRef(4).getIVar());
@@ -689,6 +685,7 @@ void settingsMenu()
 	game::game.setFont(font);
 	game::game.setFontSize(fontSize);
 	game::game.setVolume(volume);
+	game::game.isFullscreen(isFullscreen);
 	Sleep(250);
 }
 
@@ -838,8 +835,8 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 	menu.addSection("Multiplayer", true, true);
     menu.addSection("Exit", true, true);
     menu.update();
-    bool exitFlag=false;
-    while(exitFlag==false)
+    bool exitFlag = false;
+    while(exitFlag == false)
     {
         if(menu.isSectionActivated())
         {
@@ -873,8 +870,8 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 					{
 						return false;
 					}
-				}
-				else{
+				}else
+				{
 					menu.isHidden(false);
 					menu.reDrawAll();
 				}
@@ -893,7 +890,8 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 				return true; break;
             }
         }
-        menu.update();
+
+		menu.update();
 		Sleep(10);
     }
     return false;
@@ -938,33 +936,19 @@ void gameLoop()
 
 void preGameLoop()
 {
-
 	game::m_sounds.SetVolume((double)game::game.getVolume() / 100);
 
     Timer InputCoolDown;
     Position newPos(1,1);
 
 	thread sThread;
-
-    Tile core;
-    core.setGraphic('C');
-    core.setColor(TC_Gray);
-    core.setBackground(B_Black);
-    core.isWall(false);
-    core.isWalkable(false);
-    core.isDestructable(true);
-    core.isClaimable(false);
-    core.setMaxHealth(2500);
-    core.setHealth(2500);
-    core.forceClaim(game::pHandler.getLocalPlayer().getName());
-
-    Display& game=game::game;
 	
-    game.setSizeX(75);
-    game.setSizeY(30);
+    game::game.setSizeX(75);
+    game::game.setSizeY(30);
 
     setCursorPos(0,20);
-    game.update();
+    game::game.update();
+
     bool exitFlag=false;
 	bool threadStarted = false;
 
@@ -974,19 +958,19 @@ void preGameLoop()
 
 	while (exitFlag == false)
 	{
-		exitFlag = pauseMenu(game, sThread, threadStarted);
+		exitFlag = pauseMenu(game::game, sThread, threadStarted);
 
 		if (exitFlag == true)
 			continue;
 
-		game.reloadAll();
+		game::game.reloadAll();
 
 		clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 
-		if (game.isLoaded() == false)
-			gameNotLoadedMenu(game);
+		if (game::game.isLoaded() == false)
+			gameNotLoadedMenu(game::game);
 
-		if (game.isLoaded() == false)
+		if (game::game.isLoaded() == false)
 			continue;
 
 		game::tileUI.isHidden(false);
@@ -998,21 +982,15 @@ void preGameLoop()
 			threadStarted = true;
 		}
 
-		if (game::server.isPaused())
-		{
-			game::server.Continue();
-		}
-
 		Player& player = game::pHandler.getLocalPlayer();
 
 		gameLoop();
 
 		game::m_sounds.PlaySoundR("Menu");
 
-		game::server.Pause();
 		clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
-		Sleep(250);
 	}
+
 	if (threadStarted)
 	{
 		game::server.isExit(true);
@@ -1021,6 +999,7 @@ void preGameLoop()
 		Sleep(20);
 		sThread.join();
 	}
+
 	loadScreen(500, "Exiting...");
 	return;
 }
@@ -1149,6 +1128,11 @@ int main()
 	game::game.saveSettings();
 
 	setCursorPos(0, 0);
+
+	if (game::server.isConnected())
+	{
+		game::server.Disconnect();
+	}
 
 	//release the engine
 	m_sound::g_engine->Release();

@@ -890,13 +890,12 @@ void Player::update()
 	health.update();
 	if (health.getHealth() != pHealth)
 	{
-		std::stringstream msg;
-		msg << SendDefault << EndLine
-			<< PlayerUpdate << EndLine
-			<< Health << EndLine
-			<< id_ << EndLine
-			<< health.getHealth() << EndLine;
-		SendServerLiteral(msg.str());
+		Message msg(true);
+		msg << PlayerUpdate
+			<< Health
+			<< id_
+			<< health.getHealth();
+		msg.Send();
 	}
 	if (expCooldown_.Update() == true)
 	{
@@ -905,8 +904,7 @@ void Player::update()
 			Message msg(true);
 			msg << PlayerUpdate << Exp << id_ << stats.getExp();
 			msg.Send();
-		}
-		else
+		}else
 		{
 			Message msg(true);
 			msg << PlayerUpdate << Stats << id_;

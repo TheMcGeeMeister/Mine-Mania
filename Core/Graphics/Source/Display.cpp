@@ -63,6 +63,7 @@ void Display::update()
 	{
 		iter.second.update();
 	}
+
     if(reloadAll_)
     {
         for(auto &iter : m_map)
@@ -189,7 +190,7 @@ void Display::isHidden(bool hidden)
 	}
 }
 
-void Display::isFullScreen(bool is)
+void Display::isFullscreen(bool is)
 {
 	isFullscreen_ = is;
 }
@@ -389,7 +390,7 @@ bool Display::isValidPosition(Position pos)
 	return true;
 }
 
-bool Display::isFullScreen()
+bool Display::isFullscreen()
 {
 	return isFullscreen_;
 }
@@ -1315,18 +1316,18 @@ bool Display::loadSettings()
 	}
 	else
 	{
-		string none;
-		file >> none;
-		file >> none;
-		file >> font_;
-		file >> none;
-		file >> fontSize_;
-		file >> none;
-		file >> isFullscreen_;
-		file >> none;
-		file >> localPlayerName_;
-		file >> none;
-		file >> volume_;
+		string skip;
+		file >> skip
+		 >> skip
+		 >> font_
+		 >> skip
+		 >> fontSize_
+		 >> skip
+		 >> isFullscreen_
+		 >> skip
+		 >> localPlayerName_
+		 >> skip
+		 >> volume_;
 		setFontInfo(fontSize_, font_);
 		game::pHandler.getLocalPlayer().setName(localPlayerName_);
 		game::pHandler.addLocalPlayer(game::pHandler.getLocalPlayer());
@@ -1336,6 +1337,12 @@ bool Display::loadSettings()
 			DWORD flags = CONSOLE_FULLSCREEN_MODE;
 			COORD pos;
 			SetConsoleDisplayMode(h, flags, &pos);
+		}
+		else
+		{
+			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+			DWORD flags = CONSOLE_WINDOWED_MODE;
+			//SetConsoleDisplayMode(h, flags, &pos); Resets window size??
 		}
 		return true;
 	}

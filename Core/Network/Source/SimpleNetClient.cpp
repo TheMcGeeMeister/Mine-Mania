@@ -64,6 +64,7 @@ SimpleNetClient::~SimpleNetClient()
 {
 	if (isConnected_)
 	{
+		shutdown(SimpleNet::ConnectSocket, 2);
 		closesocket(SimpleNet::ConnectSocket);
 	}
 }
@@ -193,9 +194,9 @@ void SimpleNetClient::Disconnect()
 {
 	if (isConnected_ == false) return;
 	isConnected_ = false;
-	isExit_ = true;
-	shutdown(SimpleNet::ConnectSocket, 0);
+	shutdown(SimpleNet::ConnectSocket, 2);
 	closesocket(SimpleNet::ConnectSocket);
+	isExit_ = true;
 	game::ServerUI.getSectionRef(1).setVar(1, "False");
 }
 
@@ -236,6 +237,9 @@ void SimpleNetClient::Loop()
 
 		msg.str(string());
 	}
+
+	shutdown(SimpleNet::ConnectSocket, 2);
+	closesocket(SimpleNet::ConnectSocket);
 
 	isExit_ = false;
 }
@@ -732,7 +736,7 @@ void SimpleNetClient::Close()
 {
 	if (isConnected_ == true)
 	{
-		shutdown(SimpleNet::ConnectSocket, SD_SEND);
+		shutdown(SimpleNet::ConnectSocket, 2);
 		closesocket(SimpleNet::ConnectSocket);
 		isConnected_ = false;
 	}
