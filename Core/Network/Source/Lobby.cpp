@@ -16,7 +16,7 @@ namespace game
 	extern System system;
 }
 
-Lobby::Lobby() : ui(30, 10, 0, 0, 1)
+Lobby::Lobby() : UI(30, 10, 0, 0, 1)
 {
 	started_ = false;
 	isReady_ = false;
@@ -31,57 +31,59 @@ Lobby::~Lobby()
 void Lobby::Initialize(bool isHost)
 {
 	isHost_ = isHost;
-	ui.push_isection("Name:");
-	ui.push_back("Ready Up", true, true);
+	UI.push_isection("Name:");
+	UI.push_back("Ready Up", true, true);
 	if (isHost)
 	{
-		ui.push_back("Start", true, true);
+		UI.push_back("Start", true, true);
 	}
 
-	ui.getSectionRef(1).setIVar(game::pHandler.getLocalPlayer().getName());
+	UI.getSectionRef(1).setIVar(game::pHandler.getLocalPlayer().getName());
 
-	m_players_t[game::server.getId()].first = game::pHandler.getLocalPlayer().getName();
-	m_players_t[game::server.getId()].second = false;
+	m_players[game::server.getId()].first = game::pHandler.getLocalPlayer().getName();
+	m_players[game::server.getId()].second = false;
 }
 
 bool Lobby::Go()
 {
+	UI.isHidden(false);
 	DrawList();
 	if (isHost_ == false)
 	{
-		Message msg(true);
-		msg << PacketNames::Lobby
-			<< LobbyGetInfo
+		std::stringstream msg;
+		msg << SendDefault << EndLine
+			<< PacketNames::Lobby << EndLine
+			<< LobbyGetInfo << EndLine
 			<< game::server.getId();
-		msg.SendAndReset();
-		msg << SendDefault
-			<< PacketNames::Lobby
-			<< LobbyAdd
-			<< game::pHandler.getLocalPlayer().getName()
-			<< false
+		SendServerLiteral(msg.str());
+		msg.str(string());
+		msg << SendDefault << EndLine
+			<< PacketNames::Lobby << EndLine
+			<< LobbyAdd << EndLine
+			<< game::pHandler.getLocalPlayer().getName() << EndLine
+			<< false << EndLine
 			<< game::server.getId();
-		msg.Send();
+		SendServerLiteral(msg.str());
 	}
-	Sleep(250);
+
 	bool exitFlag = false;
-	ui.isHidden(false);
 	while (exitFlag == false)
 	{
-		ui.update();
-		if (ui.isSectionActivated())
+		UI.update();
+		if (UI.isSectionActivated())
 		{
-			int selected = ui.getActivatedSection();
+			int selected = UI.getActivatedSection();
 			if (selected == 1)
 			{
-				PlayerChangeName(game::server.getId(), ui.getSectionRef(1).getIVar());
+				PlayerChangeName(game::server.getId(), UI.getSectionRef(1).getIVar());
 				std::stringstream msg;
 				msg << SendDefault << EndLine
 					<< PacketNames::Lobby << EndLine
 					<< LobbyName << EndLine
-					<< ui.getSectionRef(1).getIVar() << EndLine
+					<< UI.getSectionRef(1).getIVar() << EndLine
 					<< game::server.getId() << EndLine;
 				game::server.SendLiteral(msg.str());
-				game::pHandler.getLocalPlayer().setName(ui.getSectionRef(1).getIVar());
+				game::pHandler.getLocalPlayer().setName(UI.getSectionRef(1).getIVar());
 				DrawList();
 			}
 			else if (selected == 2)
@@ -94,9 +96,9 @@ bool Lobby::Go()
 						<< LobbyUnReady << EndLine
 						<< game::server.getId() << EndLine;
 					game::server.SendLiteral(msg.str());
-					ui.getSectionRef(2).setText("Ready Up");
+					UI.getSectionRef(2).setText("Ready Up");
 					isReady_ = false;
-					m_players_t[game::server.getId()].second = false;
+					m_players[game::server.getId()].second = false;
 				}
 				else
 				{
@@ -105,27 +107,27 @@ bool Lobby::Go()
 						<< LobbyReady << EndLine
 						<< game::server.getId() << EndLine;
 					game::server.SendLiteral(msg.str());
-					ui.getSectionRef(2).setText("UnReady");
+					UI.getSectionRef(2).setText("UnReady");
 					isReady_ = true;
-					m_players_t[game::server.getId()].second = true;
+					m_players[game::server.getId()].second = true;
 				}
 				DrawList();
 			}
 			else if (selected == 3)
 			{
 				bool isStartReady = true;
-				for (auto& iter : m_players_t)
+				for (auto& iter : m_players)
 				{
 					if (iter.second.second == false)
 					{
 						isStartReady = false;
 					}
-				}
+				} // Check if all players are ready
 				if (isStartReady)
 				{
 					std::string names[4];
 					int x = 0;
-					for (auto& iter : m_players_t)
+					for (auto& iter : m_players)
 					{
 						names[x] = iter.second.first;
 						x++;
@@ -149,7 +151,7 @@ bool Lobby::Go()
 						std::string local = game::pHandler.getLocalPlayer().getName();
 						Common::SendPlayer(player, player_amount, 0);
 						std::fstream stream("Logs\\Log.txt");
-						for (auto& iter : m_players_t)
+						for (auto& iter : m_players)
 						{
 							stream << "LOOKING FOR:" << iter.second.first << "\n";
 							if (iter.second.first == local) continue;
@@ -196,8 +198,8 @@ bool Lobby::Go()
 void Lobby::AddPlayer(int id, std::string name, bool isReady)
 {
 	player_amount++;
-	m_players_t[id].first = name;
-	m_players_t[id].second = isReady;
+	m_players[id].first = name;
+	m_players[id].second = isReady;
 	DrawList();
 }
 
@@ -209,36 +211,36 @@ void Lobby::RemovePlayer(std::string name)
 
 void Lobby::PlayerChangeName(int id, std::string nName)
 {
-	if (m_players_t.count(id))
+	if (m_players.count(id))
 	{
-		m_players_t[id].first = nName;
+		m_players[id].first = nName;
 	}
 	DrawList();
 }
 
 void Lobby::PlayerSetName(int id, std::string name)
 {
-	if (m_players_t.count(id))
+	if (m_players.count(id))
 	{
-		m_players_t[id].first = name;
+		m_players[id].first = name;
 	}
 	DrawList();
 }
 
 void Lobby::PlayerReady(int id)
 {
-	if (m_players_t.count(id))
+	if (m_players.count(id))
 	{
-		m_players_t[id].second = true;
+		m_players[id].second = true;
 	}
 	DrawList();
 }
 
 void Lobby::PlayerUnReady(int id)
 {
-	if (m_players_t.count(id))
+	if (m_players.count(id))
 	{
-		m_players_t[id].second = false;
+		m_players[id].second = false;
 	}
 	DrawList();
 }
@@ -262,7 +264,7 @@ void Lobby::DrawList()
 	nPos.X = 0;
 	nPos.Y = 11;
 	pos.Y = 11;
-	for (auto& iter : m_players_t)
+	for (auto& iter : m_players)
 	{
 		pos.Y = y;
 		nPos.Y = y;

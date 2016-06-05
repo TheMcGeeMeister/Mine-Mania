@@ -76,16 +76,8 @@ void Display::update()
 
 void Display::updatePos(Position pos_)
 {
-	if (!m_map.count(pos_))
-		return;
-
     const char graphic = m_map[pos_].getGraphic();
-	WORD attribute = m_map[pos_].getColor();
-
-    if(m_map[pos_].getBackground()!=0)
-    {
-        attribute |= m_map[pos_].getBackground();
-    }
+	WORD attribute = m_map[pos_].getAttribute();
 
 	if (isSelected_.count(pos_))
 	{
@@ -121,6 +113,7 @@ void Display::setTileAt(Position _pos, Tile _tile)
     newTileChange.second=_tile;
     tileChanges_.push_back(newTileChange);
 }
+
 void Display::setTileAtS(Position _pos, Tile _tile)
 {
 	pair<Position, Tile> newTileChange;
@@ -128,6 +121,7 @@ void Display::setTileAtS(Position _pos, Tile _tile)
 	newTileChange.second = _tile;
 	tileChanges_.push_back(newTileChange);
 }
+
 void Display::setTileAsSelected(Position newPos)
 {
 	WORD color;
@@ -642,7 +636,6 @@ void Display::removeTileAt(Position pos)
 
 /* Loading/Saving */
 ///////////////////////////////////
-
 void Display::saveWorld()
 {
 	if (isLoaded_ == false)
@@ -804,21 +797,21 @@ void Display::loadWorld(string file_name)
 		{
 			std::shared_ptr<Turret> turret = std::make_shared<Turret>();
 			turret->deserialize(stream);
-			game::system.addEntity(turret, "Turret");
+			game::system.addEntity(turret);
 			Log("LOADED:Turret\n");
 		}
 		else if (name == LOAD::L_Core)
 		{
 			std::shared_ptr<Core> core = std::make_shared<Core>();
 			core->deserialize(stream);
-			game::system.addEntity(core, "Core");
+			game::system.addEntity(core);
 			Log("LOADED:Core\n");
 		}
 		else if (name == LOAD::L_GoldSpawn)
 		{
 			std::shared_ptr<GoldSpawn> goldSpawn = std::make_shared<GoldSpawn>();
 			goldSpawn->deserialize(stream);
-			game::system.addEntity(goldSpawn, "GoldSpawn");
+			game::system.addEntity(goldSpawn);
 			Log("LOADED:GoldSpawn\n");
 		}
 		if (stream.good() == false)
@@ -1075,20 +1068,19 @@ void Display::newWorld()
 	m_map[startPos].setBackground(B_Blue);
     m_map[corePos]=core;
 	isLoaded_ = true;
-	std::stringstream txt;
 	game::pHandler.getLocalPlayer().forceHandPosition(startPos, *this);
 	game::pHandler.getLocalPlayer().setSpawnPos(startPos);
 	reloadAll_ = true;
 	isMultiplayer_ = false;
 	Common::CreatePlayerCore(game::pHandler.getLocalPlayer().getName(), corePos);
 
-	//Testing GoldSpawn 
+	/*Testing GoldSpawn 
 	////////////
 	shared_ptr<GoldSpawn> gSpawnTest = make_shared<GoldSpawn>();
 	gSpawnTest->setPosition(Position(25, 10));
 	gSpawnTest->render();
 	game::system.addEntity(gSpawnTest, false);
-	////////////
+	////////////*/
 }
 
 void Display::newWorldMulti(int pAmount, std::string names[])
@@ -1129,18 +1121,6 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	gold.setHealth(150);
 	gold.setMaxHealth(150);
 
-	Tile core;
-	core.setGraphic('C');
-	core.setColor(TC_Gray);
-	core.setBackground(B_DarkGray);
-	core.isWall(false);
-	core.isWalkable(false);
-	core.isDestructable(true);
-	core.isClaimable(false);
-	core.setMaxHealth(2500);
-	core.setHealth(2500);
-	core.setClaimedBy(game::pHandler.getLocalPlayer().getName());
-
 	Tile stone;
 	stone.setGraphic(TG_Stone);
 	stone.setColor(TGC_Stone);
@@ -1174,11 +1154,12 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 
 	/* Local */
 	////////////////////
-	Common::SendPlayer(&Common::CreatePlayer(Position(0,1), names[0], (WORD)B_Blue, 0, true), pAmount, 0);
+	Common::SendPlayer(&Common::CreatePlayer(Position(0, 1), names[0], (WORD)B_Blue, 0, true), pAmount, 0);
 	Common::CreatePlayerCore(names[0], Position(0, 0));
-	Common::SetStoneFloorAt(Position(0,1), (WORD)B_Blue, names[0]);
+	Common::SetStoneFloorAt(Position(0, 1), (WORD)B_Blue, names[0]);
 	game::GameHandler.AddPlayer(names[0]);
-	m_map[Position(0, 1)].setBackground((WORD)B_Blue);
+	//m_map[Position(0, 0)].forceClaim(names[0]);
+	//m_map[Position(0, 0)].setClaimColor((WORD)B_Blue);
 	////////////////////
 
 	for (int x = 1; x < pAmount; x++)
@@ -1187,7 +1168,8 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 		Common::SetStoneFloorAt(p_pos[x], p_c[x], names[x]);
 		Common::CreatePlayerCore(names[x], p_cpos[x]);
 		game::GameHandler.AddPlayer(names[x]);
-		m_map[p_pos[x]].setBackground(p_c[x]);
+		//m_map[p_cpos[x]].forceClaim(names[x]);
+		//m_map[p_cpos[x]].setClaimColor(p_c[x]);
 	}
 
 	game::GameHandler.StartGame();
@@ -1342,7 +1324,10 @@ bool Display::loadSettings()
 		{
 			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 			DWORD flags = CONSOLE_WINDOWED_MODE;
-			//SetConsoleDisplayMode(h, flags, &pos); Resets window size??
+			pair<int, int> resolution = Common::GetDesktopResolution();
+			pos.X = resolution.first;
+			pos.Y = resolution.second;
+			//SetConsoleDisplayMode(h, flags, &pos);
 		}
 		return true;
 	}

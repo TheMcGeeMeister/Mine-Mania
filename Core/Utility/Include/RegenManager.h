@@ -12,7 +12,7 @@ class RegenManager
     public:
         RegenManager();
         virtual ~RegenManager();
-        void update(Display&);
+        void update();
         void push_back(Position);
     protected:
 

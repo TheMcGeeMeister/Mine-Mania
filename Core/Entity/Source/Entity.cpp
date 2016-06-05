@@ -99,15 +99,12 @@ void System::update()
 				if (iter.second->isKilled() == true)
 				{
 					d_queue.push_back(iter.first);
-					/* Debug */
-					/////////////////////////////////
-					std::fstream file("Logs\\Log.txt", std::ios::app);
-					file << "System: Entity Deleted ID:" << iter.first << std::endl;
-					/////////////////////////////////
+
 					std::stringstream msg;
 					msg << SendDefault << EndLine << EntityKill << EndLine << iter.first << EndLine;
 					SendServerLiteral(msg.str());
 					msg.str(std::string());
+
 					continue;
 				}
 				else
@@ -148,11 +145,7 @@ int System::addEntity(std::shared_ptr<Entity> entity, bool send)
 {
 	entity->setID(id_index);
 	m_system[id_index] = entity;
-	/* Debug */
-	/////////////////////////////////
-	std::fstream file("Logs\\Log.txt", std::ios::app);
-	file << "System: Entity Created ID:" << id_index << std::endl;
-	/////////////////////////////////
+
 	id_index++;
 	if (send)
 	{
@@ -170,8 +163,8 @@ int System::addEntityServer(std::shared_ptr<Entity> entity)
 	m_server[entity->getID()] = id_index;
 	entity->setID(id_index);
 	m_system[id_index] = entity;
-	std::fstream file("Logs\\Log.txt", std::ios::app | std::ios::out);
-	file << "System: Entity Created ID:" << id_index << std::endl;
+
+
 	id_index++;
 	return (id_index - 1);
 }
@@ -180,11 +173,7 @@ int System::addEntity(std::shared_ptr<Entity> entity, std::string txt, bool send
 {
 	entity->setID(id_index);
 	m_system[id_index] = entity;
-	/* Debug */
-	/////////////////////////////////
-	std::fstream file("Logs\\Log.txt", std::ios::app);
-	file << "System: Entity Created ID:" << id_index << " <" << txt.c_str() << ">" << std::endl;
-	/////////////////////////////////
+
 	id_index++;
 	if (send)
 	{

@@ -24,7 +24,6 @@ health_(2500, 2500, 2, true)
 	m_repair_.SetSound("Repair");
 }
 
-
 Core::~Core()
 {
 

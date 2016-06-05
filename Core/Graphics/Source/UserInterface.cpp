@@ -7,6 +7,7 @@
 #include "UserInterface.h"
 #include "SoundManager.h"
 #include "TileEnums.h"
+#include "Common.h"
 
 using namespace std;
 
@@ -674,7 +675,6 @@ void UserInterface::draw(uint16_t index)
 			vector<WORD> attributes(text.str().length(), C_White);
 			WriteConsoleOutputCharacter(h, text.str().c_str(), text.str().length(), pos, &output);
 			WriteConsoleOutputAttribute(h, &attributes[0], text.str().length(), pos, &output);
-			//WriteConsoleOutputAttribute(h, &a, text.str().length(), pos, &output);
 		}
 	}
 }
@@ -691,7 +691,13 @@ void UserInterface::drawBorder()
 			txt << (char)B_TOP_LEFT_CORNER
 				<< string((positionVars_.size_x), B_HORIZONTAL)
 				<< (char)B_TOP_RIGHT_CORNER;
-			cout << txt.str();
+			//std::cout << txt.str();
+			int output_x = positionVars_.offset_x;
+			for (int i = 0; i < txt.str().length(); i++)
+			{
+				Common::DisplayLetterAt(Position(output_x, positionVars_.offset_y + y), string() = txt.str()[i]);
+				output_x++;
+			}
 			txt.str(string());
 			continue;
 		}
@@ -700,13 +706,21 @@ void UserInterface::drawBorder()
 			txt << (char)B_BOTTOM_LEFT_CORNER
 				<< string((positionVars_.size_x), B_HORIZONTAL)
 				<< (char)B_BOTTOM_RIGHT_CORNER;
-			cout << txt.str();
+			//std::cout << txt.str();
+			int output_x = positionVars_.offset_x;
+			for (int i = 0; i < txt.str().length(); i++)
+			{
+				Common::DisplayLetterAt(Position(output_x, positionVars_.offset_y + y), string() = txt.str()[i]);
+				output_x++;
+			}
 			txt.str(string());
 			continue;
 		}
-		cout << (char)B_VERTICAL;
-		SetCursorPosition(positionVars_.offset_x + positionVars_.border_width + positionVars_.size_x, positionVars_.offset_y+y);
-		cout << (char)B_VERTICAL;
+		//std::cout << (char)B_VERTICAL;
+		Common::DisplayLetterAt(Position(positionVars_.offset_x, positionVars_.offset_y + y), string() = (char)B_VERTICAL);
+		SetCursorPosition(positionVars_.offset_x + positionVars_.border_width + positionVars_.size_x, positionVars_.offset_y + y);
+		Common::DisplayLetterAt(Position(positionVars_.offset_x + positionVars_.border_width + positionVars_.size_x, positionVars_.offset_y + y), string() = (char)B_VERTICAL);
+		//std::cout << (char)B_VERTICAL;
 	}
 }
 

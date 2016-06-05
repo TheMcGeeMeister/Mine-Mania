@@ -32,10 +32,12 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	maxGoldAmount_ = 10000;
     manaAmount_ = 500;
     maxManaAmount_ = 500;
+	handMode_ = 0;
 	ammo_ = 0;
-	baseDamage_ = 15.0;
 	passiveGoldIncrease_ = 0;
 	id_ = 0;
+	baseDamage_ = 15.0;
+
 	isGoldPassive_ = false;
 	claimedColor_ = B_Blue;
 	pos_(0, 0);
@@ -43,12 +45,13 @@ Player::Player() : UI(23, 5, 50, 30, 1)
     name_= "None";
 	moved_ = true;
 	mined_ = false;
+	isMining_ = false;
+	isDead_ = false;
+	isGoldPassive_ = false;
 
 	turret_sound.SetSound("TurretPlayerHit");
 	repair_sound.SetSound("Repair");
 	mine_sound.SetSound("Mining");
-
-	handMode_ = 0;
 
 	UI.push_back("Mining", false, true);
 	UI.push_back("Health:", false, true);
@@ -56,6 +59,7 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	UI.getSectionRef(2).push_backVar(" ");
 	UI.getSectionRef(3).push_backVar(" ");
 	UI.isHidden(true);
+
 	mineUIPos_.setX(0);
 	mineUIPos_.setY(0);
 }
@@ -493,7 +497,10 @@ void Player::mine(DIRECTION direction)
 				}
 				else
 				{
-					tile.fortify(1);
+					if (tile.fortify(1))
+					{
+						tile.setFortifiedByID(id_);
+					}
 				}
 			}
 		}

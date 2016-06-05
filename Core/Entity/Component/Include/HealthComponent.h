@@ -15,12 +15,14 @@ public:
 	void setHealthRegen(double healthRegen);
 	void setIDPtr(int* id_ptr);
 	void isRegenEnabled(bool isRegenEnabled);
+	void isRegenDelayed(bool isRegenDelayed);
 	void isDead(bool isDead);
 
 	double getHealth() const;
 	double getMaxHealth() const;
 	double getHealthRegen() const;
 	bool isRegenEnabled() const;
+	bool isRegenDelayed() const;
 	bool isDead() const;
 	bool isFull() const;
 
@@ -48,6 +50,7 @@ private:
 	double healthRegen_;
 	Timer regenCoolDown;
 	bool isRegenEnabled_;
+	bool isRegenDelayed_;
 	bool isDead_;
 	int* id_;
 };

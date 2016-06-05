@@ -22,7 +22,7 @@
 #include "UserInterface.h" // UI used by all selections, and menus
 #include "PlayerHandler.h" // Updates all the players
 #include "SimpleNetClient.h" // Server class
-#include "PositionVariables.h" // Holds on size, and offset
+#include "PositionVariables.h" // Size, and offset
 #include "TileChangeManager.h" // Updates the Display with changes
 #include "LoadParser.h" // Not really being used, but was going to be used for debbugging any saving problems
 
@@ -55,6 +55,7 @@ namespace game
 	bool lobbyStart = false;
 	bool gameWon = false;
 	bool isEscapedPressed_ = false;
+	bool isInGame = false;
 	std::atomic<bool> exitFromDisconnect = false;
 	int curFont;
 	void Log(string txt)
@@ -112,7 +113,15 @@ bool isExitGame(Display& game)
 	///////////////////////////////////////////
 	if (game::exitFromDisconnect == true)
 	{
+		game::pHandler.getLocalPlayer().stopSounds();
+		game::ServerUI.isHidden(true);
+		game::tileUI.isHidden(true);
+		game::SlideUI.isHidden(true);
+		game::statsUI.isHidden(true);
+		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
+		game::game.isHidden(true);
 		game::exitFromDisconnect = false;
+		game::GameHandler.Reset();
 		return true;
 	}
 	if (game::gameWon == true)
@@ -375,9 +384,37 @@ void lobbyMenu()
 	game::lobby.Go();
 }
 
+void useLoadedMenu()
+{
+	UserInterface UI(0, 0, 0, 0, 1);
+	UI.drawBorder();
+	UI.push_back("Save loaded: New save or use current?", false, true);
+	UI.push_back("1.Yes", true, true);
+	UI.push_back("2.No", true, true);
+
+	bool isExit = false;
+	while (isExit == false)
+	{
+		UI.update();
+		if (UI.isSectionActivated())
+		{
+			int selection = UI.getActivatedSection();
+			if (selection == 2)
+			{
+				return;
+			}
+			else if (selection == 3)
+			{
+				game::game.unloadWorld();
+				return;
+			}
+			Sleep(10);
+		}
+	}
+}
+
 void connectMenu(thread& sThread, bool& threadStarted)
 {
-	Sleep(250);
 	UserInterface ui(30, 9, 0, 0, 1);
 	ui.drawBorder();
 	ui.push_isection("Address:");
@@ -421,7 +458,7 @@ void connectMenu(thread& sThread, bool& threadStarted)
 				}
 				continue;
 			}
-			case 3: exitFlag = true; Sleep(250); break;
+			case 3: exitFlag = true; break;
 			}
 		}
 		Sleep(10);
@@ -502,7 +539,6 @@ bool loadMenu(Display& game)
 			{
 				clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 				exitFlag = true;
-				Sleep(250);
 				return false;
 				continue;
 			}
@@ -615,7 +651,6 @@ void saveMenu(Display& game)
 
 void settingsMenu()
 {
-	Sleep(250);
 	UserInterface menu(30, 9, 0, 0, 1);
 	menu.drawBorder();
 	menu.push_isection("Font Size:");
@@ -686,12 +721,10 @@ void settingsMenu()
 	game::game.setFontSize(fontSize);
 	game::game.setVolume(volume);
 	game::game.isFullscreen(isFullscreen);
-	Sleep(250);
 }
 
 bool newWorldMenu(Display& game)
 {
-	Sleep(250);
 	UserInterface NewWorld(30, 9, 0, 0, 1);
 	NewWorld.drawBorder();
 	NewWorld.push_isection("Name:");
@@ -727,14 +760,13 @@ bool newWorldMenu(Display& game)
 
 void gameNotLoadedMenu(Display& game)
 {
-	Sleep(250);
 	clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
 	UserInterface menu(30, 9, 0, 0, 1);
 	menu.drawBorder();
 	menu.addSection("No Game Loaded", false, true);
-	menu.addSection("1.New Game", true, true);
-	menu.addSection("2.Load Game", true, true);
-	menu.addSection("3.Return", true, true);
+	//9menu.addSection("1.New Game", true, true);
+	menu.addSection("1.Load Game", true, true);
+	menu.addSection("2.Return", true, true);
 	bool exitFlag = false;
 	while (exitFlag == false)
 	{
@@ -743,9 +775,9 @@ void gameNotLoadedMenu(Display& game)
 		{
 			switch (menu.getActivatedSection())
 			{
-			case 2: menu.isHidden(true); newWorldMenu(game); Sleep(250); return; break;
-			case 3: loadMenu(game); menu.isHidden(true); Sleep(250); return; break;
-			case 4: menu.isHidden(true);  Sleep(250); return; break;
+			//case : menu.isHidden(true); newWorldMenu(game); return; break;
+			case 2: loadMenu(game); menu.isHidden(true); return; break;
+			case 3: menu.isHidden(true);  return; break;
 			}
 		}
 		Sleep(10);
@@ -820,18 +852,18 @@ bool pauseGameMenu(Display& game)
 	return true;
 }
 
-bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
+bool mainMenu(Display &game, thread& sThread, bool& threadStarted)
 {
     clearScreenPart(DEFAULT_CLEAR_WIDTH, DEFAULT_CLEAR_HEIGHT);
     UserInterface menu;
-	PositionVariables pVar(30, 9, 0, 0);
+	PositionVariables pVar(30, 8, 0, 0);
 	menu.setPositionVariables(pVar);
 	menu.drawBorder();
     menu.addSection("Continue", true, true);
     menu.addSection("Save", true, true);
     menu.addSection("Load", true, true);
 	menu.addSection("Settings", true, true);
-    menu.addSection("New World", true, true);
+    //menu.addSection("New World", true, true);
 	menu.addSection("Multiplayer", true, true);
     menu.addSection("Exit", true, true);
     menu.update();
@@ -848,7 +880,6 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 				if (game.isLoaded() == false) continue;
 				menu.isHidden(true);
 				saveMenu(game);
-				Sleep(250);
 				menu.isHidden(false);
 				menu.reDrawAll();
 				break;
@@ -881,12 +912,12 @@ bool pauseMenu(Display &game, thread& sThread, bool& threadStarted)
 				settingsMenu();
 				menu.isHidden(false);
 				break;
-            case 5: // New
-				menu.isHidden(true); if(newWorldMenu(game) == true) return false; Sleep(100); menu.isHidden(false); continue; break;
-			case 6: // Connect
-				menu.isHidden(true); connectMenu(sThread, threadStarted); if (game::server.isConnected() == true) { return false; }
+            /*case 4: // New
+				menu.isHidden(true); if(newWorldMenu(game) == true) return false; Sleep(100); menu.isHidden(false); continue; break;*/
+			case 5: // Multiplayer
+				menu.isHidden(true); /*if (game::game.isLoaded()) { useLoadedMenu(); }*/ connectMenu(sThread, threadStarted); if (game::server.isConnected() == true) { return false; }
 				else menu.isHidden(false); break;
-            case 7: // Exit
+            case 6: // Exit
 				return true; break;
             }
         }
@@ -915,12 +946,13 @@ void gameLoop()
 
 	game::pHandler.updateAllPositions();
 
+	game::isInGame = true;
 	while (isExitGame(game::game) == false)
 	{
 		LOGIC(InputCoolDown, game::game);
 		game::game.update();
-		game::RegenHandler.update(game::game);
-		game::TileHandler.update(game::game);
+		game::RegenHandler.update();
+		game::TileHandler.update();
 		player.updateMiningUI();
 		updateGameInterface();
 		game::SlideUI.update();
@@ -932,6 +964,7 @@ void gameLoop()
 		Sleep(10);
 	}
 	game::m_sounds.StopSound("Ambient");
+	game::isInGame = false;
 }
 
 void preGameLoop()
@@ -958,7 +991,7 @@ void preGameLoop()
 
 	while (exitFlag == false)
 	{
-		exitFlag = pauseMenu(game::game, sThread, threadStarted);
+		exitFlag = mainMenu(game::game, sThread, threadStarted);
 
 		if (exitFlag == true)
 			continue;
@@ -973,16 +1006,12 @@ void preGameLoop()
 		if (game::game.isLoaded() == false)
 			continue;
 
-		game::tileUI.isHidden(false);
-
 		if (game::server.isConnected() == true && threadStarted == false)
 		{
 			game::server.isExit(false);
 			sThread = thread(bind(&SimpleNetClient::Loop, &game::server));
 			threadStarted = true;
 		}
-
-		Player& player = game::pHandler.getLocalPlayer();
 
 		gameLoop();
 

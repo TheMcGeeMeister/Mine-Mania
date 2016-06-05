@@ -28,6 +28,7 @@ Tile::Tile()
 	gold_ = 0;
 	claimedPercentage_ = 0;
 	fortifyAmount_ = 0;
+	fortifiedByPlayerID_ = 0;
 	objectid_ = 0;
 	isClaimable_ = true;
 	overlayEnabled_ = false;
@@ -46,12 +47,14 @@ Tile::Tile()
 Tile::Tile(Position pos)
 {
 	graphic_ = TG_StoneFloor;
-	overlayGraphic_ = ' ';
+	overlayGraphic_ = 'N';
 	color_ = TGC_StoneFloor;
 	claimColor_ = B_Black;
 	background_ = TGB_StoneFloor;
 	gold_ = 0;
 	claimedPercentage_ = 0;
+	fortifyAmount_ = 0;
+	fortifiedByPlayerID_ = 0;
 	objectid_ = 0;
 	isClaimable_ = true;
 	overlayEnabled_ = false;
@@ -63,7 +66,7 @@ Tile::Tile(Position pos)
 	isWall_ = false;
 	isClaimed_ = false;
 	hasGold_ = false;
-	pos_ = pos;
+	pos_(pos.getX(), pos.getY());
 }
 
 Tile::~Tile()
@@ -83,7 +86,22 @@ WORD Tile::getBackground() const
 
 WORD Tile::getAttribute() const
 {
-	return color_ | background_;
+	WORD attribute;
+	if (isClaimed_ == false)
+	{
+		if (background_ == 0)
+		{
+			attribute = color_;
+		}
+		else
+		{
+			attribute = color_ | background_;
+		}
+	}else
+	{
+		attribute = color_ | claimColor_;
+	}
+	return attribute;
 }
 
 Position Tile::getPos() const
@@ -172,6 +190,11 @@ int Tile::getObjectId() const
 	return objectid_;
 }
 
+int Tile::getFortifiedByID() const
+{
+	return fortifiedByPlayerID_;
+}
+
 char Tile::getOverlayGraphic() const
 {
 	return overlayGraphic_;
@@ -210,6 +233,7 @@ void Tile::setClaimColor(WORD color)
 	if (isClaimed_)
 	{
 		background_ = claimColor_;
+		game::TileHandler.push_back(pos_);
 	}
 }
 
@@ -343,6 +367,11 @@ void Tile::setPos(Position pos)
 	pos_ = pos;
 }
 
+void Tile::setFortifiedByID(int id)
+{
+	fortifiedByPlayerID_ = id;
+}
+
 void Tile::setBackground(WORD background)
 {
 	if (background_ == background) return;
@@ -460,19 +489,20 @@ void Tile::forceClaim(string claim)
 {
 	claimedBy_ = claim;
 	isClaimable_ = true;
+	isClaimed_ = true;
 	claimedPercentage_ = 0;
 	curBeingClaimedBy_ = "None";
 }
 
-void Tile::fortify(int amount)
+bool Tile::fortify(int amount)
 {
-	if (isFortified_) return;
+	if (isFortified_) return false;
 	fortifyAmount_ += amount;
 	fortifyAmount_ = 100;
 	if (fortifyAmount_ > 99)
 	{
-		health.getMaxHealthRef() += 100;
-		health.getHealthRef() += 100;
+		health.getMaxHealthRef() += 150;
+		health.getHealthRef() += 150;
 		WORD color = C_White;
 		Position cPos = pos_;
 		isFortified_ = true;
@@ -555,7 +585,9 @@ void Tile::fortify(int amount)
 		color_ = color;
 		game::TileHandler.push_back(pos_);
 		updateServer();
+		return true;
 	}
+	return false;
 }
 
 void Tile::hasGold(bool hasGold)
@@ -578,6 +610,11 @@ bool Tile::mine(int damage, Player& player)
 
 	health.getHealthRef() -= damage;
 	health.damage(damage);
+
+	if (isFortified_ && fortifiedByPlayerID_ != player.getID())
+	{
+		player.damage(5);
+	}
 
 	if (health.isDead())
 	{
@@ -776,6 +813,7 @@ void Tile::serialize(fstream& stream)
 	 << (int)overlayGraphic_ << endl
 	 << claimedBy_ << endl
 	 << curBeingClaimedBy_ << endl
+	 << fortifiedByPlayerID_ << endl
 	 << color_ << endl
 	 << claimColor_ << endl
 	 << background_ << endl
@@ -804,6 +842,7 @@ void Tile::serialize(ofstream& stream)
 		<< (int)overlayGraphic_ << endl
 		<< claimedBy_ << endl
 		<< curBeingClaimedBy_ << endl
+		<< fortifiedByPlayerID_ << endl
 		<< color_ << endl
 		<< claimColor_ << endl
 		<< background_ << endl
@@ -832,6 +871,7 @@ void Tile::serialize(stringstream& stream)
 		<< (int)overlayGraphic_ << endl
 		<< claimedBy_ << endl
 		<< curBeingClaimedBy_ << endl
+		<< fortifiedByPlayerID_ << endl
 		<< color_ << endl
 		<< claimColor_ << endl
 		<< background_ << endl
@@ -861,6 +901,7 @@ void Tile::deserialize(stringstream& stream)
 	 >> overlayGraphic
 	 >> claimedBy_
 	 >> curBeingClaimedBy_
+	 >> fortifiedByPlayerID_
 	 >> color_
 	 >> claimColor_
 	 >> background_
@@ -894,6 +935,7 @@ void Tile::deserialize(fstream& stream)
 		>> overlayGraphic
 		>> claimedBy_
 		>> curBeingClaimedBy_
+		>> fortifiedByPlayerID_
 		>> color_
 		>> claimColor_
 		>> background_
@@ -927,6 +969,7 @@ void Tile::deserialize(ifstream& stream)
 		>> overlayGraphic
 		>> claimedBy_
 		>> curBeingClaimedBy_
+		>> fortifiedByPlayerID_
 		>> color_
 		>> claimColor_
 		>> background_

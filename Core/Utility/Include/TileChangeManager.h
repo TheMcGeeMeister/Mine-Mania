@@ -9,7 +9,7 @@ class TileChangeManager
     public:
         TileChangeManager();
         virtual ~TileChangeManager();
-        void update(Display&);
+        void update();
         void push_back(Position pos);
     protected:
 

@@ -52,4 +52,5 @@ namespace Common
 	extern int GetWindowWidth();
 	extern int GetWindowHeight();
 	extern std::pair<int, int> GetWindowSize();
+	extern std::pair<int, int> GetDesktopResolution();
 }

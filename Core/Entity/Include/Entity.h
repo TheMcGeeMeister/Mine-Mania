@@ -40,8 +40,8 @@ public:
 	bool isSetToUpdate();
 	virtual bool hasKeyWord(KEYWORD key);
 
-	int getID();
-	int& getIDRef();
+	virtual int getID();
+	virtual int& getIDRef();
 
 	virtual bool hasComponent(int component) = 0;
 	virtual bool isKilled() = 0;
@@ -62,8 +62,6 @@ private:
 	bool kill_;
 	bool isObjectHosted_;
 	std::list<KEYWORD> keywords_;
-
-	static bool isServerConnected_;
 };
 
 class System

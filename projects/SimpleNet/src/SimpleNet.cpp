@@ -77,6 +77,11 @@ bool Initialize()
 
 bool StartServer()
 {
+	if (SimpleNet::ListenSocket != INVALID_SOCKET)
+	{
+		closesocket(SimpleNet::ListenSocket);
+		SimpleNet::ListenSocket = INVALID_SOCKET;
+	}
 	struct addrinfo *result = NULL, *ptr = NULL, hints;
 
 	ZeroMemory(&hints, sizeof(hints));
@@ -89,6 +94,7 @@ bool StartServer()
 	int iResult = getaddrinfo(NULL, "15015", &hints, &result);
 	if (iResult != 0) 
 	{
+		std::cout << "Start up failed with error:" << WSAGetLastError() << End;
 		WSACleanup();
 		return false;
 	}
@@ -103,6 +109,7 @@ bool StartServer()
 	{
 		freeaddrinfo(result);
 		WSACleanup();
+		std::cout << "Start up failed with error:" << WSAGetLastError() << End;
 		return false;
 	}
 
@@ -113,6 +120,7 @@ bool StartServer()
 		freeaddrinfo(result);
 		closesocket(SimpleNet::ListenSocket);
 		WSACleanup();
+		std::cout << "Start up failed with error:" << WSAGetLastError() << End;
 		return false;
 	}
 
@@ -122,6 +130,7 @@ bool StartServer()
 	{
 		closesocket(SimpleNet::ListenSocket);
 		WSACleanup();
+		std::cout << "Start up failed with error:" << WSAGetLastError() << End;
 		return false;
 	}
 
@@ -134,11 +143,20 @@ void ListenLoop()
 
 	for (int i = 0; i < 4; i++)
 	{
+		if (SimpleNet::ListenLoopContinue == false)
+		{
+			closesocket(SimpleNet::ListenSocket);
+			return;
+		}
 		SimpleNet::s_players[i] = INVALID_SOCKET;
 		SimpleNet::s_players[i] = accept(SimpleNet::ListenSocket, NULL, NULL);
 		if (SimpleNet::s_players[i] == INVALID_SOCKET)
 		{
-			shutdown(SimpleNet::ListenSocket, 2);
+			closesocket(SimpleNet::ListenSocket);
+			return;
+		}
+		if (WSAGetLastError() == WSAEINTR)
+		{
 			closesocket(SimpleNet::ListenSocket);
 			return;
 		}
@@ -149,7 +167,6 @@ void ListenLoop()
 			send(SimpleNet::s_players[i], msg.str().c_str(), msg.str().length(), NULL);
 			msg.str(std::string());
 			SimpleNet::HostConnected = true;
-			std::cout << "Host Connected" << std::endl;
 		}
 		else
 		{
@@ -157,9 +174,9 @@ void ListenLoop()
 			SimpleNet::s_threads[i] = std::thread(LoopRecieve, i);
 			send(SimpleNet::s_players[i], msg.str().c_str(), msg.str().length(), NULL);
 			msg.str(std::string());
-			std::cout << "Player Connected" << std::endl;
 		}
 	}
+
 }
 
 void Send(int sender, std::string& msg)
@@ -276,10 +293,9 @@ void LoopRecieve(int id)
 			msg << ServerDisconnected;
 			send(SimpleNet::s_players[id], msg.str().c_str(), msg.str().length(), NULL);
 			SimpleNet::Log("Forced Disconnection... (PlayerLoopExit == true)");
-			Sleep(250);
 			shutdown(SimpleNet::s_players[id], 2);
 			std::cout << "Server:Forced Disconnection..." << End;
-			if(id == 0)
+			if(id == 0 && SimpleNet::isReset == false)
 			{
 				SimpleNet::HostDisconnectReset = true;
 				return;
@@ -315,8 +331,9 @@ bool ProcessCommand(std::string cmd)
 		std::cout << "Resetting..." << End;
 		SimpleNet::ListenLoopContinue = false;
 		SimpleNet::PlayerLoopExit = true;
-		closesocket(SimpleNet::ListenSocket);
+		SimpleNet::isReset = true;
 		WSACancelBlockingCall();
+		closesocket(SimpleNet::ListenSocket);
 		Sleep(1000);
 		for (auto& iter : SimpleNet::s_players)
 		{
@@ -332,14 +349,16 @@ bool ProcessCommand(std::string cmd)
 		if (StartServer() == true)
 		{
 			std::cout << "Server Reset: Successful" << End;
+			SimpleNet::isReset = true;
 		}
 		else
 		{
 			std::cout << "Server Reset: Failed" << End;
-			SimpleNet::isReset = true;
+			SimpleNet::isReset = false;
 		}
 		SimpleNet::ListenLoopContinue = true;
 		SimpleNet::PlayerLoopExit = false;
+		return false;
 	}
 	return false;
 }
@@ -353,8 +372,6 @@ int main()
 	SimpleNet::ListenLoopContinue = true;
 
 	std::thread listen(ListenLoop);
-
-	Sleep(250);
 
 	std::string msg;
 	std::string input;
@@ -377,18 +394,21 @@ int main()
 					std::cout << End;
 					exitFlag = ProcessCommand(input);
 					input = std::string();
-					if (SimpleNet::isReset == true)
-					{
-						listen = std::thread(ListenLoop);
-						SimpleNet::isReset = false;
-					}
-					continue;
 				}
 			}
 			if (SimpleNet::HostDisconnectReset == true)
 			{
 				SimpleNet::HostDisconnectReset = false;
 				ProcessCommand("Reset");
+			}
+			if (SimpleNet::isReset == true)
+			{
+				if (listen.joinable())
+				{
+					listen.join();
+				}
+				listen = std::thread(ListenLoop);
+				SimpleNet::isReset = false;
 			}
 		}
 		Sleep(10);

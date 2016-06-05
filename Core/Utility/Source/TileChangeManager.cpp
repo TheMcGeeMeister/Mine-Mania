@@ -1,6 +1,11 @@
 #include "TileChangeManager.h"
 #include "Display.h"
 
+namespace game
+{
+	extern Display game;
+}
+
 TileChangeManager::TileChangeManager()
 {
     //ctor
@@ -16,11 +21,11 @@ void TileChangeManager::push_back(Position pos)
     Changes.push_back(pos);
 }
 
-void TileChangeManager::update(Display& game)
+void TileChangeManager::update()
 {
     for(auto &i : Changes)
     {
-        game.updatePos(i);
+        game::game.updatePos(i);
     }
     Changes.clear();
 }

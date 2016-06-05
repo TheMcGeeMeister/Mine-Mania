@@ -110,15 +110,16 @@ namespace Common
 		shared_ptr<Core> NewCore = make_shared<Core>();
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
-		game::system.addEntity(NewCore, "Core");
+		game::system.addEntity(NewCore);
 	}
 
 	void SetStoneFloorAt(Position pos, WORD color, std::string owner)
 	{
-		gametiles::stone_floor.setPos(pos);
-		gametiles::stone_floor.forceClaim(owner);
-		gametiles::stone_floor.setClaimColor(color);
-		game::game.getTileRefAt(pos) = gametiles::stone_floor;
+		Tile tile;
+		tile.setPos(pos);
+		tile.forceClaim(owner);
+		tile.setClaimColor(color);
+		game::game.getTileRefAt(pos) = tile;
 	}
 
 	void SetCursorPosition(int x, int y)
@@ -203,7 +204,9 @@ namespace Common
 		rPos.X = pos.getX();
 		rPos.Y = pos.getY();
 		DWORD o;
+		WORD attribute = C_White | B_Black;
 		WriteConsoleOutputCharacter(h, g.c_str(), 1, rPos, &o);
+		WriteConsoleOutputAttribute(h, &attribute, 1, rPos, &o);
 	}
 
 	void DisplayTextCentered(int x, int line, std::string text)
@@ -355,6 +358,21 @@ namespace Common
 		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 		size.first = csbi.srWindow.Right - csbi.srWindow.Left + 1;
 		size.second = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+		return size;
+	}
+	std::pair<int, int> GetDesktopResolution()
+	{
+		pair<int, int> size;
+		RECT desktop;
+		// Get a handle to the desktop window
+		const HWND hDesktop = GetDesktopWindow();
+		// Get the size of screen to the variable desktop
+		GetWindowRect(hDesktop, &desktop);
+		// The top left corner will have coordinates (0,0)
+		// and the bottom right corner will have coordinates
+		// (horizontal, vertical)
+		size.first = desktop.right;
+		size.second = desktop.bottom;
 		return size;
 	}
 }

@@ -8,6 +8,7 @@ HealthComponent::HealthComponent()
 	maxHealth_ = 100;
 	healthRegen_ = 1;
 	isRegenEnabled_ = true;
+	isRegenDelayed_ = true;
 	isDead_ = false;
 	id_ = nullptr;
 }
@@ -18,6 +19,7 @@ HealthComponent::HealthComponent(double health, double maxHealth, double healthR
 	maxHealth_ = maxHealth;
 	healthRegen_ = healthRegen;
 	isRegenEnabled_ = isRegenEnabled;
+	isRegenDelayed_ = true;
 	id_ = nullptr;
 	isDead_ = false;
 }
@@ -54,6 +56,11 @@ void HealthComponent::isRegenEnabled(bool isRegenEnabled)
 	isRegenEnabled_ = isRegenEnabled;
 }
 
+void HealthComponent::isRegenDelayed(bool isRegenDelayed)
+{
+	isRegenDelayed_ = isRegenDelayed;
+}
+
 void HealthComponent::isDead(bool isDead)
 {
 	isDead_ = isDead;
@@ -77,6 +84,11 @@ double HealthComponent::getHealthRegen() const
 bool HealthComponent::isRegenEnabled() const
 {
 	return isRegenEnabled_;
+}
+
+bool HealthComponent::isRegenDelayed() const
+{
+	return isRegenDelayed_;
 }
 
 bool HealthComponent::isDead() const
@@ -107,6 +119,10 @@ double & HealthComponent::getHealthRegenRef()
 void HealthComponent::damage(double amount)
 {
 	health_ -= amount;
+	if (isRegenDelayed_ == true)
+	{
+		regenCoolDown.StartNewTimer(4);
+	}
 	if (health_ < 1)
 	{
 		health_ = 0;
@@ -143,6 +159,7 @@ void HealthComponent::serialize(std::fstream & file)
 		<< maxHealth_ << std::endl
 		<< healthRegen_ << std::endl
 		<< isRegenEnabled_ << std::endl
+		<< isRegenDelayed_ << std::endl
 		<< isDead_ << std::endl;
 }
 
@@ -152,6 +169,7 @@ void HealthComponent::serialize(std::stringstream& stream)
 		<< maxHealth_ << std::endl // Double
 		<< healthRegen_ << std::endl // Double
 		<< isRegenEnabled_ << std::endl // Bool
+		<< isRegenDelayed_ << std::endl // Bool
 		<< isDead_ << std::endl; // Bool
 }
 
@@ -161,6 +179,7 @@ void HealthComponent::deserialize(std::fstream & file)
 		>> maxHealth_
 		>> healthRegen_
 		>> isRegenEnabled_
+		>> isRegenDelayed_
 		>> isDead_;
 }
 
@@ -170,6 +189,7 @@ void HealthComponent::deserialize(std::stringstream & stream)
 		>> maxHealth_
 		>> healthRegen_
 		>> isRegenEnabled_
+		>> isRegenDelayed_
 		>> isDead_;
 }
 

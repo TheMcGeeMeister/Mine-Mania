@@ -33,13 +33,13 @@ class Tile
         int getClaimedPercentage() const;
         int getGold() const;
 		int getObjectId() const;
+		int getFortifiedByID() const;
 		char getOverlayGraphic() const;
         string getClaimedBy() const;
         string getCurBeingClaimedBy() const;
         WORD getColor() const;
         WORD getBackground() const;
         WORD getAttribute() const;
-		WORD getRenderColor() const;
         Position getPos() const;
 
         void setColor(WORD color);
@@ -50,6 +50,7 @@ class Tile
         void setHealth(double health);
         void setMaxHealth(double maxHealth);
         void setPos(Position position);
+		void setFortifiedByID(int id);
         void setIsWall(bool);
         void setIsWalkable(bool);
         void setIsDestructable(bool);
@@ -71,7 +72,7 @@ class Tile
         void incrementHealth(int amount);
         void claim(int amount, string claimer, WORD color);
         void forceClaim(string claim);
-		void fortify(int amount);
+		bool fortify(int amount);
         void hasGold(bool hasGold);
 		void heal(int amount);
         bool mine(int damage, Player&);
@@ -97,6 +98,7 @@ class Tile
         int gold_;
 		int objectid_;
 		int fortifyAmount_;
+		int fortifiedByPlayerID_;
         char graphic_;
 		char overlayGraphic_;
         string claimedBy_;

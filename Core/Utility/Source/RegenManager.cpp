@@ -2,6 +2,11 @@
 #include "Tile.h"
 #include "Display.h"
 
+namespace game
+{
+	extern Display game;
+}
+
 RegenManager::RegenManager()
 {
     //ctor
@@ -12,7 +17,7 @@ RegenManager::~RegenManager()
     //dtor
 }
 
-void RegenManager::update(Display& game)
+void RegenManager::update()
 {
     if(RegenCoolDown.Update()==true)
     {
@@ -21,7 +26,7 @@ void RegenManager::update(Display& game)
         auto iEnd=Tiles.end();
         for(;iter!=iEnd;++iter)
         {
-            Tile& tile=game.getTileRefAt(*iter);
+            Tile& tile=game::game.getTileRefAt(*iter);
             tile.incrementHealth(2);
             if(tile.getHealth()==tile.getMaxHealth())
             {

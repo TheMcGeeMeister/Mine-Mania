@@ -27,13 +27,11 @@ public:
 	bool isReady();
 	void isReady(bool);
 private:
-	std::map<std::string, bool> m_players;
-	std::map<int, std::pair<std::string, bool>> m_players_t;
-	UserInterface m_player_ui;
+	std::map<int, std::pair<std::string, bool>> m_players;
 	int player_amount;
 	bool isHost_;
 	bool isReady_;
 	bool started_;
 
-	UserInterface ui;
+	UserInterface UI;
 };

@@ -174,7 +174,6 @@ class Player : public Entity
 		bool mined_;
 		bool isMining_;
 		bool isDead_;
-		bool isLocal_;
 		bool isGoldPassive_;
 
 		Position pos_;

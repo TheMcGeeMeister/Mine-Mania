@@ -35,6 +35,7 @@ namespace game
 	extern std::string winnerName;
 	extern bool lobbyStart;
 	extern bool gameWon;
+	extern bool isInGame;
 	extern atomic<bool> exitFromDisconnect;
 	extern class Lobby lobby;
 }
@@ -224,9 +225,13 @@ void SimpleNetClient::Loop()
 		if (iResult == 0)
 		{
 			isConnected_ = false;
-			game::ServerUI.getSectionRef(1).setVar(1, "False");
+			game::ServerUI.getSectionRef(1).setVar(1, "False"); // Update UI to show that you've disconnected
 			Log("Server Disconnected\n");
 			isExit_ = true;
+			if (game::isInGame == true)
+			{
+				game::exitFromDisconnect = true;
+			}
 			continue;
 		}
 		else if (iResult > 0)
@@ -462,7 +467,7 @@ void SimpleNetClient::Do(std::string rMsg)
 				core->setToNoUpdate();
 				core->render();
 				game::system.addEntityServer(core);
-				Log("EntityAdd\ECore\n");
+				//Log("ECore Added");
 			}
 			else if (name == EGoldSpawn)
 			{
