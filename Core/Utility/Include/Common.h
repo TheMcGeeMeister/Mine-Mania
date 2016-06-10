@@ -37,6 +37,7 @@ namespace Common
 	extern void SetFont(int font);
 	extern void SendSound(std::string sound_name);
 	extern void ResizeWindowUntilFit(int x, int y);
+	extern void Log(std::string message);
 	extern inline void DisplayLetterAt(Position pos, std::string letter);
 	extern void DisplayTextCentered(int x, int line, std::string text);
 	extern bool GetPlayerByName(std::string name, Player** player);

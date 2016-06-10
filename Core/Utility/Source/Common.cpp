@@ -106,10 +106,14 @@ namespace Common
 
 	void CreatePlayerCore(std::string name, Position pos)
 	{
-		game::game.removeTileAt(pos);
+		Tile& tile = game::game.getTileRefAt(pos);
+		tile = Tile();
+		tile.setColor(C_Black);
+		tile.setPos(pos);
 		shared_ptr<Core> NewCore = make_shared<Core>();
 		NewCore->setPos(pos);
 		NewCore->setOwner(name);
+		NewCore->setGraphic('C');
 		game::system.addEntity(NewCore);
 	}
 
@@ -119,7 +123,7 @@ namespace Common
 		tile.setPos(pos);
 		tile.forceClaim(owner);
 		tile.setClaimColor(color);
-		game::game.getTileRefAt(pos) = tile;
+		game::game.setTileAtNoSend(pos, tile);
 	}
 
 	void SetCursorPosition(int x, int y)
@@ -197,6 +201,16 @@ namespace Common
 		}
 	}
 
+	void Log(std::string message)
+	{
+		std::fstream stream("Logs\\Log.txt");
+		if (stream.is_open())
+		{
+			stream << message;
+		}
+		return;
+	}
+
 	inline void DisplayLetterAt(Position pos, std::string g)
 	{
 		HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -268,10 +282,9 @@ namespace Common
 					shared_ptr<Bullet> bullet = make_shared<Bullet>();
 					bullet->setDirection((DIRECTION)direction);
 					bullet->setPositionNoUpdate(nPos);
-					bullet->setGraphicNoUpdate(250);
 					bullet->setBulletRange(bullet_range);
 
-					game::system.addEntity(bullet, "Bullet");
+					game::system.addEntity(bullet);
 					return true;
 				}
 			}

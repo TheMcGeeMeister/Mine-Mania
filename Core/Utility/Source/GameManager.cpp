@@ -115,21 +115,24 @@ void GameManager::Update()
 	{
 		if (game::server.isHost() == true)
 		{
-			if (GameOver == false)
+			if (PlayerAmount > 1)
 			{
-				if (CoreDestroyedAmount == (PlayerAmount - 1))
+				if (GameOver == false)
 				{
-					GameOver = true;
-					for (auto& iter : g_players)
+					if (CoreDestroyedAmount == (PlayerAmount - 1))
 					{
-						if (iter.second.isCoreDestroyed == false)
+						GameOver = true;
+						for (auto& iter : g_players)
 						{
-							game::winnerName = iter.first;
-							game::gameWon = true;
-							std::stringstream msg;
-							msg << SendDefault << EndLine << Win << EndLine << game::winnerName << EndLine;
-							SendServerLiteral(msg.str());
-							break;
+							if (iter.second.isCoreDestroyed == false)
+							{
+								game::winnerName = iter.first;
+								game::gameWon = true;
+								std::stringstream msg;
+								msg << SendDefault << EndLine << Win << EndLine << game::winnerName << EndLine;
+								SendServerLiteral(msg.str());
+								break;
+							}
 						}
 					}
 				}

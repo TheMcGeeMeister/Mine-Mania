@@ -47,6 +47,8 @@ enum PacketNames
 
 	PlayerConnect, ServerDisconnected,
 
+	Ping,
+
 	Lobby,
 	///////////////////
 	LobbyAdd,

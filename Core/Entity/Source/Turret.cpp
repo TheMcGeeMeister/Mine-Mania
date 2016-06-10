@@ -6,6 +6,7 @@
 #include "TileChangeManager.h"
 #include "SoundManager.h"
 #include "Common.h"
+#include "TileEnums.h"
 
 namespace game
 {
@@ -233,6 +234,7 @@ void Turret::send()
 void Turret::render()
 {
 	game::game.getTileRefAt(ai.getPosition()).updateOverlay(true, graphic);
+	game::game.getTileRefAt(ai.getPosition()).setOverlayColor(C_Black);
 }
 
 void Turret::activate(Player* player)

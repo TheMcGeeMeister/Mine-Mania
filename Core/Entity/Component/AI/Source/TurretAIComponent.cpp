@@ -157,7 +157,6 @@ void TurretAIComponent::shoot(DIRECTION direction)
 	shared_ptr<Bullet> bullet = make_shared<Bullet>();
 	bullet->setDirection(direction);
 	bullet->setPosition(nPos);
-	bullet->setGraphic(250);
 	bullet->addKeyWord(KEYWORD_BULLET);
 
 	Player* player = nullptr;

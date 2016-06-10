@@ -9,8 +9,8 @@ using namespace std;
 
 Position::Position()
 {
-	x_ = 1;
-	y_ = 1;
+	x_ = 0;
+	y_ = 0;
     isValid_ = true;
 }
 

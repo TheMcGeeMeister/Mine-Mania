@@ -44,4 +44,6 @@ private:
 
 	int id_;
 	int sync_amount_;
+
+	std::string pingMessage_;
 };

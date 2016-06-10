@@ -17,8 +17,8 @@ class Display
 public:
     Display();
     virtual ~Display();
-    void setTileAt(Position, Tile);
-	void setTileAtS(Position, Tile);
+    void setTileAt(Position, Tile, bool send = true);
+	void setTileAtNoSend(Position, Tile);
 	void setTileAsSelected(Position);
 	void setTileAsSelectedS(Position);
     void setSizeX(int x);
@@ -41,6 +41,8 @@ public:
 
 	void updateTileServer(Position pos);
 
+
+	void writeDebug(std::string file_name);
 	/* Search Method */
 	Position searchLine(Position sPos, DIRECTION direction, int amount, char target);
 

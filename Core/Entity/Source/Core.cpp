@@ -4,6 +4,7 @@
 #include "LoadEnums.h"
 #include "GameManager.h"
 #include "Player.h"
+#include "TileEnums.h"
 
 namespace game
 {
@@ -17,7 +18,6 @@ namespace game
 Core::Core() :
 health_(2500, 2500, 2, true)
 {
-	pos_(0, 0);
 	graphic_ = 'C';
 	owner_ = "NO_OWNER";
 	isDead_ = false;
@@ -83,6 +83,16 @@ void Core::deserialize(std::stringstream & file)
 	health_.deserialize(file);
 	graphic_ = graphic;
 	setID(id);
+}
+
+char Core::getGraphic()
+{
+	return graphic_;
+}
+
+std::string Core::getOwner()
+{
+	return owner_;
 }
 
 void Core::deserialize(std::fstream & file)
@@ -191,6 +201,7 @@ void Core::send()
 void Core::render()
 {
 	game::game.getTileRefAt(pos_).updateOverlay(true, graphic_);
+	game::game.getTileRefAt(pos_).setOverlayColor(C_Black);
 }
 
 void Core::activate(Player* player)

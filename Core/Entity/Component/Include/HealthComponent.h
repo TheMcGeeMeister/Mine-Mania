@@ -33,6 +33,7 @@ public:
 	void damage(double amount);
 	void heal(double amount);
 	void forceHealth(double amount);
+	void delayHealing(double timeInSeconds);
 
 	void reset();
 

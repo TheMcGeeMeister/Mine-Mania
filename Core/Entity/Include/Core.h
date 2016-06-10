@@ -19,6 +19,9 @@ public:
 	void serialize(std::stringstream& file);
 	void deserialize(std::stringstream& file);
 
+	char getGraphic();
+	std::string getOwner();
+
 
 	virtual void update();
 	virtual bool hasComponent(int component);

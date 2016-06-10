@@ -3,6 +3,7 @@
 #include "PlayerHandler.h"
 #include "SoundManager.h"
 #include "Common.h"
+#include "TileEnums.h"
 
 namespace game
 {
@@ -22,7 +23,9 @@ BulletAIComponent::BulletAIComponent()
 	damage = 10;
 	direction = DIRECTION_UP;
 	isDestroyed_ = false;
+	isCleaned_ = false;
 	position(0, 0);
+	graphic_ = 250;
 	movementCoolDown.StartNewTimer(movementCoolDownTime);
 }
 
@@ -49,7 +52,9 @@ void BulletAIComponent::setPosition(Position position)
 {
 	game::game.getTileRefAt(this->position).removeOverlay();
 	this->position = position;
-	game::game.getTileRefAt(position).updateOverlay(true, graphic_);
+	Tile& tile = game::game.getTileRefAt(position);
+	tile.updateOverlay(true, graphic_);
+	tile.setOverlayColor(C_Black);
 }
 
 void BulletAIComponent::setPositionNoUpdate(Position position)
@@ -77,6 +82,7 @@ void BulletAIComponent::setGraphic(char g)
 	graphic_ = g;
 	Tile& tile = game::game.getTileRefAt(position);
 	tile.updateOverlay(true, g);
+	tile.setOverlayColor(C_Black);
 }
 
 void BulletAIComponent::setGraphicNoUpdate(char g)
@@ -88,6 +94,7 @@ void BulletAIComponent::updateOverlay()
 {
 	Tile& tile = game::game.getTileRefAt(position);
 	tile.updateOverlay(true, graphic_);
+	tile.setOverlayColor(C_Black);
 }
 
 void BulletAIComponent::setID(int id)
@@ -133,8 +140,6 @@ void BulletAIComponent::serialize(fstream & file)
 		<< isDestroyed_ << std::endl
 		<< isCleaned_ << std::endl
 		<< (int)graphic_ << std::endl;
-
-	realMovementCoolDownTime = movementCoolDownTime / 2;
 }
 
 void BulletAIComponent::serialize(std::stringstream & file)
@@ -149,8 +154,6 @@ void BulletAIComponent::serialize(std::stringstream & file)
 		<< isDestroyed_ << std::endl
 		<< isCleaned_ << std::endl
 		<< (int)graphic_ << std::endl;
-
-	realMovementCoolDownTime = movementCoolDownTime / 2;
 }
 
 void BulletAIComponent::deserialize(fstream & file)
@@ -169,6 +172,14 @@ void BulletAIComponent::deserialize(fstream & file)
 		>> graphic;
 	graphic_ = graphic;
 	direction = (DIRECTION)direction_;
+	if (direction == DIRECTION_LEFT || DIRECTION_RIGHT)
+	{
+		realMovementCoolDownTime = movementCoolDownTime / 2;
+	}
+	else
+	{
+		realMovementCoolDownTime = movementCoolDownTime;
+	}
 }
 
 void BulletAIComponent::deserialize(std::stringstream & file)
@@ -187,6 +198,14 @@ void BulletAIComponent::deserialize(std::stringstream & file)
 		>> graphic;
 	graphic_ = graphic;
 	direction = (DIRECTION)direction_;
+	if (direction == DIRECTION_LEFT || DIRECTION_RIGHT)
+	{
+		realMovementCoolDownTime = movementCoolDownTime / 2;
+	}
+	else
+	{
+		realMovementCoolDownTime = movementCoolDownTime;
+	}
 }
 
 void BulletAIComponent::update()
@@ -259,6 +278,7 @@ void BulletAIComponent::update()
 		}
 
 		tile.updateOverlay(true, graphic_);
+		tile.setOverlayColor(C_Black);
 
 		std::stringstream msg;
 

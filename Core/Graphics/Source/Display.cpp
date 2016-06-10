@@ -106,20 +106,26 @@ void Display::cleanOverlays()
 	}
 }
 
-void Display::setTileAt(Position _pos, Tile _tile)
+void Display::setTileAt(Position _pos, Tile _tile, bool send)
 {
-    pair<Position, Tile> newTileChange;
-    newTileChange.first=_pos;
-    newTileChange.second=_tile;
-    tileChanges_.push_back(newTileChange);
+	pair<Position, Tile> tileChange;
+	tileChange.first = _pos;
+	tileChange.second = _tile;
+	tileChanges_.push_back(tileChange);
+	m_map[_pos] = _tile;
+	if (send)
+	{
+		updateTileServer(_pos);
+	}
 }
 
-void Display::setTileAtS(Position _pos, Tile _tile)
+void Display::setTileAtNoSend(Position _pos, Tile _tile)
 {
-	pair<Position, Tile> newTileChange;
-	newTileChange.first = _pos;
-	newTileChange.second = _tile;
-	tileChanges_.push_back(newTileChange);
+	pair<Position, Tile> tileChange;
+	tileChange.first = _pos;
+	tileChange.second = _tile;
+	tileChanges_.push_back(tileChange);
+	m_map[_pos] = _tile;
 }
 
 void Display::setTileAsSelected(Position newPos)
@@ -401,6 +407,33 @@ void Display::updateTileServer(Position pos)
 	SendServerLiteral(msg.str());
 }
 
+void Display::writeDebug(std::string _in_file_name)
+{
+	std::stringstream file_name;
+	file_name << "Logs\\Log.txt";
+	std::fstream stream("Logs\\Log.txt");
+	std::stringstream output;
+	for (auto& iter : m_map)
+	{
+		output << iter.second.getPos().getX() << ","
+			<< iter.second.getPos().getY() << ":"
+			<< iter.second.getGraphic() << ": Attribute:"
+			<< iter.second.getAttribute() << ": Color:"
+			<< iter.second.getColor() << ": Background:"
+			<< iter.second.getBackground() << ": ClaimColor:"
+			<< iter.second.getClaimColor() << ": isClaimed:";
+		if (iter.second.isClaimed())
+		{
+			output << "True" << EndLine;
+		}
+		else
+		{
+			output << "False" << EndLine;
+		}
+	}
+	stream << output.str();
+}
+
 Position Display::searchLine(Position sPos, DIRECTION direction, int amount, char target)
 {
 	Position rPos; // Return Position
@@ -630,7 +663,8 @@ void Display::removeSelectedAtTileS(Position pos)
 
 void Display::removeTileAt(Position pos)
 {
-	m_map[pos] = Tile(pos);
+	m_map[pos] = Tile();
+	m_map[pos].setPos(pos);
 }
 
 
@@ -958,27 +992,39 @@ void Display::loadWorldServer(string data)
 
 void Display::loadWorldServer(stringstream& msg)
 {
-	int text;
-	msg >> text;
+	int name;
+	msg >> name;
 
-	while (text != LOAD::END)
+	while (name != LOAD::END)
 	{
-		if (text == L_Tile)
+		if (name == L_Tile)
 		{
 			msg.clear();
 			Tile tile;
 			tile.deserialize(msg);
 			m_map[tile.getPos()] = tile;
+			if (msg.good() == false)
+			{
+				Log("LoadWorldServer: ERROR msg.good() == false : On Load L_Tile\n");
+				msg.clear();
+			}
 			msg.clear();
 		}
-		if (text == L_Player)
+		if (name == L_Player)
 		{
+			msg.clear();
 			Player player;
 			player.deserialize(msg);
 			game::pHandler.addPlayer(player);
+			if (msg.good() == false)
+			{
+				Log("LoadWorldServer: ERROR msg.good() == false : On Load L_Player\n");
+				msg.clear();
+			}
+			msg.clear();
 		}
 		msg.clear();
-		msg >> text;
+		msg >> name;
 	}
 
 	reloadAll_ = true;
@@ -1085,6 +1131,19 @@ void Display::newWorld()
 
 void Display::newWorldMulti(int pAmount, std::string names[])
 {
+	std::stringstream logMsg;
+	logMsg << "---------------" << EndLine
+		<< "Creating World" << EndLine
+		<< "Player Amount:" << pAmount << EndLine
+		<< "Players:" << EndLine;
+	for (int x = 0; x < pAmount; x++)
+	{
+		logMsg << x + 1 << "." << names[x] << EndLine;
+	}
+	logMsg << "----------------" << EndLine;
+
+	Log(logMsg.str());
+
 	game::GameHandler.Reset();
 
 	playerAmount_ = pAmount;
@@ -1158,18 +1217,19 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 	Common::CreatePlayerCore(names[0], Position(0, 0));
 	Common::SetStoneFloorAt(Position(0, 1), (WORD)B_Blue, names[0]);
 	game::GameHandler.AddPlayer(names[0]);
-	//m_map[Position(0, 0)].forceClaim(names[0]);
-	//m_map[Position(0, 0)].setClaimColor((WORD)B_Blue);
+	Position nPos(0, 0);
+	m_map[nPos].forceClaim(names[0]);
+	m_map[nPos].setClaimColor((WORD)B_Blue);
 	////////////////////
 
 	for (int x = 1; x < pAmount; x++)
 	{
 		Common::SendPlayer(&Common::CreatePlayer(p_pos[x], names[x], p_c[x], x), pAmount, x);
-		Common::SetStoneFloorAt(p_pos[x], p_c[x], names[x]);
 		Common::CreatePlayerCore(names[x], p_cpos[x]);
+		Common::SetStoneFloorAt(p_pos[x], p_c[x], names[x]);
 		game::GameHandler.AddPlayer(names[x]);
-		//m_map[p_cpos[x]].forceClaim(names[x]);
-		//m_map[p_cpos[x]].setClaimColor(p_c[x]);
+		m_map[p_cpos[x]].forceClaim(names[x]);
+		m_map[p_cpos[x]].setClaimColor(p_c[x]);
 	}
 
 	game::GameHandler.StartGame();

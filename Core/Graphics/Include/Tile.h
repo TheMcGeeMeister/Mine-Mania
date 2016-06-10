@@ -39,10 +39,13 @@ class Tile
         string getCurBeingClaimedBy() const;
         WORD getColor() const;
         WORD getBackground() const;
-        WORD getAttribute() const;
+		WORD getAttribute();
+		WORD getOverlayColor() const;
+		WORD getClaimColor() const;
         Position getPos() const;
 
         void setColor(WORD color);
+		void setOverlayColor(WORD color);
 		void setClaimColor(WORD color);
         void setBackground(WORD background);
         void setGraphic(char graphic);
@@ -100,19 +103,21 @@ class Tile
 		int fortifyAmount_;
 		int fortifiedByPlayerID_;
         char graphic_;
-		char overlayGraphic_;
+		char overlayGraphic_; // Real-Time Variable Not Saved
         string claimedBy_;
         string curBeingClaimedBy_;
         WORD color_;
         WORD background_;
 		WORD claimColor_;
+		WORD overlayColor_; // Real-Time Variable Not Saved
         bool isClaimable_;
         bool isWalkable_;
         bool isDestructable_;
         bool isWall_;
 		bool isFortified_;
+		bool isOverlayColorSet_; // Real-Time Variable Not Saved
+		bool isOverlayEnabled_; // Real-Time Variable Not Saved
         bool isClaimed_;
         bool hasGold_;
-		bool overlayEnabled_;
         Position pos_;
 };

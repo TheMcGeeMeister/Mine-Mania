@@ -59,6 +59,7 @@ SimpleNetClient::SimpleNetClient()
 	SimpleNet::ConnectSocket = INVALID_SOCKET;
 	id_ = 0;
 	sync_amount_ = 0;
+	pingMessage_ = "-1";
 }
 
 SimpleNetClient::~SimpleNetClient()
@@ -292,6 +293,10 @@ void SimpleNetClient::Do(std::string rMsg)
 			msg >> name;
 			game::m_sounds.PlaySoundR(name);
 		}
+		else if (name == Ping)
+		{
+			SendLiteral(pingMessage_);
+		}
 		else if (name == SetSelected)
 		{
 			int posX;
@@ -318,7 +323,7 @@ void SimpleNetClient::Do(std::string rMsg)
 		{
 			Tile tile;
 			tile.deserialize(msg);
-			game::game.setTileAtS(tile.getPos(), tile);
+			game::game.setTileAtNoSend(tile.getPos(), tile);
 			Log("Tile\n");
 		}
 		/* Updates */
@@ -367,7 +372,7 @@ void SimpleNetClient::Do(std::string rMsg)
 			string null;
 			msg >> null;
 			tile.deserialize(msg);
-			game::game.setTileAt(tile.getPos(), tile);
+			game::game.setTileAt(tile.getPos(), tile, false);
 		}
 		////////////////////////////////////////////
 
@@ -398,6 +403,10 @@ void SimpleNetClient::Do(std::string rMsg)
 			player.deserialize(msg);
 			game::pHandler.addPlayer(player);
 			Log("Player Added - " + player.getName() + "\n");
+			if (msg.good() == false)
+			{
+				Log("Error: msg.good() == false : AddPlayer\n");
+			}
 		}
 		else if (name == AddPlayerLocal)
 		{
@@ -407,6 +416,10 @@ void SimpleNetClient::Do(std::string rMsg)
 			player.deserialize(msg);
 			game::pHandler.addLocalPlayer(player);
 			Log("Local Player Added - " + player.getName() + "\n");
+			if (msg.good() == false)
+			{
+				Log("Error: msg.good() == false : AddPlayerLocal\n");
+			}
 		}
 		////////////////////////////////////////////
 
@@ -466,8 +479,15 @@ void SimpleNetClient::Do(std::string rMsg)
 				core->deserialize(msg);
 				core->setToNoUpdate();
 				core->render();
-				game::system.addEntityServer(core);
-				//Log("ECore Added");
+				if (msg.good())
+				{
+					game::system.addEntityServer(core);
+				}
+				else
+				{
+					Log("Msg.Good == False : Core Deserialize\n");
+				}
+				Log("ECore Added\n");
 			}
 			else if (name == EGoldSpawn)
 			{
@@ -545,6 +565,8 @@ void SimpleNetClient::Do(std::string rMsg)
 				if (game::pHandler.getPlayerByID(id, &player))
 				{
 					player->setHealth(health);
+					HealthComponent& health = player->getHealthComponentRef();
+					health.delayHealing(4);
 				}
 			}
 			else if (name == Kill)
@@ -604,15 +626,16 @@ void SimpleNetClient::Do(std::string rMsg)
 		{
 			std::string world = game::game.getWorld();
 			std::stringstream wMsg; // World Msg
-			wMsg << SendDefault << endl;
-			wMsg << World << endl;
-			wMsg << world << endl;
+			wMsg << SendDefault << EndLine
+				<< World << EndLine
+				<< world << EndLine;
 			SendLiteral(wMsg.str());
 			//Log("GetWorld\n");
 		}
 		else if (name == World)
 		{
 			game::game.loadWorldServer(msg);
+			game::system.cleanAndUpdateOverlays();
 			//Log("World\n");
 		}
 		else if (name == SetHost)

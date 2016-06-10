@@ -145,6 +145,11 @@ void HealthComponent::forceHealth(double amount)
 	if (health_ > maxHealth_) maxHealth_ = amount;
 }
 
+void HealthComponent::delayHealing(double timeInSeconds)
+{
+	regenCoolDown.StartNewTimer(timeInSeconds);
+}
+
 void HealthComponent::reset()
 {
 	maxHealth_ = 100;

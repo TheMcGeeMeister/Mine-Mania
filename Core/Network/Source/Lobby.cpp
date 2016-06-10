@@ -85,7 +85,7 @@ bool Lobby::Go()
 				game::server.SendLiteral(msg.str());
 				game::pHandler.getLocalPlayer().setName(UI.getSectionRef(1).getIVar());
 				DrawList();
-			}
+			} // Name
 			else if (selected == 2)
 			{
 				std::stringstream msg;
@@ -112,7 +112,7 @@ bool Lobby::Go()
 					m_players[game::server.getId()].second = true;
 				}
 				DrawList();
-			}
+			} // Ready up
 			else if (selected == 3)
 			{
 				bool isStartReady = true;
@@ -184,10 +184,13 @@ bool Lobby::Go()
 						started_ = true;
 					}
 				}
-			}
+			} // Start(Host Only)
 		}
 		if (started_ == true)
 		{
+			std::stringstream log_msg;
+			log_msg << "Multiplayer Started With ID:" << game::pHandler.getLocalPlayer().getID() << EndLine;
+			Common::Log(log_msg.str());
 			return true;
 		}
 		Sleep(10);

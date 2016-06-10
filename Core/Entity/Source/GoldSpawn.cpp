@@ -148,8 +148,10 @@ void GoldSpawn::send()
 
 void GoldSpawn::render()
 {
-	game::game.getTileRefAt(pos_).updateOverlay(true, '@');
-	game::game.getTileRefAt(pos_).setBackground(color_);
+	Tile& tile = game::game.getTileRefAt(pos_);
+	tile.updateOverlay(true, '@');
+	tile.setBackground(color_);
+	tile.setOverlayColor(C_Black);
 }
 
 void GoldSpawn::activate(Player* player)

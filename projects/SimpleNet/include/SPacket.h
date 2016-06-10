@@ -31,6 +31,8 @@ enum SPacketNames
 
 	PlayerConnect, ServerDisconnected,
 
+	Ping,
+
 	Lobby,
 	///////////////////
 	LobbyAdd,

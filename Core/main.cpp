@@ -12,6 +12,7 @@
 #include "GameManager.h" // Handles winning/losing
 #include "Timer.h" // Timer utility class
 #include "Player.h" // Player Class
+#include "Core.h" // Player Core Class
 #include "Tile.h" // Tile Class
 #include "Lobby.h" // Multiplayer Lobby Class
 #include "Wave.h" // Sound Class
@@ -44,6 +45,7 @@ namespace game
 	Display game;
 	UserInterface tileUI(30, 8, 0, 30, 1);
 	UserInterface SlideUI(25, 15, 75, 0, 1);
+	UserInterface DebugUI(25, 8, 75, 16, 1);
 	UserInterface ServerUI(18, 3, 75, 27, 1);
 	UserInterface statsUI(16, 5, 32, 30, 1);
 	SimpleNetClient server;
@@ -317,6 +319,13 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				case 'c':player.purchaseTurret(); break;
 				case 'v':player.claimOnHand(); InputCoolDown.StartNewTimer(0.075); break;
 				case 'b':player.purchaseBullet(); break;
+				//case 'h':game::game.writeDebug("WorldInfo.txt"); break;
+				/*case 'k':
+				{
+					std::stringstream msg;
+					msg << SendDefault << EndLine << World << EndLine << game::game.getWorld() << EndLine;
+					SendServerLiteral(msg.str()); break;
+				}*/
 				case 72:player.mine(DIRECTION_UP); InputCoolDown.StartNewTimer(0.075); break;
 				case 80:player.mine(DIRECTION_DOWN); InputCoolDown.StartNewTimer(0.075); break;
 				case 75:player.mine(DIRECTION_LEFT); InputCoolDown.StartNewTimer(0.075); break;
@@ -359,16 +368,22 @@ void updateGameInterface()
 	TileInfo.getSectionRef(2).setVar(1, tile.getClaimedBy());
 
 	stringstream claimed;
-	claimed << tile.getClaimedPercentage() << "%";
-	TileInfo.getSectionRef(3).setVar(1, claimed.str());
+	if(tile.isClaimedBy(player.getName()))
+	{
+		claimed << "100%";
+		TileInfo.getSectionRef(3).setVar(1, claimed.str());
+	}
+	else
+	{
+		claimed << tile.getClaimedPercentage() << "%";
+		TileInfo.getSectionRef(3).setVar(1, claimed.str());
+	}
 
 	TileInfo.getSectionRef(4).setVar(1, player.getAmmoAmount());
 
 	std::stringstream gold;
 	gold << player.getGoldAmount();
 	TileInfo.getSectionRef(5).setVar(1, gold.str());
-
-	TileInfo.update();
 
 	std::stringstream level;
 	level << player.getLevel();
@@ -377,6 +392,8 @@ void updateGameInterface()
 	std::stringstream exp;
 	exp << player.getExp() << "/" << player.getMaxExp();
 	game::statsUI.getSectionRef(3).setVar(1, exp.str());
+
+	TileInfo.update();
 }
 
 void lobbyMenu()
@@ -928,6 +945,34 @@ bool mainMenu(Display &game, thread& sThread, bool& threadStarted)
     return false;
 }
 
+void updateDebugInterface()
+{
+	std::stringstream id;
+	id << game::pHandler.getLocalPlayer().getID();
+	game::DebugUI.getSectionRef(1).setVar(1, id.str());
+	std::stringstream core;
+	if (game::pHandler.getLocalPlayer().getID() == 1)
+	{
+		Entity* entity;
+		if (game::system.getEntityAt(Position(74, 29), &entity))
+		{
+			Core* pCore = reinterpret_cast<Core*>(entity);
+			core << entity->getPos().getX() << ", " << entity->getPos().getY() << " :" << pCore->getGraphic();
+			game::DebugUI.getSectionRef(2).setVar(1, core.str());
+		}
+	}
+	std::stringstream playerPos;
+	playerPos << game::pHandler.getLocalPlayer().getPos().getX() << ", " << game::pHandler.getLocalPlayer().getPos().getY();
+	game::DebugUI.getSectionRef(3).setVar(1, playerPos.str());
+
+	std::stringstream tileInfo;
+	Tile& tile = game::game.getTileRefAt(Position(74, 29));
+	tileInfo << tile.getOverlayGraphic();
+	game::DebugUI.getSectionRef(4).setVar(1, tileInfo.str());
+
+	game::DebugUI.update();
+}
+
 void gameLoop()
 {
 	Timer InputCoolDown;
@@ -937,7 +982,8 @@ void gameLoop()
 	game::ServerUI.isHidden(false);
 	game::tileUI.isHidden(false);
 	game::statsUI.isHidden(false);
-	player.getUIRef().isHidden(true);
+	//game::DebugUI.isHidden(false);
+	player.getUIRef().isHidden(false);
 
 	clearInput();
 
@@ -955,6 +1001,7 @@ void gameLoop()
 		game::TileHandler.update();
 		player.updateMiningUI();
 		updateGameInterface();
+		//updateDebugInterface();
 		game::SlideUI.update();
 		game::ServerUI.update();
 		game::statsUI.update();
@@ -1059,6 +1106,17 @@ void initializeMenus()
 	game::statsUI.addSection("Exp:", false, true);
 	game::statsUI.getSectionRef(2).push_backVar(" ");
 	game::statsUI.getSectionRef(3).push_backVar(" ");
+
+
+	/*DEBUG*/
+	game::DebugUI.addSection("Player ID:", false, true);
+	game::DebugUI.getSectionRef(1).push_backVar("??");
+	game::DebugUI.addSection("Player Core:", false, true);
+	game::DebugUI.getSectionRef(2).push_backVar("??");
+	game::DebugUI.addSection("Player Pos:", false, true);
+	game::DebugUI.getSectionRef(3).push_backVar("??");
+	game::DebugUI.addSection("Tile:", false, true);
+	game::DebugUI.getSectionRef(4).push_backVar("??");
 
 }
 

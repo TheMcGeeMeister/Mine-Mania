@@ -22,6 +22,7 @@ Tile::Tile()
 {
 	graphic_ = TG_StoneFloor;
 	overlayGraphic_ = ' ';
+	overlayColor_ = 0;
 	color_ = TGC_StoneFloor;
 	claimColor_ = B_Black;
 	background_ = TGB_StoneFloor;
@@ -31,7 +32,8 @@ Tile::Tile()
 	fortifiedByPlayerID_ = 0;
 	objectid_ = 0;
 	isClaimable_ = true;
-	overlayEnabled_ = false;
+	isOverlayEnabled_ = false;
+	isOverlayColorSet_ = false;
 	claimedBy_ = "Neutral";
 	curBeingClaimedBy_ = "None";
 	isWalkable_ = true;
@@ -47,7 +49,8 @@ Tile::Tile()
 Tile::Tile(Position pos)
 {
 	graphic_ = TG_StoneFloor;
-	overlayGraphic_ = 'N';
+	overlayGraphic_ = ' ';
+	overlayColor_ = 0;
 	color_ = TGC_StoneFloor;
 	claimColor_ = B_Black;
 	background_ = TGB_StoneFloor;
@@ -57,7 +60,8 @@ Tile::Tile(Position pos)
 	fortifiedByPlayerID_ = 0;
 	objectid_ = 0;
 	isClaimable_ = true;
-	overlayEnabled_ = false;
+	isOverlayEnabled_ = false;
+	isOverlayColorSet_ = false;
 	claimedBy_ = "Neutral";
 	curBeingClaimedBy_ = "None";
 	isWalkable_ = true;
@@ -84,24 +88,60 @@ WORD Tile::getBackground() const
 	return background_;
 }
 
-WORD Tile::getAttribute() const
+WORD Tile::getAttribute()
 {
-	WORD attribute;
-	if (isClaimed_ == false)
+    WORD attribute;
+	if (isOverlayColorSet_ == false)
 	{
-		if (background_ == 0)
+		overlayColor_ = color_;
+	}
+	if (isOverlayEnabled_)
+	{
+		if (isClaimed_ == false)
 		{
-			attribute = color_;
+			if (background_ == 0)
+			{
+				attribute = overlayColor_;
+			}
+			else
+			{
+				attribute = overlayColor_ | background_;
+			}
 		}
 		else
 		{
-			attribute = color_ | background_;
+			attribute = overlayColor_ | claimColor_;
 		}
-	}else
+	}
+	else
 	{
-		attribute = color_ | claimColor_;
+		if (isClaimed_ == false)
+		{
+			if (background_ == 0)
+			{
+				attribute = color_;
+			}
+			else
+			{
+				attribute = color_ | background_;
+			}
+		}
+		else
+		{
+			attribute = color_ | claimColor_;
+		}
 	}
 	return attribute;
+}
+
+WORD Tile::getOverlayColor() const
+{
+	return overlayColor_;
+}
+
+WORD Tile::getClaimColor() const
+{
+	return claimColor_;
 }
 
 Position Tile::getPos() const
@@ -111,7 +151,7 @@ Position Tile::getPos() const
 
 char Tile::getGraphic() const
 {
-	if (overlayEnabled_ == true)
+	if (isOverlayEnabled_ == true)
 		return overlayGraphic_;
 	else
 		return graphic_;
@@ -162,7 +202,7 @@ bool Tile::hasGold() const
 
 bool Tile::hasOverlay() const
 {
-	return overlayEnabled_;
+	return isOverlayEnabled_;
 }
 
 double Tile::getHealth() const
@@ -227,14 +267,15 @@ void Tile::setColor(WORD color)
 	game::TileHandler.push_back(pos_);
 }
 
+void Tile::setOverlayColor(WORD color)
+{
+	overlayColor_ = color;
+	isOverlayColorSet_ = true;
+}
+
 void Tile::setClaimColor(WORD color)
 {
 	claimColor_ = color;
-	if (isClaimed_)
-	{
-		background_ = claimColor_;
-		game::TileHandler.push_back(pos_);
-	}
 }
 
 void Tile::setIsWall(bool wall)
@@ -284,7 +325,7 @@ void Tile::setObjectId(int id)
 
 void Tile::setOverlayEnabled(bool is) // Deprecated Use updateOverlay(bool, char)
 {
-	overlayEnabled_ = is;
+	isOverlayEnabled_ = is;
 	game::TileHandler.push_back(pos_);
 }
 
@@ -698,21 +739,23 @@ bool Tile::mine(int damage, Player& player)
 void Tile::removeOverlay()
 {
 	overlayGraphic_ = ' ';
-	overlayEnabled_ = false;
+	overlayColor_ = 0;
+	isOverlayEnabled_ = false;
+	isOverlayColorSet_ = false;
 	game::TileHandler.push_back(pos_);
 }
 
 void Tile::updateOverlay(bool enabled, char graphic)
 {
 	overlayGraphic_ = graphic;
-	overlayEnabled_ = enabled;
+	isOverlayEnabled_ = enabled;
 	game::TileHandler.push_back(pos_);
 }
 
 void Tile::updateOverlayS(bool enabled, char graphic)
 {
 	overlayGraphic_ = graphic;
-	overlayEnabled_ = enabled;
+	isOverlayEnabled_ = enabled;
 	game::TileHandler.push_back(pos_);
 }
 
@@ -810,7 +853,6 @@ void Tile::serialize(fstream& stream)
 	 << claimedPercentage_ << endl
 	 << gold_ << endl
 	 << (int)graphic_ << endl
-	 << (int)overlayGraphic_ << endl
 	 << claimedBy_ << endl
 	 << curBeingClaimedBy_ << endl
 	 << fortifiedByPlayerID_ << endl
@@ -822,9 +864,8 @@ void Tile::serialize(fstream& stream)
 	 << isDestructable_ << endl
 	 << isWall_ << endl
 	 << isFortified_ << endl
-	 << isClaimable_ << endl
+	 << isClaimed_ << EndLine
 	 << hasGold_ << endl
-	 << overlayEnabled_ << endl
 	 << pos_x << endl
 	 << pos_y << endl;
 }
@@ -839,7 +880,6 @@ void Tile::serialize(ofstream& stream)
 		<< claimedPercentage_ << endl
 		<< gold_ << endl
 		<< (int)graphic_ << endl
-		<< (int)overlayGraphic_ << endl
 		<< claimedBy_ << endl
 		<< curBeingClaimedBy_ << endl
 		<< fortifiedByPlayerID_ << endl
@@ -851,9 +891,8 @@ void Tile::serialize(ofstream& stream)
 		<< isDestructable_ << endl
 		<< isWall_ << endl
 		<< isFortified_ << endl
-		<< isClaimable_ << endl
+		<< isClaimed_ << EndLine
 		<< hasGold_ << endl
-		<< overlayEnabled_ << endl
 		<< pos_x << endl
 		<< pos_y << endl;
 }
@@ -868,7 +907,6 @@ void Tile::serialize(stringstream& stream)
 		<< claimedPercentage_ << endl
 		<< gold_ << endl
 		<< (int)graphic_ << endl
-		<< (int)overlayGraphic_ << endl
 		<< claimedBy_ << endl
 		<< curBeingClaimedBy_ << endl
 		<< fortifiedByPlayerID_ << endl
@@ -880,45 +918,10 @@ void Tile::serialize(stringstream& stream)
 		<< isDestructable_ << endl
 		<< isWall_ << endl
 		<< isFortified_ << endl
-		<< isClaimable_ << endl
+		<< isClaimed_ << EndLine
 		<< hasGold_ << endl
-		<< overlayEnabled_ << endl
 		<< pos_x << endl
 		<< pos_y << endl;
-}
-
-void Tile::deserialize(stringstream& stream)
-{
-	int pos_x = 0;
-	int pos_y = 0;
-	int graphic = 0;
-	int overlayGraphic = 0;
-	stream >> health.getHealthRef()
-	 >> health.getMaxHealthRef()
-	 >> claimedPercentage_
-	 >> gold_
-	 >> graphic
-	 >> overlayGraphic
-	 >> claimedBy_
-	 >> curBeingClaimedBy_
-	 >> fortifiedByPlayerID_
-	 >> color_
-	 >> claimColor_
-	 >> background_
-	 >> isClaimable_
-	 >> isWalkable_
-	 >> isDestructable_
-	 >> isWall_
-	 >> isFortified_
-	 >> isClaimable_
-	 >> hasGold_
-	 >> overlayEnabled_
-	 >> pos_x
-	 >> pos_y;
-	pos_.setX(pos_x);
-	pos_.setY(pos_y);
-	graphic_ = graphic;
-	overlayGraphic_ = overlayGraphic;
 }
 
 void Tile::deserialize(fstream& stream)
@@ -932,7 +935,6 @@ void Tile::deserialize(fstream& stream)
 		>> claimedPercentage_
 		>> gold_
 		>> graphic
-		>> overlayGraphic
 		>> claimedBy_
 		>> curBeingClaimedBy_
 		>> fortifiedByPlayerID_
@@ -944,9 +946,8 @@ void Tile::deserialize(fstream& stream)
 		>> isDestructable_
 		>> isWall_
 		>> isFortified_
-		>> isClaimable_
+		>> isClaimed_
 		>> hasGold_
-		>> overlayEnabled_
 		>> pos_x
 		>> pos_y;
 	pos_.setX(pos_x);
@@ -966,7 +967,6 @@ void Tile::deserialize(ifstream& stream)
 		>> claimedPercentage_
 		>> gold_
 		>> graphic
-		>> overlayGraphic
 		>> claimedBy_
 		>> curBeingClaimedBy_
 		>> fortifiedByPlayerID_
@@ -978,9 +978,40 @@ void Tile::deserialize(ifstream& stream)
 		>> isDestructable_
 		>> isWall_
 		>> isFortified_
-		>> isClaimable_
+		>> isClaimed_
 		>> hasGold_
-		>> overlayEnabled_
+		>> pos_x
+		>> pos_y;
+	pos_.setX(pos_x);
+	pos_.setY(pos_y);
+	graphic_ = graphic;
+	overlayGraphic_ = overlayGraphic;
+}
+
+void Tile::deserialize(std::stringstream& stream)
+{
+	int pos_x = 0;
+	int pos_y = 0;
+	int graphic = 0;
+	int overlayGraphic = 0;
+	stream >> health.getHealthRef()
+		>> health.getMaxHealthRef()
+		>> claimedPercentage_
+		>> gold_
+		>> graphic
+		>> claimedBy_
+		>> curBeingClaimedBy_
+		>> fortifiedByPlayerID_
+		>> color_
+		>> claimColor_
+		>> background_
+		>> isClaimable_
+		>> isWalkable_
+		>> isDestructable_
+		>> isWall_
+		>> isFortified_
+		>> isClaimed_
+		>> hasGold_
 		>> pos_x
 		>> pos_y;
 	pos_.setX(pos_x);
