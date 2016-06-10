@@ -156,7 +156,7 @@ class Player : public Entity
         int manaAmount_;
         int maxManaAmount_;
 		int handMode_;
-		int mineProgress_;
+		int wallPlacementProgress_;
 		int ammo_;
 		int passiveGoldIncrease_;
 		int id_;

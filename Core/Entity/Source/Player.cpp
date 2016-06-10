@@ -460,7 +460,7 @@ void Player::mine(DIRECTION direction)
 		if (moved_ == true)
 		{
 			moved_ = false;
-			mineProgress_ = 0;
+			wallPlacementProgress_ = 0;
 		}
 		Position newPos = pos_;
 		newPos.go(direction);
@@ -474,8 +474,8 @@ void Player::mine(DIRECTION direction)
 			Tile& tile = game::game.getTileRefAt(newPos);
 			if (tile.isWall() == false)
 			{
-				mineProgress_ += 25;
-				if (mineProgress_ >= 100)
+				wallPlacementProgress_ += 25;
+				if (wallPlacementProgress_ >= 100)
 				{
 					tile.setGraphic(TG_Stone);
 					tile.isWall(true);
@@ -485,7 +485,7 @@ void Player::mine(DIRECTION direction)
 					tile.isDestructable(true);
 					game::m_sounds.PlaySoundR("Place");
 					tile.updateServer();
-					mineProgress_ = 0;
+					wallPlacementProgress_ = 0;
 				}
 			}
 			else

@@ -699,28 +699,27 @@ bool Tile::mine(int damage, Player& player)
 				Tile* tile;
 				Common::GetTileAt(cPos, &tile);
 				tile->updateFortify();
-				cPos = pos_;
 			}
+			cPos = pos_;
 			if (cPos.go(DIRECTION_DOWN))
 			{
 				Tile* tile;
 				Common::GetTileAt(cPos, &tile);
 				tile->updateFortify();
-				cPos = pos_;
 			}
+			cPos = pos_;
 			if (cPos.go(DIRECTION_LEFT))
 			{
 				Tile* tile;
 				Common::GetTileAt(cPos, &tile);
 				tile->updateFortify();
-				cPos = pos_;
 			}
+			cPos = pos_;
 			if (cPos.go(DIRECTION_RIGHT))
 			{
 				Tile* tile;
 				Common::GetTileAt(cPos, &tile);
 				tile->updateFortify();
-				cPos = pos_;
 			}
 		}
 		////////////////////
