@@ -71,6 +71,13 @@ int & Entity::getIDRef()
 	return id_;
 }
 
+NoteUI Entity::getNote()
+{
+	NoteUI default;
+	default.AddLine("No information given");
+	return default;
+}
+
 bool Entity::isKilled()
 {
 	return kill_;

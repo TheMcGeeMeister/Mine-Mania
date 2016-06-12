@@ -6,6 +6,7 @@
 #include <windows.h>
 #include "Position.h"
 #include "HealthComponent.h"
+#include "NoteUI.h"
 
 class Player;
 

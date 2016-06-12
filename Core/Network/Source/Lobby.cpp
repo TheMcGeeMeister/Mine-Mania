@@ -21,6 +21,7 @@ Lobby::Lobby() : UI(30, 10, 0, 0, 1)
 	started_ = false;
 	isReady_ = false;
 	isHost_ = false;
+	isDrawListCalled_ = false;
 	player_amount = 1;
 }
 
@@ -193,6 +194,44 @@ bool Lobby::Go()
 			Common::Log(log_msg.str());
 			return true;
 		}
+		if (isDrawListCalled_ == true)
+		{
+			isDrawListCalled_ = false;
+			int y = 11;
+			std::stringstream txt;
+			HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+			DWORD length;
+			DWORD output;
+			COORD pos;
+			COORD nPos;
+			WORD Attribute = 7;
+			pos.X = 0;
+			nPos.X = 0;
+			nPos.Y = 11;
+			pos.Y = 11;
+			for (auto& iter : m_players)
+			{
+				pos.Y = y;
+				nPos.Y = y;
+				txt << iter.second.first;
+				if (iter.second.second == true)
+				{
+					txt << ": Ready      ";
+				}
+				else
+				{
+					txt << ": Not Ready       ";
+				}
+				WriteConsoleOutputCharacter(h, txt.str().c_str(), txt.str().length(), pos, &length);
+				for (int x = 0; x < length; x++)
+				{
+					nPos.X = x;
+					WriteConsoleOutputAttribute(h, &Attribute, 1, nPos, &output);
+				}
+				y++;
+				txt.str(string());
+			}
+		}
 		Sleep(10);
 	}
 	return true;
@@ -255,40 +294,7 @@ void Lobby::Start()
 
 void Lobby::DrawList()
 {
-	int y = 11;
-	std::stringstream txt;
-	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-	DWORD length;
-	DWORD output;
-	COORD pos;
-	COORD nPos;
-	WORD Attribute = 7;
-	pos.X = 0;
-	nPos.X = 0;
-	nPos.Y = 11;
-	pos.Y = 11;
-	for (auto& iter : m_players)
-	{
-		pos.Y = y;
-		nPos.Y = y;
-		txt << iter.second.first;
-		if (iter.second.second == true)
-		{
-			txt << ": Ready      ";
-		}
-		else
-		{
-			txt << ": Not Ready       ";
-		}
-		WriteConsoleOutputCharacter(h, txt.str().c_str(), txt.str().length(), pos, &length);
-		for (int x = 0; x < length; x++)
-		{
-			nPos.X = x;
-			WriteConsoleOutputAttribute(h, &Attribute, 1, nPos, &output);
-		}
-		y++;
-		txt.str(string());
-	}
+	isDrawListCalled_ = true;
 }
 
 bool Lobby::isReady()

@@ -136,9 +136,9 @@ void UserInterface::addSection(Section newSection)
 
 	newSection.setIndex(sectionAmount_);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 
 	if (newSection.isSelectable())
 	{
@@ -156,9 +156,9 @@ void UserInterface::addSection(string text)
 	
 	Section newSection(sectionAmount_, text, false, true);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 }
 
 void UserInterface::addSection(string text, bool isSelectable)
@@ -167,9 +167,9 @@ void UserInterface::addSection(string text, bool isSelectable)
 
 	Section newSection(sectionAmount_, text, isSelectable, false);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 
 	if (newSection.isSelectable())
 	{
@@ -187,9 +187,9 @@ void UserInterface::addSection(string text, bool isSelectable, bool isNumberHidd
 
 	Section newSection(sectionAmount_, text, isSelectable, isNumberHidden);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 
 	if (newSection.isSelectable())
 	{
@@ -212,9 +212,9 @@ void UserInterface::push_back(Section newSection)
 
 	newSection.setIndex(sectionAmount_);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 
 	if (newSection.isSelectable())
 	{
@@ -232,9 +232,9 @@ void UserInterface::push_back(string text)
 
 	Section newSection(sectionAmount_, text, false, true);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 }
 
 void UserInterface::push_back(string text, bool isSelectable)
@@ -243,9 +243,9 @@ void UserInterface::push_back(string text, bool isSelectable)
 
 	Section newSection(sectionAmount_, text, isSelectable, false);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 
 	if (newSection.isSelectable())
 	{
@@ -263,9 +263,9 @@ void UserInterface::push_back(string text, bool isSelectable, bool isNumberHidde
 
 	Section newSection(sectionAmount_, text, isSelectable, isNumberHidden);
 
-	sections[sectionAmount_] = newSection;
+	sections_[sectionAmount_] = newSection;
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 
 	if (newSection.isSelectable())
 	{
@@ -285,14 +285,14 @@ void UserInterface::push_isection(string text)
 	iSection.setText(text);
 	iSection.setIndex(sectionAmount_);
 	iSection.isSelectable(true);
-	sections[sectionAmount_] = iSection;
+	sections_[sectionAmount_] = iSection;
 	if (isSelectionAvailable_ == false)
 	{
 		isSelectionAvailable_ = true;
 		curSelected_ = sectionAmount_;
 	}
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 }
 
 void UserInterface::push_isection(string text, int maxIText)
@@ -304,14 +304,14 @@ void UserInterface::push_isection(string text, int maxIText)
 	iSection.setMaxIText(maxIText);
 	iSection.setIndex(sectionAmount_);
 	iSection.isSelectable(true);
-	sections[sectionAmount_] = iSection;
+	sections_[sectionAmount_] = iSection;
 	if (isSelectionAvailable_ == false)
 	{
 		isSelectionAvailable_ = true;
 		curSelected_ = sectionAmount_;
 	}
 
-	redraws.push_back(sectionAmount_);
+	redraws_.push_back(sectionAmount_);
 }
 
 void UserInterface::setPositionVariables(PositionVariables posV)
@@ -323,25 +323,25 @@ void UserInterface::setPositionVariables(PositionVariables posV)
 
 Section& UserInterface::getSectionRef(uint16_t sectionIndex)
 {
-	if (sections.count(sectionIndex))
+	if (sections_.count(sectionIndex))
 	{
-		return sections[sectionIndex];
+		return sections_[sectionIndex];
 	}
 }
 
 Section UserInterface::getSection(uint16_t sectionIndex)
 {
-	if (sections.count(sectionIndex))
+	if (sections_.count(sectionIndex))
 	{
-		return sections[sectionIndex];
+		return sections_[sectionIndex];
 	}
 }
 
 bool UserInterface::getSectionRefT(uint16_t sectionIndex, Section ** section)
 {
-	if (sections.count(sectionIndex))
+	if (sections_.count(sectionIndex))
 	{
-		*section = &sections[sectionIndex];
+		*section = &sections_[sectionIndex];
 		return true;
 	}
 	*section = nullptr;
@@ -370,7 +370,7 @@ void UserInterface::initializeSlideUI()
 
 void UserInterface::moveSelectionUp()
 {
-	redraws.push_back(curSelected_);
+	redraws_.push_back(curSelected_);
 	if (isSelectionAvailable_ == false)
 		return;
 
@@ -378,18 +378,18 @@ void UserInterface::moveSelectionUp()
 	if (curSelected_ == 0)
 		curSelected_ = sectionAmount_;
 
-	while (sections[curSelected_].isSelectable() != true && sections[curSelected_].isHidden() == false)
+	while (sections_[curSelected_].isSelectable() != true && sections_[curSelected_].isHidden() == false)
 	{
 		curSelected_--;
 		if (curSelected_ == 0)
 			curSelected_ = sectionAmount_;
 	}
-	redraws.push_back(curSelected_);
+	redraws_.push_back(curSelected_);
 }
 
 void UserInterface::moveSelectionDown()
 {
-	redraws.push_back(curSelected_);
+	redraws_.push_back(curSelected_);
 	if (isSelectionAvailable_ == false)
 		return;
 
@@ -397,19 +397,19 @@ void UserInterface::moveSelectionDown()
 	if (curSelected_ > sectionAmount_)
 		curSelected_ = 1;
 
-	while (sections[curSelected_].isSelectable() != true && sections[curSelected_].isHidden() == false)
+	while (sections_[curSelected_].isSelectable() != true && sections_[curSelected_].isHidden() == false)
 	{
 		curSelected_++;
 		if (curSelected_ > sectionAmount_)
 			curSelected_ = 1;
 	}
-	redraws.push_back(curSelected_);
+	redraws_.push_back(curSelected_);
 }
 
 void UserInterface::moveSlideDown()
 {
-	auto iter = SlideSections.rbegin();
-	auto end = SlideSections.rend();
+	auto iter = slideSections_.rbegin();
+	auto end = slideSections_.rend();
 	bool deleteLast = false;
 	uint16_t theDelete;
 	for (; iter != end; iter++)
@@ -421,13 +421,13 @@ void UserInterface::moveSlideDown()
 		}
 		else
 		{
-			SlideSections[iter->first + 1] = iter->second;
-			SlideSections[iter->first] = "";
+			slideSections_[iter->first + 1] = iter->second;
+			slideSections_[iter->first] = "";
 		}
 	}
 	if (deleteLast == true)
 	{
-		SlideSections.erase(theDelete);
+		slideSections_.erase(theDelete);
 	}
 }
 
@@ -439,18 +439,18 @@ void UserInterface::update()
 	{
 		if (isSlideUI_ == false)
 		{
-			for (auto& iter : sections)
+			for (auto& iter : sections_)
 			{
 				if (iter.second.redraw() == true)
-					redraws.push_back(iter.second.getIndex());
+					redraws_.push_back(iter.second.getIndex());
 			}
-			if (redraws.empty() == false)
+			if (redraws_.empty() == false)
 			{
-				for (auto& iter : redraws)
+				for (auto& iter : redraws_)
 				{
 					draw(iter);
 				}
-				redraws.clear();
+				redraws_.clear();
 			}
 
 			if (isSelectionAvailable_)
@@ -480,14 +480,14 @@ void UserInterface::update()
 						}
 						if (input.isReturnPressed())
 						{
-							if (sections[curSelected_].isISection() == true)
+							if (sections_[curSelected_].isISection() == true)
 							{
 								isInIMode_ = true;
 								iManager.clear();
 								iManager.isExit(false);
 								FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
 								clearInput();
-								redraws.push_back(curSelected_);
+								redraws_.push_back(curSelected_);
 							}
 							else
 							{
@@ -526,11 +526,11 @@ void UserInterface::update()
 							char key = iManager.getInput();
 							string skey;
 							skey.push_back(key);
-							sections[curSelected_].addIText(skey);
+							sections_[curSelected_].addIText(skey);
 						}
 						if (GetAsyncKeyState(VK_BACK))
 						{
-							sections[curSelected_].removeIText();
+							sections_[curSelected_].removeIText();
 							inputCoolDown.StartNewTimer(0.100);
 						}
 					}
@@ -541,17 +541,17 @@ void UserInterface::update()
 		{
 			if (inputCoolDown.Update() == true)
 			{
-				if (SlideSections.empty() == false)
+				if (slideSections_.empty() == false)
 				{
 					moveSlideDown();
 					inputCoolDown.StartNewTimer(0.100);
 				}
 				if (slideSectionAdd_.empty() == false)
 				{
-					SlideSections[0] = slideSectionAdd_.front();
+					slideSections_[0] = slideSectionAdd_.front();
 					slideSectionAdd_.pop_front();
 				}
-				for (auto& iter : SlideSections)
+				for (auto& iter : slideSections_)
 				{
 					slideDraw(iter.first, iter.second);
 				}
@@ -562,10 +562,10 @@ void UserInterface::update()
 
 void UserInterface::reset()
 {
-	sections.clear();
-	redraws.clear();
+	sections_.clear();
+	redraws_.clear();
 	slideSectionAdd_.clear();
-	SlideSections.clear();
+	slideSections_.clear();
 	curSelected_ = 0;
 	isSelectionActivated_ = false;
 	isSelectionAvailable_ = false;
@@ -580,9 +580,23 @@ void UserInterface::reset()
 	positionVars_.offset_y = 0;
 }
 
+void UserInterface::resetDisplay()
+{
+	hide(false);
+	sections_.clear();
+	redraws_.clear();
+	slideSectionAdd_.clear();
+	slideSections_.clear();
+	curSelected_ = 0;
+	isSelectionActivated_ = false;
+	isSelectionAvailable_ = false;
+	isInIMode_ = false;
+	sectionAmount_ = 0;
+}
+
 void UserInterface::draw(uint16_t index)
 {
-	if (sections.count(index))
+	if (sections_.count(index))
 	{
 		unsigned int offset_y = positionVars_.offset_y + (positionVars_.border_width); 
 		offset_y += index - 1;
@@ -590,25 +604,25 @@ void UserInterface::draw(uint16_t index)
 		stringstream text;
 		if (curSelected_ == index)
 		{
-			if (sections[index].isISection() == true)
+			if (sections_[index].isISection() == true)
 			{
 				if (isInIMode_ == true)
 				{
-					text << sections[index]() + "_";
+					text << sections_[index]() + "_";
 				}
 				else
 				{
-					text << sections[index]() + " <-";
+					text << sections_[index]() + " <-";
 				}
 			}
 			else
 			{
-				text << sections[index]() + " <-";
+				text << sections_[index]() + " <-";
 			}
 		}
 		else
 		{
-			text << sections[index]();
+			text << sections_[index]();
 		}
 		int length = text.str().length();
 		int spaces = 0;
@@ -788,9 +802,9 @@ void UserInterface::slideClear(uint16_t index)
 
 void UserInterface::reDrawAll()
 {
-	for (auto& iter: sections)
+	for (auto& iter: sections_)
 	{
-		redraws.push_back(iter.second.getIndex());
+		redraws_.push_back(iter.second.getIndex());
 	}
 }
 
@@ -803,9 +817,9 @@ void UserInterface::SetCursorPosition(int x, int y)
 	SetConsoleCursorPosition(h, pos);
 }
 
-void UserInterface::hide()
+void UserInterface::hide(bool borderHide)
 {
-	for (auto& iter : sections)
+	for (auto& iter : sections_)
 	{
 		unsigned int offset_y = positionVars_.offset_y + positionVars_.border_width;
 		offset_y += iter.second.getIndex() - 1;
@@ -822,9 +836,12 @@ void UserInterface::hide()
 		text += string(spaces, ' ');
 		cout << createClearLine(text.length());
 	}
-	if (positionVars_.border_width > 0)
+	if (borderHide)
 	{
-		hideBorder();
+		if (positionVars_.border_width > 0)
+		{
+			hideBorder();
+		}
 	}
 }
 

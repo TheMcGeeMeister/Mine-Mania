@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include "HealthComponent.h"
 #include "SoundPlayer.h"
+#include "NoteUI.h"
 
 class Core :
 	public Entity
@@ -21,6 +22,8 @@ public:
 
 	char getGraphic();
 	std::string getOwner();
+
+	virtual NoteUI getNote();
 
 
 	virtual void update();

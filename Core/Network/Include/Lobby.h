@@ -32,6 +32,7 @@ private:
 	bool isHost_;
 	bool isReady_;
 	bool started_;
+	bool isDrawListCalled_;
 
 	UserInterface UI;
 };

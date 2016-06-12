@@ -3,6 +3,7 @@
 #include <memory>
 #include <map>
 #include "Position.h"
+#include "NoteUI.h"
 
 class Player;
 
@@ -42,6 +43,7 @@ public:
 
 	virtual int getID();
 	virtual int& getIDRef();
+	virtual NoteUI getNote();
 
 	virtual bool hasComponent(int component) = 0;
 	virtual bool isKilled() = 0;

@@ -165,6 +165,7 @@ public:
 
 	void update();
 	void reset();
+	void resetDisplay();
 	void draw(uint16_t index);
 	void drawBorder();
 	void hideBorder();
@@ -185,15 +186,15 @@ private:
 	InputManager iManager;
 	InputManager input;
 
-	std::map<uint16_t, Section> sections; // DFNC - Doesn't Follow Naming Convention
-	std::vector<uint16_t> redraws; // DFNC - Doesn't Follow Naming Convention
+	std::map<uint16_t, Section> sections_;
+	std::vector<uint16_t> redraws_;
 	std::list<std::string> slideSectionAdd_;
-	std::map<uint16_t, std::string> SlideSections; // DFNC - Doesn't Follow Naming Convention
+	std::map<uint16_t, std::string> slideSections_;
 
 	bool isSelectionAvailable_;
 
 	void SetCursorPosition(int x, int y);
-	void hide();
+	void hide(bool hideBorder = true);
 	void log(std::string text);
 	std::string createClearLine(int x);
 };

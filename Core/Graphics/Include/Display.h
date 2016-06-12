@@ -26,6 +26,7 @@ public:
 	void setFont(int font);
 	void setFontSize(int fontSize);
 	void setVolume(int volume);
+	void setLocalPlayerName(std::string name);
 	void isHidden(bool hidden);
 	void isFullscreen(bool is);
 

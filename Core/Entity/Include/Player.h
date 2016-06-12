@@ -40,6 +40,7 @@ class Player : public Entity
 		UserInterface& getUIRef();
 		HealthComponent& getHealthComponentRef();
 		PlayerStatComponent& getStatComponentRef();
+		DIRECTION getDirectionFacing();
 		//////////////////////////////////
 
 		/* Colors */
@@ -98,6 +99,7 @@ class Player : public Entity
 		void updateHandPos();
 		void disableMovementFor(int time);
 		void knockbackTo(DIRECTION direction, int amount);
+		bool isDirectionChanged();
 		Position getHandPosition();
 		//////////////////////////////////
 
@@ -137,7 +139,7 @@ class Player : public Entity
 		virtual void kill();
 		virtual void clean();
 		virtual bool damage(int damage, string name = "", bool isServer=false);
-		virtual void setPos(Position pos); // Calls forceHandPosition(Position)
+		virtual void setPos(Position pos);
 		virtual void updateOverlay();
 		virtual void updateID(); // Not used for player
 		virtual void send();
@@ -175,6 +177,7 @@ class Player : public Entity
 		bool isMining_;
 		bool isDead_;
 		bool isGoldPassive_;
+		bool isDirectionChanged_;
 
 		Position pos_;
 		Position mineUIPos_;
@@ -183,6 +186,8 @@ class Player : public Entity
         string name_;
 
 		UserInterface UI;
+
+		DIRECTION directionFacing_;
 
 		Timer movementTimer_;
 		Timer mineTimer_;

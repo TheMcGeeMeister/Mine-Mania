@@ -25,7 +25,7 @@
 #include "SimpleNetClient.h" // Server class
 #include "PositionVariables.h" // Size, and offset
 #include "TileChangeManager.h" // Updates the Display with changes
-#include "LoadParser.h" // Not really being used, but was going to be used for debbugging any saving problems
+#include "LoadParser.h"
 
 #define DEFAULT_CLEAR_WIDTH 100
 #define DEFAULT_CLEAR_HEIGHT 36
@@ -48,6 +48,7 @@ namespace game
 	UserInterface DebugUI(25, 8, 75, 16, 1);
 	UserInterface ServerUI(18, 3, 75, 27, 1);
 	UserInterface statsUI(16, 5, 32, 30, 1);
+	UserInterface noteUI(25, 12, 75, 15, 1);
 	SimpleNetClient server;
 	SoundManager m_sounds;
 	LoadParser Parser;
@@ -58,6 +59,7 @@ namespace game
 	bool gameWon = false;
 	bool isEscapedPressed_ = false;
 	bool isInGame = false;
+	bool isNoteUiCleared = true;
 	std::atomic<bool> exitFromDisconnect = false;
 	int curFont;
 	void Log(string txt)
@@ -120,6 +122,7 @@ bool isExitGame(Display& game)
 		game::tileUI.isHidden(true);
 		game::SlideUI.isHidden(true);
 		game::statsUI.isHidden(true);
+		game::noteUI.isHidden(true);
 		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		game::game.isHidden(true);
 		game::exitFromDisconnect = false;
@@ -133,10 +136,19 @@ bool isExitGame(Display& game)
 		game::tileUI.isHidden(true);
 		game::SlideUI.isHidden(true);
 		game::statsUI.isHidden(true);
+		game::noteUI.isHidden(true);
 		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		game::game.isHidden(true);
 		std::stringstream winnerTxt;
 		winnerTxt << "Player " << game::winnerName << " won the game!";
+		if (game::pHandler.getLocalPlayer().getName() == game::winnerName)
+		{
+			winnerTxt << " You Win!";
+		}
+		else
+		{
+			winnerTxt << " You Lose!";
+		}
 		Common::DisplayTextCentered(Common::GetWindowWidth(), Common::GetWindowHeight() / 2, winnerTxt.str());
 		Common::DisplayTextCentered(Common::GetWindowWidth(), (Common::GetWindowHeight() + 2) / 2, "Press Enter to Continue");
 		Common::SetCursorPosition(0, 0);
@@ -176,6 +188,7 @@ bool isExitGame(Display& game)
 		game::tileUI.isHidden(true);
 		game::SlideUI.isHidden(true);
 		game::statsUI.isHidden(true);
+		game::noteUI.isHidden(true);
 		game::pHandler.getLocalPlayer().getUIRef().isHidden(true);
 		exit = pauseGameMenu(game);
 		if (exit == false)
@@ -184,6 +197,7 @@ bool isExitGame(Display& game)
 			game::tileUI.isHidden(false);
 			game::SlideUI.isHidden(false);
 			game::statsUI.isHidden(false);
+			game::noteUI.isHidden(false);
 			game::pHandler.getLocalPlayer().updateMiningUI();
 			clearInput();
 		}
@@ -585,7 +599,6 @@ bool loadMenu(Display& game)
 
 void saveMenu(Display& game)
 {
-	Sleep(500);
 	UserInterface menu(30, 9, 0, 0, 1);
 	int worldAmount = game.getSaveAmount();
 	bool exitFlag = false;
@@ -662,7 +675,6 @@ void saveMenu(Display& game)
 		Sleep(10);
 	}
 	menu.isHidden(true);
-	Sleep(250);
 	return;
 }
 
@@ -671,14 +683,14 @@ void settingsMenu()
 	UserInterface menu(30, 9, 0, 0, 1);
 	menu.drawBorder();
 	menu.push_isection("Font Size:");
-	menu.addSection("Font:", true, false);
+	menu.addSection("Font:", true, true);
 	menu.getSectionRef(2).addVar("");
-	menu.addSection("Fullscreen:", true, false);
+	menu.addSection("Fullscreen:", true, true);
 	menu.getSectionRef(3).addVar("");
 	menu.push_isection("Name:");
-	menu.addSection("Volume", true, false);
+	menu.addSection("Volume", true, true);
 	menu.getSectionRef(5).addVar(game::game.getVolume());
-	menu.addSection("Exit", true, false);
+	menu.addSection("Exit", true, true);
 
 	menu.getSectionRef(4).setIVar(game::pHandler.getLocalPlayer().getName());
 
@@ -738,6 +750,7 @@ void settingsMenu()
 	game::game.setFontSize(fontSize);
 	game::game.setVolume(volume);
 	game::game.isFullscreen(isFullscreen);
+	game::game.setLocalPlayerName(menu.getSectionRef(4).getIVar());
 }
 
 bool newWorldMenu(Display& game)
@@ -945,6 +958,41 @@ bool mainMenu(Display &game, thread& sThread, bool& threadStarted)
     return false;
 }
 
+void updateNoteInterface()
+{
+	if (game::pHandler.getLocalPlayer().isDirectionChanged())
+	{
+		DIRECTION directionFacing = game::pHandler.getLocalPlayer().getDirectionFacing();
+		Position position = game::pHandler.getLocalPlayer().getPos();
+		if (position.go(directionFacing))
+		{
+			Entity *entity;
+			if (game::system.getEntityAt(position, &entity))
+			{
+				NoteUI note = entity->getNote();
+				int x = 0;
+				game::noteUI.resetDisplay();
+				while (note.IsEndOfNote() == false)
+				{
+					if (x == 15) break; // Make sure we don't go beyond the ui size
+					game::noteUI.addSection(note.GetNextLine(), false, true);
+					x++;
+				}
+				game::isNoteUiCleared = false;
+				game::noteUI.update();
+			}
+			else
+			{
+				if (game::isNoteUiCleared == false)
+				{
+					game::isNoteUiCleared = true;
+					game::noteUI.resetDisplay();
+				}
+			}
+		}
+	}
+}
+
 void updateDebugInterface()
 {
 	std::stringstream id;
@@ -982,6 +1030,7 @@ void gameLoop()
 	game::ServerUI.isHidden(false);
 	game::tileUI.isHidden(false);
 	game::statsUI.isHidden(false);
+	game::noteUI.isHidden(false);
 	//game::DebugUI.isHidden(false);
 	player.getUIRef().isHidden(false);
 
@@ -1001,6 +1050,7 @@ void gameLoop()
 		game::TileHandler.update();
 		player.updateMiningUI();
 		updateGameInterface();
+		updateNoteInterface();
 		//updateDebugInterface();
 		game::SlideUI.update();
 		game::ServerUI.update();

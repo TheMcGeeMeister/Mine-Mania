@@ -176,6 +176,12 @@ void Display::setVolume(int volume)
 	volume_ = volume;
 }
 
+void Display::setLocalPlayerName(std::string name)
+{
+	localPlayerName_ = name;
+	game::pHandler.getLocalPlayer().setName(name);
+}
+
 void Display::isHidden(bool hidden)
 {
 	isHidden_ = hidden;

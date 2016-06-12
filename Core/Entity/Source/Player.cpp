@@ -48,6 +48,9 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	isMining_ = false;
 	isDead_ = false;
 	isGoldPassive_ = false;
+	isDirectionChanged_ = false;
+
+	directionFacing_ = DIRECTION_DOWN;
 
 	turret_sound.SetSound("TurretPlayerHit");
 	repair_sound.SetSound("Repair");
@@ -144,6 +147,19 @@ int Player::getID()
 	return id_;
 }
 
+bool Player::isDirectionChanged()
+{
+	if (isDirectionChanged_ == true)
+	{
+		isDirectionChanged_ = false;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 string Player::getName()
 {
     return name_;
@@ -167,6 +183,11 @@ HealthComponent & Player::getHealthComponentRef()
 PlayerStatComponent& Player::getStatComponentRef()
 {
 	return stats;
+}
+
+DIRECTION Player::getDirectionFacing()
+{
+	return directionFacing_;
 }
 
 WORD Player::getClaimedColor()
@@ -305,7 +326,9 @@ void Player::healS(int amount)
 void Player::moveHand(DIRECTION direction)
 {
 	if (movementTimer_.Update() == false) return;
-	Position newPos = pos_; // The position that the player is moving to
+	directionFacing_ = direction;
+	isDirectionChanged_ = true;
+	Position newPos = pos_; // The position that the player is attempting to move to
 	newPos.go(direction);
 
 	/* Collision Checking */
@@ -318,7 +341,6 @@ void Player::moveHand(DIRECTION direction)
 		if (entity->hasKeyWord(KEYWORD_BULLET))
 		{
 			damage(Common::GetBulletDamageFromEntity(entity));
-			forceHandPosition(newPos);
 			knockbackTo((DIRECTION)Common::GetBulletDirectionFromEntity(entity), 1);
 			entity->kill();
 			game::m_sounds.PlaySoundR("Bullet");
@@ -326,7 +348,10 @@ void Player::moveHand(DIRECTION direction)
 			msg << SendDefault << EndLine << Sound << EndLine << "Bullet" << EndLine;
 			SendServerLiteral(msg.str());
 		}
-		return;
+		else
+		{
+			return;
+		}
 	}
 	///////////////////////////////////
 
@@ -335,6 +360,7 @@ void Player::moveHand(DIRECTION direction)
 	pos_ = newPos;
 	moved_ = true;
 	mined_ = false;
+	isDirectionChanged_ = true;
 	std::stringstream msg;
 	msg << SendDefault << EndLine
 		<< UpdatePlayerPosition << EndLine
@@ -504,7 +530,6 @@ void Player::mine(DIRECTION direction)
 				}
 			}
 		}
-
 	}
 	else if (handMode_ = MODE_SHOOTING)
 	{

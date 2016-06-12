@@ -95,6 +95,18 @@ std::string Core::getOwner()
 	return owner_;
 }
 
+NoteUI Core::getNote()
+{
+	NoteUI note;
+	std::stringstream line;
+	line << "Health: " << health_.getHealth() << "/" << health_.getMaxHealth();
+	note.AddLine(line.str());
+	line.str(string());
+	line << "Owner: " << owner_;
+	note.AddLine(line.str());
+	return note;
+}
+
 void Core::deserialize(std::fstream & file)
 {
 	int graphic = 0;
@@ -162,13 +174,16 @@ bool Core::damage(int damage, std::string name, bool isServer)
 	}
 	else
 	{
-		health_.damage(damage);
 		if (isSetToUpdate())
 		{
-			if (health_.isDead())
+			health_.damage(damage);
+			if (isSetToUpdate())
 			{
-				kill();
-				game::GameHandler.CoreDestroyed(owner_);
+				if (health_.isDead())
+				{
+					kill();
+					game::GameHandler.CoreDestroyed(owner_);
+				}
 			}
 		}
 	}
