@@ -20,6 +20,8 @@ class Tile
         virtual ~Tile();
         char getGraphic() const;
 
+		NoteUI getNote();
+
         bool isWall() const;
 		bool isFortified() const;
         bool isClaimed() const;

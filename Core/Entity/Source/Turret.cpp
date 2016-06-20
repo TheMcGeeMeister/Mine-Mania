@@ -7,6 +7,7 @@
 #include "SoundManager.h"
 #include "Common.h"
 #include "TileEnums.h"
+#include "Player.h"
 
 namespace game
 {
@@ -22,6 +23,7 @@ Turret::Turret()
 	graphic = '+';
 	owner = "None";
 	health.setMaxHealth(1000);
+	repair_sound_.SetSound("Repair");
 }
 
 Turret::Turret(Position position, std::string owner)
@@ -42,6 +44,18 @@ Turret::~Turret()
 HealthComponent& Turret::getHealthRef()
 {
 	return health;
+}
+
+NoteUI Turret::getNote()
+{
+	NoteUI note;
+	std::stringstream line;
+	line << "Owner: " << owner;
+	note.AddLine(line.str());
+	line.str(string());
+	line << "Health: " << health.getHealth() << "/" << health.getMaxHealth();
+	note.AddLine(line.str());
+	return note;
 }
 
 void Turret::setGraphic(char g)
@@ -134,6 +148,7 @@ void Turret::deserialize(fstream & file)
 
 void Turret::update()
 {
+	repair_sound_.Update();
 	if (isDestroyed_ == true) return;
 	ai.update();
 }
@@ -239,7 +254,14 @@ void Turret::render()
 
 void Turret::activate(Player* player)
 {
-	return;
+	if (player->getName() == owner)
+	{
+		health.heal(2);
+		if (health.isFull() == false)
+		{
+			repair_sound_.SetTimer(0.2);
+		}
+	}
 }
 
 Position Turret::getPos()

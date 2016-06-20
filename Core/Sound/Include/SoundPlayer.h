@@ -9,6 +9,7 @@ public:
 	~SoundPlayer();
 
 	void Update();
+	void Tick();
 	void SetSound(std::string sound);
 	void SetTimer(double time);
 	void StopSound();

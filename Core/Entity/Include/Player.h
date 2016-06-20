@@ -7,8 +7,11 @@
 #include "HealthComponent.h"
 #include "PlayerStatComponent.h"
 #include "SoundPlayer.h"
+#include "NoteUI.h"
 
 using namespace std;
+
+enum PLACE_MODE;
 
 class Display;
 
@@ -20,6 +23,8 @@ class Player : public Entity
         virtual ~Player();
 
 		void stopSounds();
+
+		virtual NoteUI getNote();
 
         /* Getters */
 		//////////////////////////////////
@@ -36,11 +41,13 @@ class Player : public Entity
 		int getMaxExp();
 		int getID();
         string getName();
+		string getPlaceModeInText();
 		Position getSpawnPos();
 		UserInterface& getUIRef();
 		HealthComponent& getHealthComponentRef();
 		PlayerStatComponent& getStatComponentRef();
 		DIRECTION getDirectionFacing();
+		PLACE_MODE getPlaceMode();
 		//////////////////////////////////
 
 		/* Colors */
@@ -69,6 +76,7 @@ class Player : public Entity
 		void setHealth(int amount);
 		void setMaxHealth(int amount);
 		void setID(int id);
+		void setPlaceMode(PLACE_MODE placeMode);
 		//////////////////////////////////
 
 		/* Stats*/
@@ -92,10 +100,11 @@ class Player : public Entity
 		void mineRight(Display& game);
 		void mine(DIRECTION direction);
 		void forceHandPosition(Position newPos, Display& game); /* Updates Position on map, and changes variable :: Deprecated Use forceHandPositon(Position);*/
-		void forceHandPosition(Position newPos); /*Also updates position on the map*/
+		void forceHandPosition(Position newPos); /* Also updates position on the map */
 		void claimOnHand();
 		void switchMode();
 		void switchModeTo(int mode);
+		void swapPlaceMode();
 		void updateHandPos();
 		void disableMovementFor(int time);
 		void knockbackTo(DIRECTION direction, int amount);
@@ -171,6 +180,9 @@ class Player : public Entity
 		SoundPlayer turret_sound;
 		SoundPlayer repair_sound;
 		SoundPlayer mine_sound;
+		SoundPlayer fortify_sound;
+
+		PLACE_MODE placeMode_;
 
 		bool moved_;
 		bool mined_;

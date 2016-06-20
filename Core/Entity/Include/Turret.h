@@ -5,6 +5,8 @@
 #include "TurretAIComponent.h"
 #include "HealthComponent.h"
 #include "Position.h"
+#include "NoteUI.h"
+#include "SoundPlayer.h"
 
 class Turret : public Entity
 {
@@ -14,6 +16,8 @@ public:
 	~Turret();
 
 	HealthComponent& getHealthRef();
+
+	virtual NoteUI getNote();
 
 	void setGraphic(char g);
 	void setOwner(std::string owner);
@@ -59,5 +63,6 @@ private:
 	bool isDestroyed_;
 
 	TurretAIComponent ai;
+	SoundPlayer repair_sound_;
 };
 

@@ -207,6 +207,18 @@ bool Position::operator==(const Position & pos)
 	}
 }
 
+bool Position::operator!=(const Position & pos)
+{
+	if (x_ == pos.x_ & y_ == pos.y_)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 std::string Position::serializeR()
 {
 	std::stringstream msg;

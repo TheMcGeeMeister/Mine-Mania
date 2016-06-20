@@ -47,11 +47,10 @@ namespace game
 	UserInterface SlideUI(25, 15, 75, 0, 1);
 	UserInterface DebugUI(25, 8, 75, 16, 1);
 	UserInterface ServerUI(18, 3, 75, 27, 1);
-	UserInterface statsUI(16, 5, 32, 30, 1);
+	UserInterface statsUI(16, 6, 32, 30, 1);
 	UserInterface noteUI(25, 12, 75, 15, 1);
 	SimpleNetClient server;
 	SoundManager m_sounds;
-	LoadParser Parser;
 	std::string winnerName;
 	class Lobby lobby;
 	bool threadExit;
@@ -60,6 +59,7 @@ namespace game
 	bool isEscapedPressed_ = false;
 	bool isInGame = false;
 	bool isNoteUiCleared = true;
+	Position prevPosNoteUI;
 	std::atomic<bool> exitFromDisconnect = false;
 	int curFont;
 	void Log(string txt)
@@ -333,6 +333,7 @@ void LOGIC(Timer& InputCoolDown, Display& game)
 				case 'c':player.purchaseTurret(); break;
 				case 'v':player.claimOnHand(); InputCoolDown.StartNewTimer(0.075); break;
 				case 'b':player.purchaseBullet(); break;
+				case 'z':player.swapPlaceMode(); break;
 				//case 'h':game::game.writeDebug("WorldInfo.txt"); break;
 				/*case 'k':
 				{
@@ -371,14 +372,19 @@ void loadScreen(int time, string text)
 
 void updateGameInterface()
 {
+	// Initialization
 	Player& player = game::pHandler.getLocalPlayer();
 	Display& game = game::game;
 	UserInterface& TileInfo = game::tileUI;
+
+	// Health
 	std::stringstream health;
 	Tile& tile = game.getTileRefAt(player.getHandPosition());
 	health << game::pHandler.getLocalPlayer().getHealth() << "/" << game::pHandler.getLocalPlayer().getMaxHealth();
 	TileInfo.getSectionRef(1).setVar(1, health.str());
+	
 
+	// Claimed
 	TileInfo.getSectionRef(2).setVar(1, tile.getClaimedBy());
 
 	stringstream claimed;
@@ -393,19 +399,34 @@ void updateGameInterface()
 		TileInfo.getSectionRef(3).setVar(1, claimed.str());
 	}
 
+
+	// Ammo
 	TileInfo.getSectionRef(4).setVar(1, player.getAmmoAmount());
 
+	// Gold
 	std::stringstream gold;
 	gold << player.getGoldAmount();
 	TileInfo.getSectionRef(5).setVar(1, gold.str());
 
+
+	/* Stats UI */
+	//////////////////////////
+
+	// Level
 	std::stringstream level;
 	level << player.getLevel();
 	game::statsUI.getSectionRef(2).setVar(1, level.str());
 
+	// Exp
 	std::stringstream exp;
 	exp << player.getExp() << "/" << player.getMaxExp();
 	game::statsUI.getSectionRef(3).setVar(1, exp.str());
+
+	// Place Mode
+	std::stringstream place;
+	place << player.getPlaceModeInText();
+	game::statsUI.getSectionRef(4).setVar(1, place.str());
+	//////////////////////////
 
 	TileInfo.update();
 }
@@ -967,29 +988,97 @@ void updateNoteInterface()
 		if (position.go(directionFacing))
 		{
 			Entity *entity;
+			Player *player;
 			if (game::system.getEntityAt(position, &entity))
 			{
 				NoteUI note = entity->getNote();
 				int x = 0;
-				game::noteUI.resetDisplay();
-				while (note.IsEndOfNote() == false)
+				if (position != game::prevPosNoteUI)
 				{
-					if (x == 15) break; // Make sure we don't go beyond the ui size
-					game::noteUI.addSection(note.GetNextLine(), false, true);
-					x++;
+					game::noteUI.resetDisplay();
+					while (note.IsEndOfNote() == false)
+					{
+						if (x == 15) break; // Make sure we don't go beyond the ui size
+						game::noteUI.addSection(note.GetNextLine(), false, true);
+						x++;
+					}
+				}
+				else
+				{
+					while (note.IsEndOfNote() == false)
+					{
+						if (x == 15) break; // Make sure we don't go beyond the ui size
+						game::noteUI.getSectionRef(x + 1).setText(note.GetNextLine());
+						x++;
+					}
+				}
+				game::isNoteUiCleared = false;
+
+				game::noteUI.update();
+			}
+			else if (game::pHandler.getPlayerAt(position, &player))
+			{
+				NoteUI note = player->getNote();
+				int x = 0;
+				if (position != game::prevPosNoteUI)
+				{
+					game::noteUI.resetDisplay();
+					while (note.IsEndOfNote() == false)
+					{
+						if (x == 15) break; // Make sure we don't go beyond the ui size
+						game::noteUI.addSection(note.GetNextLine(), false, true);
+						x++;
+					}
+				}
+				else
+				{
+					while (note.IsEndOfNote() == false)
+					{
+						if (x == 15) break; // Make sure we don't go beyond the ui size
+						game::noteUI.getSectionRef(x + 1).setText(note.GetNextLine());
+						x++;
+					}
 				}
 				game::isNoteUiCleared = false;
 				game::noteUI.update();
 			}
 			else
 			{
-				if (game::isNoteUiCleared == false)
+				Tile& tile = game::game.getTileRefAt(position);
+				NoteUI note = tile.getNote();
+				int x = 0;
+				if (position != game::prevPosNoteUI)
 				{
-					game::isNoteUiCleared = true;
 					game::noteUI.resetDisplay();
+					while (note.IsEndOfNote() == false)
+					{
+						if (x == 15) break; // Make sure we don't go beyond the ui size
+						game::noteUI.addSection(note.GetNextLine(), false, true);
+						x++;
+					}
 				}
+				else
+				{
+					while (note.IsEndOfNote() == false)
+					{
+						if (x == 15) break; // Make sure we don't go beyond the ui size
+						game::noteUI.getSectionRef(x + 1).setText(note.GetNextLine());
+						x++;
+					}
+				}
+				game::isNoteUiCleared = false;
+				game::noteUI.update();
 			}
 		}
+		else
+		{
+			if (game::isNoteUiCleared == false)
+			{
+				game::isNoteUiCleared = true;
+				game::noteUI.resetDisplay();
+			}
+		}
+		game::prevPosNoteUI = position;
 	}
 }
 
@@ -1154,8 +1243,10 @@ void initializeMenus()
 	game::statsUI.addSection("Player", false, true);
 	game::statsUI.addSection("Level:", false, true);
 	game::statsUI.addSection("Exp:", false, true);
+	game::statsUI.addSection("Hand:", false, true);
 	game::statsUI.getSectionRef(2).push_backVar(" ");
 	game::statsUI.getSectionRef(3).push_backVar(" ");
+	game::statsUI.getSectionRef(4).push_backVar(" ");
 
 
 	/*DEBUG*/
@@ -1231,12 +1322,14 @@ void loadSounds()
 	game::m_sounds.AddSound("Loser", "Sounds//Loser.wav");
 	game::m_sounds.AddSound("Repair", "Sounds//Repair.wav");
 	game::m_sounds.AddSound("Swap", "Sounds//Swap.wav");
+	game::m_sounds.AddSound("Fortify", "Sounds//Fortify.wav");
 
 	game::m_sounds.SetInfinite("Mining");
 	game::m_sounds.SetInfinite("Ambient");
 	game::m_sounds.SetInfinite("TurretPlayerHit");
 	game::m_sounds.SetInfinite("Menu");
 	game::m_sounds.SetInfinite("Repair");
+	game::m_sounds.SetInfinite("Fortify");
 }
 
 int main()

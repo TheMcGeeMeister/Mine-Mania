@@ -1205,7 +1205,7 @@ void Display::newWorldMulti(int pAmount, std::string names[])
 			newPos.setY(y);
 			if ((rand() % 15) == key)
 			{
-				gold.setGoldAmount((rand() % 500) + 101);
+				gold.setGoldAmount((rand() % 250) + 100);
 				gold.setPos(newPos);
 				m_map[newPos] = gold;
 			}

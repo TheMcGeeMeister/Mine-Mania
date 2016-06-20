@@ -26,6 +26,11 @@ enum PLAYER_MODE
 	MODE_MINING, MODE_HAND, MODE_SHOOTING,
 };
 
+enum PLACE_MODE
+{
+	PLACE_WALL, PLACE_GOLD,
+};
+
 Player::Player() : UI(23, 5, 50, 30, 1)
 {
     goldAmount_ = 100;
@@ -49,12 +54,14 @@ Player::Player() : UI(23, 5, 50, 30, 1)
 	isDead_ = false;
 	isGoldPassive_ = false;
 	isDirectionChanged_ = false;
+	placeMode_ = PLACE_WALL;
 
 	directionFacing_ = DIRECTION_DOWN;
 
 	turret_sound.SetSound("TurretPlayerHit");
 	repair_sound.SetSound("Repair");
 	mine_sound.SetSound("Mining");
+	fortify_sound.SetSound("Fortify");
 
 	UI.push_back("Mining", false, true);
 	UI.push_back("Health:", false, true);
@@ -75,6 +82,16 @@ Player::Player(Player & p)
 Player::~Player()
 {
     //dtor
+}
+
+NoteUI Player::getNote()
+{
+	NoteUI note;
+	std::stringstream line;
+	note.AddLine(name_);
+	line << "Health: " << health.getHealth() << "/" << health.getMaxHealth();
+	note.AddLine(line.str());
+	return note;
 }
 
 void Player::stopSounds()
@@ -165,6 +182,19 @@ string Player::getName()
     return name_;
 }
 
+string Player::getPlaceModeInText()
+{
+	if (placeMode_ == PLACE_WALL)
+	{
+		return "Wall";
+	}
+	else if (placeMode_ == PLACE_GOLD)
+	{
+		return "Gold";
+	}
+	return "WTF?";
+}
+
 Position Player::getSpawnPos()
 {
 	return spawnPos_;
@@ -188,6 +218,11 @@ PlayerStatComponent& Player::getStatComponentRef()
 DIRECTION Player::getDirectionFacing()
 {
 	return directionFacing_;
+}
+
+PLACE_MODE Player::getPlaceMode()
+{
+	return placeMode_;
 }
 
 WORD Player::getClaimedColor()
@@ -257,6 +292,11 @@ void Player::setMaxHealth(int amount)
 void Player::setID(int id)
 {
 	id_ = id;
+}
+
+void Player::setPlaceMode(PLACE_MODE placeMode)
+{
+	placeMode_ = placeMode;
 }
 
 bool Player::damage(int amount, string name, bool isServer)
@@ -419,6 +459,8 @@ void Player::mineRight(Display& game)
 void Player::mine(DIRECTION direction)
 {
 	if (mineTimer_.Update() == false) return;
+	directionFacing_ = direction;
+	isDirectionChanged_ = true;
 	if (handMode_ == MODE_MINING)
 	{
 		Position newPos = pos_;
@@ -503,13 +545,40 @@ void Player::mine(DIRECTION direction)
 				wallPlacementProgress_ += 25;
 				if (wallPlacementProgress_ >= 100)
 				{
-					tile.setGraphic(TG_Stone);
-					tile.isWall(true);
-					tile.setColor(TGC_Stone);
-					tile.setBackground(TGB_Stone);
-					tile.isWalkable(false);
-					tile.isDestructable(true);
-					game::m_sounds.PlaySoundR("Place");
+					if (placeMode_ == PLACE_WALL)
+					{
+						tile.setGraphic(TG_Stone);
+						tile.setColor(TGC_Stone);
+						tile.setBackground(TGB_Stone);
+						tile.isWall(true);
+						tile.isWalkable(false);
+						tile.isDestructable(true);
+						game::m_sounds.PlaySoundR("Place");
+					}
+					else
+					{
+						if (goldAmount_ > 0)
+						{
+							if (goldAmount_ >= 500)
+							{
+								tile.setGoldAmount(500);
+								goldAmount_ -= 500;
+							}
+							else
+							{
+								tile.setGoldAmount(goldAmount_);
+								goldAmount_ = 0;
+							}
+							tile.setGraphic(TG_Gold);
+							tile.setColor(TGC_Gold);
+							tile.setBackground(TGB_Gold);
+							tile.isWall(true);
+							tile.isWalkable(false);
+							tile.isDestructable(true);
+							tile.hasGold(true);
+							game::m_sounds.PlaySoundR("Place");
+						}
+					}
 					tile.updateServer();
 					wallPlacementProgress_ = 0;
 				}
@@ -523,9 +592,20 @@ void Player::mine(DIRECTION direction)
 				}
 				else
 				{
-					if (tile.fortify(1))
+					if (tile.isFortified() == false)
 					{
-						tile.setFortifiedByID(id_);
+						if (goldAmount_ >= 100)
+						{
+							if (tile.hasGold() == false)
+							{
+								if (tile.fortify(1))
+								{
+									goldAmount_ -= 100;
+									tile.setFortifiedByID(id_);
+								}
+								fortify_sound.Tick();
+							}
+						}
 					}
 				}
 			}
@@ -606,6 +686,18 @@ void Player::switchModeTo(int mode)
 	case 2:game::tileUI.getSectionRef(6).setVar(1, "Weapon"); break;
 	}
 	game::m_sounds.PlaySoundR("Swap");
+}
+
+void Player::swapPlaceMode()
+{
+	if (placeMode_ == PLACE_WALL)
+	{
+		placeMode_ = PLACE_GOLD;
+	}
+	else if (placeMode_ == PLACE_GOLD)
+	{
+		placeMode_ = PLACE_WALL;
+	}
 }
 
 void Player::updateHandPos()
@@ -956,6 +1048,7 @@ void Player::update()
 	turret_sound.Update();
 	repair_sound.Update();
 	mine_sound.Update();
+	fortify_sound.Update();
 }
 
 bool Player::hasComponent(int id)

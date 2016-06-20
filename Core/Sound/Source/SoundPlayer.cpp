@@ -29,6 +29,16 @@ void SoundPlayer::Update()
 	}
 }
 
+void SoundPlayer::Tick()
+{
+	soundStop_.StartNewTimer(0.3);
+	if (soundPlaying_ == false)
+	{
+		game::m_sounds.PlaySoundR(soundName);
+		soundPlaying_ = true;
+	}
+}
+
 void SoundPlayer::SetSound(std::string sound)
 {
 	soundName = sound;

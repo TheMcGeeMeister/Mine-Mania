@@ -157,6 +157,23 @@ char Tile::getGraphic() const
 		return graphic_;
 }
 
+NoteUI Tile::getNote()
+{
+	NoteUI note;
+	note.AddLine("Tile");
+	std::stringstream line;
+	line << "Health: " << health.getHealth() << "/" << health.getMaxHealth();
+	note.AddLine(line.str());
+	line.str(string());
+	if (isClaimed_)
+	{
+		line << "Owner:" << claimedBy_;
+		note.AddLine(line.str());
+		line.str(string());
+	}
+	return note;
+}
+
 bool Tile::isWall() const
 {
 	return isWall_;
@@ -539,8 +556,7 @@ bool Tile::fortify(int amount)
 {
 	if (isFortified_) return false;
 	fortifyAmount_ += amount;
-	fortifyAmount_ = 100;
-	if (fortifyAmount_ > 99)
+	if (fortifyAmount_  >= 25)
 	{
 		health.getMaxHealthRef() += 150;
 		health.getHealthRef() += 150;

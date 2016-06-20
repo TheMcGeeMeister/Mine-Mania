@@ -164,6 +164,7 @@ void TurretAIComponent::shoot(DIRECTION direction)
 	if (game::pHandler.getPlayerAt(nPos, &player))
 	{
 		player->damage(25, owner_);
+		player->knockbackTo(direction, 1);
 		game::m_sounds.PlaySoundR("TurretShoot");
 		Common::SendSound("TurretShoot");
 		bullet->clean();

@@ -40,6 +40,7 @@ class Position
 		void operator=(const Position& pos);
 
 		bool operator==(const Position& pos);
+		bool operator!=(const Position& pos);
 
 		std::string serializeR();
 		void serialize(std::stringstream& stream);
